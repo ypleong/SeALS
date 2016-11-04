@@ -138,59 +138,7 @@ addpath('./scripts/');
 
 %% setup
 
-% 1. domain 
-d = 12;
-x = sym('x',[d,1]); %do not change
-n = 100;
-bdim = [-8 8 ; -8 8; -8 8; -10*pi 10*pi; -10*pi 10*pi; -10*pi 10*pi; -1 1; -1 1; -1 1; -pi pi; -pi pi; -pi pi];
-
-% for boundary x = 1
-bcon_x = (1-x(1)^2/8^2)*(1-x(2)^2/8^2)*(1-x(3)^2/8^2)*(1-x(4)^2/(10*pi)^2)*(1-x(5)^2/(10*pi)^2)*(1-x(6)^2/(10*pi)^2)*(1-x(8)^2)*(1-x(9)^2)*(1-x(10)^2/pi^2)*(1-x(11)^2/pi^2)*(1-x(12)^2/pi^2);
-
-bcon = { {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,bcon_x} , {'d',0,0} , {'d',0,0} , {'p'} , {'p'} , {'p'} };
-
-bsca = []; %no manual scaling
-region = []; %no region
-regval = [];
-regsca = [];
-sca_ver = 1; %first scaling version
-ord_of_acc = 2; %since als error probably is dominant
-
-% 2. dynamics
-lambda = 60;
-g = 9.8;
-f = [0; 0; -g; 0; 0; 0; x(1); x(2); x(3); x(4); x(5); x(6)];
-
-hf1 = sin(x(12))*sin(x(10))+cos(x(12))*cos(x(10))*sin(x(11)); %help functions for G
-hf2 = cos(x(12))*sin(x(11))*sin(x(10))-cos(x(10))*sin(x(12));
-hf3 = cos(x(11))*cos(x(12));
-
-G = [hf1 0 0 0; hf2 0 0 0; hf3 0 0 0; ...
-    0 1 0 0; 0 0 1 0; 0 0 0 1; ...
-    0 0 0 0; 0 0 0 0; 0 0 0 0; ...
-    0 0 0 0; 0 0 0 0; 0 0 0 0];
-
-B = G;
-noise_cov = 30;
-q = 2;
-R = 2;
-
-% 3. artificial diffusion, compress operator and solve als
-artdiff_option = {1,'needed',0.3};
-tol_err_op = 1e-5;
-comp_options = [];
-tol_err = 1e-9;
-als_options = {2000,20,'average',1e-3,1e-12,0.01,15};
-als_variant = {10,50};
-debugging = 0;
-
-% 4. visualize result, run simulation
-saveplots = 1;
-savedata = 1;
-sim_config = {5,0.005, repmat( [0;0;0; 0;0;0; 0;0;0; 0.1;0.1;0.1], 1, 6 ) ,[],[]};
-
-% 5. run index
-run = 1;
+run('./examples/Quadcopter.m')
 
 %% arrange input
 input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};

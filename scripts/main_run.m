@@ -99,8 +99,14 @@ rank_op_uncomp = ncomponents(op);
 tic;
 start_compress = tic;
 
-[op, err_op, iter_op, cond_op, enrich_op, t_step_op, illcondmat_op, noreduce_op] = ...
+tic
+[op3, err_op, iter_op, cond_op, enrich_op, t_step_op, illcondmat_op, noreduce_op] = ...
     als(op,[],tol_err_op,comp_options);
+toc
+
+tic
+[op2, err_op2, iter_op2] = als2(op,tol_err_op);
+toc
 
 compress_time = toc(start_compress);
 toc;
