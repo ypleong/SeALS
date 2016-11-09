@@ -33,13 +33,9 @@ for i=1:d
     d_out = find( (gridi < region(i,1)) | (gridi > region(i,2)));
     
     %Go through each rank and eliminate nodes outside region
-    newOpU = opRem.U{i};
-    for j=1:sr 
-        opD = reshape(newOpU(:,j),ni,ni);
-        opD(d_out,:) = 0;
-        newOpU(:,j) = opD(:);
-    end
-    opRem.U{i} = newOpU;
+    temp = reshape(opRem.U{i},ni,ni*sr);
+    temp(d_out,:) = 0;
+    opRem.U{i} = reshape(temp,ni*ni,sr);
     
     %Create identity for nodes inside region
     id = eye(ni);
@@ -49,9 +45,7 @@ for i=1:d
     
     %Go through the boundary and eliminate nodes outside region
     newBCU = bcd.U{i};
-    for j=1:sr_b
-        newBCU(d_out,j) = zeros(length(d_out),1);
-    end
+    newBCU(d_out,:) = zeros(length(d_out),sr_b);
     bcd.U{i} = newBCU;
     bcAdd{i} = zeros(ni,1);
     bcAdd{i}(d_ind,1) = ones(length(d_ind),1);
