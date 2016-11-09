@@ -13,41 +13,14 @@ function res = SRMultM(A,B)
 %
 % SRMULTM is for example used in HESSIAN.
 
-%%% Old comments %%%
-% A and B are matrices stored with the matrices unrolled into n^2 vectors
-% computes AB
-%%% Old coments %%%%
-
-rB = ncomponents(B);
 rA = ncomponents(A);
+rB = ncomponents(B);
 nd = ndims(A);
 
-Alambda = A.lambda;
-Blambda = B.lambda;
-
-for k = 1:nd
-    nA = round(sqrt(length(A.U{k}(:,1))));
-    nB = round(sqrt(length(B.U{k}(:,1))));
-    
-    AU{k} = reshape(A.U{k},nA,nA,rA);
-    BU{k} = reshape(B.U{k},nB,nB,rB);
+LL = blockTransposeV2H(A.lambda*B.lambda',1)';
+AB = cell(nd,1);
+N = round(sqrt(size(B,1)));
+for nn = 1:nd
+    AB{nn} = reshape(blockTransposeV2H(blockTransposeH2V(reshape(A.U{nn},N,N*rA),N)*reshape(B.U{nn},N,N*rB),N),N*N,[]);
 end
-
-first = 1;
-for kA = 1:rA
-	for kB = 1:rB
-		clear T U mat
-		U = cell(1,nd);
-		for k = 1:nd
-			mat = AU{k}(:,:,kA)*BU{k}(:,:,kB);
-			U{k} = mat(:);
-		end
-		T = ktensor(Alambda(kA)*Blambda(kB),U);
-		if first
-			res = T;
-			first = 0;
-		else
-			res = res + T;
-		end
-	end
-end
+res = ktensor(LL,AB);
