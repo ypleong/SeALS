@@ -55,10 +55,16 @@ G.lambda = ones(rG,1);
 F.lambda = ones(rF,1);
 
 % tensor reference is slow, so do this at the expense of mem
+Acell = cell(nd,1);
+Gcell = cell(nd,1);
+
+A_U = cell(nd,1);
 for k = 1:nd
     nf = sizeG(k);
     Acell{k} = reshape(A.U{k},nf,nf,rA);
-    Gcell{k} = G.U{k};
+    Gcell{k} = G.U{k};  
+    
+    A_U{k} = reshape(A.U{k},nf,nf*rA);
 end
 
 for k = 1:nd
@@ -66,10 +72,13 @@ for k = 1:nd
     
     idx = [1:(k-1) (k+1):nd];
     Fcell = cell(nd,1);
+    F_U = zeros(nf,rF,nd);
     for n = 1:nd
         Fcell{n} = F.U{n};
+        
+        F_U(:,:,n) = F.U{n};
     end
-    
+
     M = cell(rF,rF);
     N = cell(rF,1);
     
@@ -83,23 +92,21 @@ for k = 1:nd
                 M{i,j} = M{i,j}+alpha*eye(nf);
             end
             
+            AtA = zeros(nf*rA,nf*rA,nd);
+            for d = 1:nd
+                AtA(:,:,d) = A_U{d}'*A_U{d}; 
+            end
+            
+            F_i = squeeze(F_U(:,i,:));
+            F_j = repmat(F_U(:,j,:),1,nf,1);
+                
             for ia=1:rA
-                A_k_ia = Acell{k}(:,:,ia);
-                for ja=1:rA
-                    A_k_ja = Acell{k}(:,:,ja);
-                    Aprod = 1;
-                    for d = idx
-                        
-                        A_d_ia = Acell{d}(:,:,ia);
-                        A_d_ja = Acell{d}(:,:,ja);
-                        
-                        u_d_i = Fcell{d}(:,i);
-                        u_d_j = Fcell{d}(:,j);
-                        
-                        Aprod = Aprod * (A_d_ia*u_d_j)' * (A_d_ja*u_d_i);
-                    end
+                for ja=1:rA                    
+                    A_ia_ja = AtA((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf),:);
+                    temp = dot(squeeze(dot(F_j, A_ia_ja)), F_i);               
+                    Aprod2 = prod(temp(idx));
                     
-                    M{i,j} = M{i,j} + A_k_ja'*A_k_ia*Aprod;
+                    M{i,j} = M{i,j} + A_ia_ja(:,:,k)'*Aprod2;
                     
                 end
             end
@@ -115,6 +122,7 @@ for k = 1:nd
             A_k_ia = Acell{k}(:,:,ia);
             for ig=1:rG
                 g_k_ig = Gcell{k}(:,ig);
+                
                 Agprod = 1;
                 for d=idx%setdiff(1:nd,k)
                     A_d_ia = Acell{d}(:,:,ia);
@@ -161,9 +169,9 @@ for k = 1:nd
     u = B\b;
     
     u = reshape(u,nf,rF);
-    newU = cell(d,1);
+    newU = cell(nd,1);
     
-    for i=1:d
+    for i=1:nd
         newU{i} = F.U{i};
     end
     
