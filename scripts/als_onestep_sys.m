@@ -83,6 +83,11 @@ for k = 1:nd
     N = cell(rF,1);
     
     %Calculate B matrix
+    AtA = zeros(nf*rA,nf*rA,nd);
+    for d = 1:nd
+        AtA(:,:,d) = A_U{d}'*A_U{d}; 
+    end
+    
     for i=1:rF
         for j=1:rF
             
@@ -91,12 +96,7 @@ for k = 1:nd
             if i==j
                 M{i,j} = M{i,j}+alpha*eye(nf);
             end
-            
-            AtA = zeros(nf*rA,nf*rA,nd);
-            for d = 1:nd
-                AtA(:,:,d) = A_U{d}'*A_U{d}; 
-            end
-            
+                      
             F_i = squeeze(F_U(:,i,:));
             F_j = repmat(F_U(:,j,:),1,nf,1);
                 
@@ -115,28 +115,16 @@ for k = 1:nd
     end
     
     %Calculate b matrix
+    AtG = zeros(nf,rA*rG,nd);
+    for d = 1:nd
+        AtG(:,:,d) = reshape(A_U{d}'*Gcell{d},nf,[],1); 
+    end
+    
     for i=1:rF
-        N{i} = zeros(nf,1);
-        
-        for ia=1:rA
-            A_k_ia = Acell{k}(:,:,ia);
-            for ig=1:rG
-                g_k_ig = Gcell{k}(:,ig);
-                
-                Agprod = 1;
-                for d=idx%setdiff(1:nd,k)
-                    A_d_ia = Acell{d}(:,:,ia);
-                    
-                    g_d_ig = Gcell{d}(:,ig);
-                    
-                    u_d_i = Fcell{d}(:,i);
-                    
-                    Agprod = Agprod * (A_d_ia*u_d_i)'*(g_d_ig);
-                end
-                
-                N{i} = N{i} + A_k_ia'*g_k_ig*Agprod;
-            end
-        end
+        F_i = repmat(F_U(:,i,:),1,rA*rG,1);
+        temp = dot(F_i, AtG);
+        Agprod = prod(temp(:,:,idx),3);
+        N{i} = sum(AtG(:,:,k).*repmat(Agprod,nf,1),2);
     end
     
     B = cell2mat(M);
