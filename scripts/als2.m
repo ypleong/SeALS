@@ -1,4 +1,4 @@
-function [F, err, iter] = als2(op,varargin)
+function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)
 % ALS code to perform the ALS algorithm as described in Beylkin
 % and Mohlenkamp 2005.
 % Input:
@@ -21,9 +21,8 @@ function [F, err, iter] = als2(op,varargin)
 %
 % See also MAIN_RUN.
 
-debug = 0;
-
 dim = ndims(op);
+R = ncomponents(op);
 op_len = length(varargin);
 
 if op_len < 3
@@ -49,19 +48,22 @@ end
 
 curr_rank = 1;
 iter = 0;
-if debug
-    err = zeros(maxit,1);
-end
+err = zeros(maxit,1);
+t_step = zeros(maxit,1);
 tol = 1000;
+noreduce = 0;
 
-while (iter < maxit) && (tol > e)
+e_list = 1;
+
+while (iter < maxit) && (tol > e) && (curr_rank < R)
     
     [P,~,out]= cp_als(op,curr_rank,'init',Pinit,'printitn',0);
     iter = iter + out.iters;
-    tol = out.err;
-    if debug
-        err(iter) = tol;
-    end
+    e_list = [e_list out.iters+1];
+    tol = out.err(out.iters);
+    illcond = out.ill_cond;
+    err(iter-out.iters+1:iter) = out.err;
+    t_step(iter-out.iters+1:iter) = out.t_step;
     temp = cell(1,dim);
     for ii = 1:dim
         temp{ii} = matrandnorm(size(P.U{ii},1),1);
@@ -71,13 +73,20 @@ while (iter < maxit) && (tol > e)
     
 end
 
-if ~debug
-    err = tol;
+t_step = t_step(1:iter);
+err = err(1:iter);
+
+if curr_rank == R
+    F = op;
+    err(iter) = 0;
+    disp('cannot reduce rank')
+    noreduce = 1;
+else
+    F = P;
 end
 
 if (iter == maxit && err > e)
     disp('Max iterations reached without finding a good solution')
 end
 
-F = P;
 
