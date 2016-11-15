@@ -35,12 +35,12 @@ tol_err_op = 1e-6;
 comp_options = [];
 tol_err = 1e-9;
 als_options = [];
-als_variant = {10,50};
-debugging = 1;
+als_variant = []; %{10,50};
+debugging = 0;
 
 % 4. visualize result and run simulation
-saveplots = 1;
-savedata = 1;
+saveplots = 0;
+savedata = 0;
 sim_config = {5,0.005,[-0.5 0.5 0.2 -0.7 -0.2 0.3;0.5 0 0.6 -0.2 -0.4 -0.6],[],[]};
 
 % 5. run index
