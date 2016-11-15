@@ -99,7 +99,7 @@ rank_op_uncomp = ncomponents(op);
 tic;
 start_compress = tic;
 
-[op, err_op, iter_op] = als2(op,tol_err_op);
+[op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(op,tol_err_op);
 
 compress_time = toc(start_compress);
 toc;
@@ -112,7 +112,7 @@ disp('Beginning Solving');
 tic;
 start_solve = tic;
 
-if isempty(als_variant) == 1 %original
+if isempty(als_variant) %original    
     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...
         als_sys(op,bc,[],tol_err,als_options,debugging);
     restart = []; %no restarts for original
@@ -146,19 +146,19 @@ end
 
 %% Step 13. run simulations
 
-% arrange input data
-sim_data = {lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
-
-% run simulation
-if isempty(sim_config) == 0
-    try
-        fprintf('Starting simulations \n')
-        sim_run(sim_config,sim_data,saveplots,savedata,run)
-        fprintf('Simulations complete \n')
-    catch
-        fprintf('Could not run simulation \n')
-    end
-end
+% % arrange input data
+% sim_data = {lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+% 
+% % run simulation
+% if isempty(sim_config) == 0
+%     try
+%         fprintf('Starting simulations \n')
+%         sim_run(sim_config,sim_data,saveplots,savedata,run)
+%         fprintf('Simulations complete \n')
+%     catch
+%         fprintf('Could not run simulation \n')
+%     end
+% end
 
 %% Step 14: save data
 
@@ -206,4 +206,3 @@ if savedata == 1
 end
 
 fprintf(['Run ',num2str(run),' with main_run is complete \n'])
-end
