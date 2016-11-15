@@ -74,14 +74,13 @@ end
 %% main script
 nd = ndims(G);
 sizeG = size(G);
-rG = ncomponents(G);
-% sG = sizeG(1); %For simplicity, assuming all meshes are the same.
+
+U = cell(nd,1);
 
 if isempty(F)
     for n = 1:nd
         %U{n} = abs(ones(sizeG(n),1)+randn(sizeG(n),1));
-        U{n} = randn(sizeG(n),1);
-        U{n} = U{n}/norm(U{n});
+        U{n} = matrandnorm(sizeG(n),1);
     end
     F = ktensor(U);
     F = arrange(F);
@@ -92,8 +91,7 @@ elseif isfloat(F)
     for i = 1:terms
         for n = 1:nd
             %U{n} =  abs(ones(sizeG(n),1)+randn(sizeG(n),terms));
-            U{n} = randn(sizeG(n),1);
-            U{n} = U{n}./norm(U{n});
+            U{n} = matrandnorm(sizeG(n),1);
         end
         if i == 1
             F = ktensor(U);
@@ -119,18 +117,17 @@ end
 old_err = norm(SRMultV(A,F)-G)/norA;
 
 reverseStr = '';
-addStr = '';
 msg = '';
 
 useStop = 1;
 e_count = 2;
 e_list(1) = 1;
 
-F_count = 1;
-
 if useStop
     FS = stoploop({'Exit execution at current iteration?', 'Stop'}) ;
 end
+
+[AtA, AtG] = prepareAG_4_als_sys(A, G);
 
 for iter = 1:tol_it
     
@@ -158,7 +155,7 @@ for iter = 1:tol_it
     end
     
     step_time = tic;
-    [Fn, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(G,F,A,alpha,debugging);
+    [Fn, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA,AtG,F,alpha,debugging);
     time_step(iter) = toc(step_time);
     
     %%% documentation %%%
@@ -188,12 +185,6 @@ for iter = 1:tol_it
         break;
     end
     
-    %if( ncomponents(F) >= tol_rank )
-    %    disp('Maximum rank reached. Quitting...');
-    %    maxrank = 1;
-    %    break;
-    %end
-    
     if abs(err(iter) - old_err)/old_err < r_tol
         clear nF U
         rF = rF + 1;
@@ -213,10 +204,10 @@ for iter = 1:tol_it
         fprintf(addStr);
         
         for n = 1:nd
-            U{n} = randn(sizeG(n),1);
-            U{n} = U{n}/norm(U{n});
+            U{n} = matrandnorm(sizeG(n),1);
         end
         nF = ktensor(U);
+        nF1 = nF;
         
         % Precondition the new rank 1 tensor
         count = 1;
@@ -228,9 +219,12 @@ for iter = 1:tol_it
         
         clear F_cell_precond B_cell_precond b_cell_precond
         
+        [AtA2, AtG2] = prepareAG_4_als_sys(A, G-SRMultV(A,F));
+        
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
             
-            [nF, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(G-SRMultV(A,F),nF,A,alpha,debugging);
+            [nF, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA2,AtG2,nF,alpha,debugging);
+
             err_oldF = err_newF;
             err_newF = nF.lambda;
             
