@@ -205,6 +205,7 @@ for iter = 1:tol_it
         G = G-SRMultV(A,F);
         addStr = repmat(sprintf(' '), 1, length(msg));
         fprintf(addStr);
+        [AtA, AtG] = prepareAG_4_als_sys(A, G);
         
         % create new F
         for n = 1:nd
@@ -218,7 +219,7 @@ for iter = 1:tol_it
         err_newF = 1;
         err_oldF = 2;
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
-            [F] = als_onestep_sys(G,F,A,alpha,debugging);
+            [F] = als_onestep_sys(AtA,AtG,F,alpha,debugging);
             err_oldF = err_newF;
             err_newF = nF.lambda;
             count = count + 1;
