@@ -54,11 +54,6 @@ for k = 1:nd
     M = cell(rF,rF);
     N = cell(rF,1);
     
-    F_U = zeros(nf,rF,nd);
-    for i = 1:nd
-        F_U(:,:,i) = F.U{i};
-    end
-    
     %Calculate B matrix    
     for i=1:rF
         for j=1:rF
