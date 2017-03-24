@@ -89,12 +89,11 @@ F_saved = []; %saved tensor terms of F
 %% main script
 nd = ndims(G);
 sizeG = size(G);
-rG = ncomponents(G);
 % sG = sizeG(1); %For simplicity, assuming all meshes are the same.
 
 if isempty(F)
+    U = cell(1,nd);
     for n = 1:nd
-        %U{n} = abs(ones(sizeG(n),1)+randn(sizeG(n),1));
         U{n} = matrandnorm(sizeG(n),1);
     end
     F = ktensor(U);
@@ -102,9 +101,8 @@ if isempty(F)
     
 elseif isfloat(F)
     terms = F;
-    
+    U = cell(1,nd);
     for n = 1:nd
-        %U{n} =  abs(ones(sizeG(n),1)+randn(sizeG(n),terms));
         U{n} = matrandnorm(sizeG(n),terms);
     end
     F = ktensor(U);
@@ -113,8 +111,6 @@ elseif isfloat(F)
 else
     F = arrange(F);
 end
-
-rF = ncomponents(F);
 
 %%% documentation %%%
 if debugging == 1
@@ -131,8 +127,6 @@ msg = '';
 useStop = 1;
 e_count = 2;
 e_list(1) = 1;
-
-F_count = 1;
 
 if useStop
     FS = stoploop({'Exit execution at current iteration?', 'Stop'}) ;
