@@ -25,7 +25,7 @@ F = arrange(F);
 sizeAtG = size(AtG);
 if length(sizeAtG) == 3
     nd = sizeAtG(3);
-elseif length(sizeAtG) == 1
+elseif length(sizeAtG) == 2
     nd = 1;
 end
 nf = sizeAtG(1);
