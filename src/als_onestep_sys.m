@@ -23,7 +23,11 @@ status = 1;
 F = arrange(F);
 
 sizeAtG = size(AtG);
-nd = sizeAtG(3);
+if length(sizeAtG) == 3
+    nd = sizeAtG(3);
+elseif length(sizeAtG) == 1
+    nd = 1;
+end
 nf = sizeAtG(1);
 
 rF = ncomponents(F);
