@@ -116,6 +116,7 @@ for k = 1:nd
         u = B\b;
     catch
         status = 0;
+        
         %%% Debugging %%%
         if 1==0
             plotmatrix(B);
