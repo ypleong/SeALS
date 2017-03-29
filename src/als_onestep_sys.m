@@ -18,6 +18,8 @@ function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,d
 
 % Elis Stefansson, Aug 2015
 
+warning('error', 'MATLAB:nearlySingularMatrix');
+
 status = 1;
 
 F = arrange(F);
@@ -110,17 +112,19 @@ for k = 1:nd
     end
     %%% documentation %%%
     
-    if cond(B) > 1e13
+    try
+        u = B\b;
+    catch
         status = 0;
         %%% Debugging %%%
         if 1==0
             plotmatrix(B);
         end
         %%% Debugging %%%
+        
+        warning('off', 'MATLAB:nearlySingularMatrix');
+        u = B\b;
     end
-    
-    %disp(B);
-    u = B\b;
     
     u = reshape(u,nf,rF);
     
@@ -147,3 +151,5 @@ for ii = 1:nd
 end
 F = ktensor(U);
 F = arrange(F);
+
+warning('on', 'MATLAB:nearlySingularMatrix');
