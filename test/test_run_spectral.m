@@ -11,7 +11,9 @@ start_whole = tic;
 %% Initialization
 
 d = 2;
+x = sym('x',[d,1]); %do not change
 n = 101;
+
 bdim = [-1 1 ; -1 1];
 bcon = { {'d',0,0} , {'d',0,0} };
 bsca = []; %no manual scaling
@@ -36,8 +38,6 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 
 %% Calculate dynamics
-
-x = sym('x',[d,1]); %do not change
 
 %   x = sym('x',[2,1]) %two dimensions
 %   f = x(1)*x(2)+x(2)
