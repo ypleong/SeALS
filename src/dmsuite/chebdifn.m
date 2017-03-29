@@ -1,4 +1,4 @@
-function [x, DM] = chebdifn(N, M, xmin, xmax)
+function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)
 
 % Without (a) and (b)
 
@@ -10,6 +10,8 @@ function [x, DM] = chebdifn(N, M, xmin, xmax)
 %  M:        Number of derivatives required (integer).
 %  xmin:     lower bound of the domain
 %  xmax:     upper bound of the domain
+%  imin:     lower bound of the interior domain
+%  imax:     upper bound of the interior domain
 %  Note:     0 < M <= N-1.
 %
 %  Output:
@@ -33,16 +35,50 @@ function [x, DM] = chebdifn(N, M, xmin, xmax)
 
 if nargin < 3
     xmin = -1;
-    xmax = 1;   
+    xmax = 1;
+    imin = [];
+    imax = [];
+elseif nargin < 5
+    imin = [];
+    imax = [];
+elseif nargin == 6
+    if N < 5
+        error('N must be greater than 4')
+    end
 end
+    
+     if isempty(imin) && isempty(imax)
+         k = (0:N-1)';                        % Compute theta vector.
+        th = k*pi/(N-1);
+        
+        x = cos(th); % Compute Chebyshev points.
+        x = ((xmax-xmin)*x+xmax+xmin)/2;
+       
+     else
+         Nb = floor((imin-xmin)*N/(xmax-xmin));
+         k1 = (0:Nb-1)';
+         k2 = (0:N-Nb-2)';
+         th1 = k1*pi/(Nb-1);
+         th2 = k2*pi/(N-Nb-2);
+         
+         x1 = cos(th1); % Compute Chebyshev points.
+         x2 = cos(th2); % Compute Chebyshev points.
+         
+         if imin == imax
+             dx = (xmax-xmin)/N;
+             imin = imin-dx/2;
+             imax = imax+dx/2;
+         end
+         x = [((xmax-imax)*x2+imax+xmax)/2; (imax+imin)/2; ((imin-xmin)*x1+imin+xmin)/2;];
+     end
+     
+     DM = computeD(x, (0:N-1)', N, M);
+end
+
+function [DM] = computeD(x, k, N, M)
 
      I = eye(N);                          % Identity matrix.     
      L = logical(I);                      % Logical identity matrix.
-
-     k = (0:N-1)';                        % Compute theta vector.
-    th = k*pi/(N-1);
-
-     x = cos(th); % Compute Chebyshev points.
 
      T = repmat(x,1,N);                
     DX = T-T';           
@@ -58,13 +94,10 @@ C(:,1) = C(:,1)/2; C(:,N) = C(:,N)/2;
      D = eye(N);                          % D contains diff. matrices.
 
 DM = zeros(N,N,M);
+
 for ell = 1:M
     D = ell*Z.*(C.*repmat(diag(D),1,N) - D); % Off-diagonals
     D(L) = -sum(D,2);                            % Correct main diagonal of D
     DM(:,:,ell) = D;                                   % Store current D in DM
 end
-    
-if ~(xmin == -1 && xmax == 1)
-    x = ((xmax-xmin)*x+xmax+xmin)/2;
-    DM = 2*DM/(xmax-xmin);
 end
