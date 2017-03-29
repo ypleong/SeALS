@@ -23,7 +23,7 @@ sca_ver = 1;
 tol_err_op = 1e-6;
 tol_err = 1e-9;
 als_options = [];
-als_variant = []}; %{10,50};
+als_variant = []; %{10,50};
 debugging = 0;
 
 run = 1;
@@ -58,26 +58,16 @@ op = DiagKTensor(kTens{1}) + D2{1} + D2{2};
 if isempty(bsca) == 1 || isempty(regsca) == 1
     
     if sca_ver == 1
-        [bscat, regscat] = make_bc_sca_var(op,grid,region,bcon);    
+        [bscat, ~] = make_bc_sca_var(op,grid,region,bcon);    
     elseif sca_ver == 2
-        [bscat, regscat] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n);
-    elseif sca_ver == 3
-        % temporarily option made for comparing with old results
-        op = (h(1)^2*h(2)^2)*op;
-        bscat = ones(d,2);
-        regscat = 1;
+        [bscat, ~] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n);
     else
         error('wrong specification on boundary scaling');
     end
-    
 end
 
 if isempty(bsca)
     bsca = bscat;
-end
-
-if isempty(regsca)
-    regsca = regscat;
 end
 
 % make bc
@@ -131,7 +121,6 @@ plotdebug = {F_cell,b_cell,B_cell};
 try
     fprintf('Plotting results \n')
     visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
-    figure;contour(grid{2},grid{1},reshape(double(F)',101,101))
     fprintf('Plotting complete \n')
 catch
     fprintf('Could not visualize results \n')

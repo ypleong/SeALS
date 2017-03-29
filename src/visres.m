@@ -131,6 +131,10 @@ if d == 2
     sol = double(F)';
     [x1mesh,x2mesh] = meshgrid(grid{1},grid{2});
     
+    figure;
+    contour(grid{2},grid{1},reshape(sol,n(1),n(2)))
+    xlabel('x_1');ylabel('x_2');
+    
     % plot solution as 2D-plot
     fig = figure;
     imagesc(grid{1},grid{2},sol); axis xy
