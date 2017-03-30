@@ -11,7 +11,7 @@ start_whole = tic;
 
 d = 2;
 x = sym('x',[d,1]); %do not change
-n = 101;
+n = 100; % n has to be even to avoid r = 0
 
 bdim = [-1 1 ; 0 2*pi];
 bcon = { {'d',0,0} , {'p'} };
@@ -121,6 +121,10 @@ plotdebug = {F_cell,b_cell,B_cell};
 try
     fprintf('Plotting results \n')
     visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+    [rr,tt] = meshgrid(grid{1}(1:n(1)/2), grid{2}([n(2) 1:n(2)]));
+    [xx,yy] = pol2cart(tt,rr);
+    ftemp = reshape(double(F)',n(1),n(2));
+    figure; mesh(xx,yy,ftemp([n(2) 1:n(2)],1:n(1)/2))
     fprintf('Plotting complete \n')
 catch
     fprintf('Could not visualize results \n')
