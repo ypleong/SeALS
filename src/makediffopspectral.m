@@ -53,18 +53,19 @@ grid = cell(1,d);
 
 for i=1:d
     
-    if length(bcon{i}) == 1 %then bcon{i} = {'p'} so periodic
-        
-        [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+    if bcon{i, 1} == 'p' %then bcon{i} = {'p'} so periodic
+        [grid{i}, sd] = fourdif(n(i), 2);
         fd1{i} = sd(:,:,1);
         fd2{i} = sd(:,:,2);
         
     else
-        
-        [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+        if ~isempty(region)
+            [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+        else
+            [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2));
+        end
         fd1{i} = sd(:,:,1);
         fd2{i} = sd(:,:,2);
-        
     end
     
 end
@@ -93,7 +94,7 @@ end
 D = cell(1,d);
 D2 = cell(1,d);
 
-if isempty(region) == 1
+if isempty(region)
     
     for i=1:d
         DU = idUop;
