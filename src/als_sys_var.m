@@ -24,6 +24,8 @@ function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cel
 %   newcond_r_tol - tolerated decrease for preconditon. Default is 1e-2.
 %   newcond_it_tol - maximum number of tolerated iterations for
 %   preconditon. Default is 15.
+%   w_tol - if the smallest divide by the largest normalization constant is
+%   < w_tol, stop iterations.
 % Outputs:
 %   F - obtained solution.
 %   err - achieved error.
@@ -49,12 +51,14 @@ if isempty(als_options)
     tol_rank = 20;
     e_type = 'average';
     r_tol = 1e-3;
+    w_tol = sqrt(eps);
     alpha = 1e-12;
     newcond_r_tol = 0.01;
     newcond_it_tol = 15;
 else
     [tol_it,tol_rank,e_type,r_tol,alpha,newcond_r_tol,newcond_it_tol] = ...
         deal(als_options{:});
+    w_tol = sqrt(eps);
 end
 
 if strcmp(e_type,'average')
@@ -124,6 +128,7 @@ reverseStr = '';
 addStr = '';
 msg = '';
 
+stopforloop = 0;
 useStop = 1;
 e_count = 2;
 e_list(1) = 1;
@@ -186,6 +191,11 @@ for iter = 1:tol_it
         else
             F_saved = F+F_saved;
             %save('F_saved','F_saved') %backup if something goes wrong
+        end    
+        
+        F_saved = arrange(F_saved);
+        if abs(F_saved.lambda(end)/F_saved.lambda(1)) < w_tol
+            stopforloop = 1;
         end
         
         % incooporate F in G
@@ -326,6 +336,10 @@ for iter = 1:tol_it
         if FS.Stop()
             break;
         end
+    end
+    
+    if stopforloop
+        break;
     end
 end
 
