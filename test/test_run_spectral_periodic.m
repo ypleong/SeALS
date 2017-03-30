@@ -1,10 +1,9 @@
-function test_run_spectral_hemholtz(run)
+function test_run_spectral_periodic(run)
 
-% Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen
-% Dxx u + Dyy u + k^2 u = f(x,y)  -1 < x,y < 1
-% u = 0 at boundary
-% k = 9
-% f(x,y) = e^(-10(y-1)^2) e^(-10(x-1/2)^2)
+% Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen
+% Drr u + 1/r Dr u +1/r^2 Dthth u = f(r, th)   -1 < r < 1, 0 < th < 2pi
+% u = 0 at r = 1
+% f(r,th) = -r^2sin(th/2)^4 + sin(6th)cos(th/2)^2
 
 start_whole = tic;
 
@@ -14,8 +13,8 @@ d = 2;
 x = sym('x',[d,1]); %do not change
 n = 101;
 
-bdim = [-1 1 ; -1 1];
-bcon = { {'d',0,0} , {'d',0,0} };
+bdim = [-1 1 ; 0 2*pi];
+bcon = { {'d',0,0} , {'p'} };
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -43,14 +42,15 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 %   f = x(1)*x(2)+x(2)
 %   becomes in cell array represenation
 %   fcell = { { @(x2)x2, [2] }, { @(x1)x1, [1] ; @(x2)x2, [2]} }
+% -r^2sin(th/2)^4 + sin(6th)cos(th/2)^2
 
-fcell = {{{@(x1)exp(-10*(x1-1/2).^2), [1]; @(x2)exp(-10*(x2-1).^2), [2]}}};
-k = 9;
-kcell = {{{@(x1)k^2, [1]}}};
+fcell = {{{@(x1)-x1.^2, 1; @(x2)sin(x2/2).^4, 2}, {@(x2)sin(6*x2).*cos(x2/2).^2, 2}}};
 fTens = fcell2ftens(fcell,grid);
-kTens = fcell2ftens(kcell,grid);
+rcell = {{{@(x1)1./x1, 1}}};
+rTens = fcell2ftens(rcell,grid);
+rTen = DiagKTensor(rTens{1});
 
-op = DiagKTensor(kTens{1}) + D2{1} + D2{2};
+op = D2{1} + SRMultM(rTen, D{1}) + SRMultM(rTen, SRMultM(rTen, D2{2}));
 
 %% Create boundary conditions
 

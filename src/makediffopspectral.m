@@ -53,7 +53,7 @@ grid = cell(1,d);
 
 for i=1:d
     
-    if bcon{i, 1} == 'p' %then bcon{i} = {'p'} so periodic
+    if bcon{i}{1} == 'p' %then bcon{i} = {'p'} so periodic
         [grid{i}, sd] = fourdif(n(i), 2);
         fd1{i} = sd(:,:,1);
         fd2{i} = sd(:,:,2);
