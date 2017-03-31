@@ -72,7 +72,7 @@ end
 
 % make bc
 [bc] = makebc(bcon,bsca,grid,x,n)+fTens{1};
-[op] = makebcop(op,bcon,bsca,n,fd1);
+[op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
 %% Compress operator
 
