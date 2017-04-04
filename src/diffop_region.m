@@ -26,6 +26,11 @@ if length(ord(:)) == 1 %same order for every dimension
     for i=1:d
         ord(i,1) = ord_old;
     end
+else
+    ord_old = ord(der,:);
+    for i=1:d
+        ord(i,:) = ord_old;
+    end
 end
                   
 for ii = 1:d
