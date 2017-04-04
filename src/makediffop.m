@@ -36,7 +36,7 @@ end
 
 for i=1:d
     
-    if length(bcon{i}) == 1 %then bcon{i} = {'p'} so periodic
+    if bcon{i}{1} == 'p' %then bcon{i} = {'p'} so periodic
         
         fd1{i} = fdmatrix(n(i),1,ord_of_acc(1,:),1);
         fd1{i} = 1/h(i)*fd1{i};
