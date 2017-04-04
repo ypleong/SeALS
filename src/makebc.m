@@ -31,7 +31,7 @@ for i = 1:d %add boundary conditions to each dimension
     
     bconi = bcon{i};
     
-    if strcmp(bconi{1},'p') == 0 %not periodic
+    if strcmp(bconi{1},'n') || strcmp(bconi{1},'d') %not periodic
         
         
         % 1. create lower boundary tensor
@@ -98,7 +98,7 @@ for i = 1:d %add boundary conditions to each dimension
     
 end
 
-if isempty(bc) == 1 %all periodic
+if isempty(bc) == 1 %all periodic or vanishing
     
     bcU = cell(1,d);
     for i=1:d

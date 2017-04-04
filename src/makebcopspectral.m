@@ -31,6 +31,20 @@ for i=1:d
         
     elseif strcmp(bconi{1},'n')
         op = bc_neumann(op,i,bsca(i,:),n,fd1{i});
+        
+    elseif strcmp(bconi{1},'v') % vanishing boundary
+        % Eliminate whatever is happening on the boundary currently
+        sr = ncomponents(op);
+        dimU = op.U{i};
+        ndim = n(i);
+        for jj=1:sr
+            el = reshape(dimU(:,jj),ndim,ndim);
+            el(1,:) = zeros(1,ndim);
+            %el(ndim,:) = zeros(1,ndim); %not needed
+            dimU(:,jj) = el(:);
+        end
+        op.U{i} = dimU;
+        op = arrange(op);
     else
         error('wrong type of boundary condition')
     end
