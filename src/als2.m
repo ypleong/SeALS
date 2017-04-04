@@ -78,7 +78,11 @@ err = err(1:iter);
 
 if curr_rank == R
     F = op;
-    err(iter) = 0;
+    if iter == 0
+        err = 0;
+    else
+        err(iter) = 0;
+    end
     disp('cannot reduce rank')
     noreduce = 1;
 else

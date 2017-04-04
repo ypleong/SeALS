@@ -122,9 +122,9 @@ for k = 1:nd
             plotmatrix(B);
         end
         %%% Debugging %%%
-        
         warning('off', 'MATLAB:nearlySingularMatrix');
         u = B\b;
+        warning('error', 'MATLAB:nearlySingularMatrix');
     end
     
     u = reshape(u,nf,rF);

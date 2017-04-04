@@ -49,7 +49,7 @@ function [P,Uinit,output] = cp_als(X,R,varargin)
 % require a license from the United States Government.
 % The full license terms can be found in the file LICENSE.txt
 
-
+warning('error', 'MATLAB:nearlySingularMatrix');
 
 %% Extract number of dimensions and norm of X.
 N = ndims(X);
@@ -161,7 +161,14 @@ else
                 lambda = max( max(abs(Unew),[],1), 1 )'; %max-norm
             end            
             
-            Unew = bsxfun(@rdivide, Unew, lambda');
+            try
+                Unew = bsxfun(@rdivide, Unew, lambda');
+            catch
+                ill_cond = 1;
+                warning('off', 'MATLAB:nearlySingularMatrix');
+                Unew = bsxfun(@rdivide, Unew, lambda');
+                warning('error', 'MATLAB:nearlySingularMatrix');
+            end
 
             U{n} = Unew;
             UtU(:,:,n) = U{n}'*U{n};
@@ -195,6 +202,10 @@ else
         end
         
         t_step(iter) = toc;
+        
+        if ill_cond
+            break
+        end
     end   
 end
 
@@ -221,3 +232,6 @@ output.iters = iter;
 output.err = err(1:iter);
 output.ill_cond = ill_cond;
 output.t_step = t_step(1:iter);
+
+warning('on', 'MATLAB:nearlySingularMatrix');
+

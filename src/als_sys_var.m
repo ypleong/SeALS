@@ -1,4 +1,4 @@
-function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging)
+function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)
 % ALS_SYS_VAR is a modified version of the original ALS algorithm found
 % in Beylkin and Mohlenkamp 2005. ALS_SYS solves AF = G by iterating as in
 % the original ALS until matrices gets ill-conditioned. Then it fixes the
@@ -69,6 +69,10 @@ else
     error('wrong type of error specified');
 end
 
+if nargin < 8
+    verbose = 1;
+end
+
 %% documentation
 if debugging == 1
     maxit = 0; %1 if max iter exceeded
@@ -129,7 +133,7 @@ addStr = '';
 msg = '';
 
 stopforloop = 0;
-useStop = 1;
+useStop = 0;
 e_count = 2;
 e_list(1) = 1;
 
@@ -158,7 +162,7 @@ for iter = 1:tol_it
     %%%%%% Debugging %%%%%%
     
     % Display progress
-    if 1 == 1
+    if verbose
         msg = sprintf('Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n', iter, tol_it, old_err, e, ncomponents(F));
         fprintf([reverseStr, msg]);
         reverseStr = repmat(sprintf('\b'), 1, length(msg));
@@ -352,7 +356,7 @@ if useStop
     clear FS ;    % this structure has no use anymore
 end
 
-if illcond == 0
+if ~illcond && verbose
     msg = sprintf('Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n', iter, tol_it, err(iter), e, ncomponents(F));
     fprintf([reverseStr, msg]);
 end

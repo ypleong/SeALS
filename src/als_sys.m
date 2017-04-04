@@ -1,4 +1,4 @@
-function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging)
+function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)
 % ALS_SYS code to perform the ALS algorithm as described in Beylkin
 % and Mohlenkamp 2005. Tries to solve AF = G.
 % Inputs:
@@ -36,7 +36,7 @@ function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cel
 %% assign
 if isempty(als_options)
     tol_it = 2000;
-    tol_rank = 20;
+    tol_rank = 30;
     e_type = 'average';
     r_tol = 1e-3;
     alpha = 1e-12;
@@ -53,6 +53,10 @@ elseif strcmp(e_type,'total')
     norA = 1;
 else
     error('wrong type of error specified');
+end
+
+if nargin < 7
+    verbose = 1;
 end
 
 %% documentation
@@ -119,7 +123,7 @@ old_err = norm(SRMultV(A,F)-G)/norA;
 reverseStr = '';
 msg = '';
 
-useStop = 1;
+useStop = 0;
 e_count = 2;
 e_list(1) = 1;
 
@@ -148,7 +152,7 @@ for iter = 1:tol_it
     %%%%%% Debugging %%%%%%
     
     % Display progress
-    if 1 == 1
+    if verbose
         msg = sprintf('Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n', iter, tol_it, old_err, e, ncomponents(F));
         fprintf([reverseStr, msg]);
         reverseStr = repmat(sprintf('\b'), 1, length(msg));
@@ -285,7 +289,7 @@ if useStop
     clear FS ;    % this structure has no use anymore
 end
 
-if illcond == 0
+if ~illcond && verbose
     msg = sprintf('Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n', iter, tol_it, err(iter), e, ncomponents(F));
     fprintf([reverseStr, msg]);
 end
