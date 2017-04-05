@@ -133,7 +133,7 @@ addStr = '';
 msg = '';
 
 stopforloop = 0;
-useStop = 0;
+useStop = 1;
 e_count = 2;
 e_list(1) = 1;
 
@@ -222,7 +222,7 @@ for iter = 1:tol_it
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
             [F] = als_onestep_sys(AtA,AtG,F,alpha,debugging);
             err_oldF = err_newF;
-            err_newF = nF.lambda;
+            err_newF = F.lambda; %% TODO some error here for 2d heat
             count = count + 1;
         end
         
