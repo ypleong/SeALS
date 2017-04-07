@@ -69,10 +69,19 @@ for k = 1:nd
             if i==j
                 M{i,j} = M{i,j}+alpha*eye(nf);
             end
-                      
-            F_i = squeeze(F_U(:,i,:));
-            F_j = repmat(F_U(:,j,:),1,nf,1);
             
+%             AtA2 = permute(reshape(AtA,nf,rA,nf,rA,nd),[ 2 4 3 1 5]);
+%             tic
+%             F_i2 = permute(repmat(F_U(:,i,:),1,1,1,rA,rA),[4 5 2 1 3]);
+%             F_j2 = permute(repmat(F_U(:,j,:),1,nf,1,rA,rA),[4 5 1 2 3]);
+%             temp2 = squeeze(dot(dot(F_j2, AtA2,3),F_i2,4));
+%             MM = repmat(prod(temp2(:,:,idx),3),1,1,nf,nf);
+%             M2 = M{i,j}+squeeze(sum(sum(MM.* permute(AtA2(:,:,:,:,k),[1 2 4 3 5]),1),2));
+%             toc
+            
+%             tic
+            F_i = squeeze(F_U(:,i,:));
+            F_j = repmat(F_U(:,j,:),1,nf,1);      
             for ia=1:rA
                 for ja=1:rA                    
                     A_ia_ja = AtA((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf),:);
@@ -83,16 +92,15 @@ for k = 1:nd
                     
                 end
             end
+%             toc
             
         end
     end
     
     %Calculate b matrix
     for i=1:rF
-        F_i = repmat(F_U(:,i,:),1,sizeAtG(2),1);
-        temp = dot(F_i, AtG);
-        Agprod = prod(temp(:,:,idx),3);
-        N{i} = sum(AtG(:,:,k).*repmat(Agprod,nf,1),2);
+        temp = dot(repmat(F_U(:,i,:),1,sizeAtG(2),1), AtG);
+        N{i} = sum(AtG(:,:,k).*repmat(prod(temp(:,:,idx),3),nf,1),2);
     end
     
     B = cell2mat(M);
