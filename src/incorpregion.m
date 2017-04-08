@@ -29,8 +29,8 @@ for i=1:d
     
     gridi = grid{i};
     ni = length(gridi);
-    d_ind = find( (gridi >= region(i,1)) & (gridi <= region(i,2)));
-    d_out = find( (gridi < region(i,1)) | (gridi > region(i,2)));
+    d_ind = (gridi >= region(i,1)) & (gridi <= region(i,2));
+    d_out = (gridi < region(i,1)) | (gridi > region(i,2));
     
     %Go through each rank and eliminate nodes outside region
     temp = reshape(opRem.U{i},ni,ni*sr);
@@ -45,17 +45,14 @@ for i=1:d
     
     %Go through the boundary and eliminate nodes outside region
     newBCU = bcd.U{i};
-    newBCU(d_out,:) = zeros(length(d_out),sr_b);
+    newBCU(d_out,:) = zeros(sum(d_out),sr_b);
     bcd.U{i} = newBCU;
     bcAdd{i} = zeros(ni,1);
-    bcAdd{i}(d_ind,1) = ones(length(d_ind),1);
+    bcAdd{i}(d_ind,1) = ones(sum(d_ind),1);
     
 end
 
-newbcop = regsca*ktensor(opAdd);
-
-op = op - opRem + newbcop;
-
+op = op - opRem + regsca*ktensor(opAdd);
 bc = bc - bcd + regsca*regval*ktensor(bcAdd);
 
 end
