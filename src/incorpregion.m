@@ -54,11 +54,7 @@ end
 
 newbcop = regsca*ktensor(opAdd);
 
-if norm(opRem) == 0 %it usually is
-    op = op + newbcop;
-else
-    op = op - opRem + newbcop;
-end
+op = op - opRem + newbcop;
 
 bc = bc - bcd + regsca*regval*ktensor(bcAdd);
 
