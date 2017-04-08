@@ -41,14 +41,7 @@ B_cell = {};
 b_cell = {};
 %%% documentation %%%
 
-%This let's us not worry about the normalization factor. It might not be a
-%good idea in term of condition to put all the scaling on the first
-%element.
-% A.U{1} = A.U{1}*diag(A.lambda);
-% G.U{1} = G.U{1}*diag(G.lambda);
-% F.U{1} = F.U{1}*diag(F.lambda);
-
-%Let's distribute it evenly, see if it makes a difference;
+% Distribute normalization factor evenly
 F_U = zeros(nf,rF,nd);
 for i = 1:nd
     F_U(:,:,i) = F.U{i}*diag((F.lambda).^(1/nd));

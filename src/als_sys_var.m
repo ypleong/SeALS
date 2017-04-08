@@ -97,7 +97,6 @@ F_saved = []; %saved tensor terms of F
 %% main script
 nd = ndims(G);
 sizeG = size(G);
-% sG = sizeG(1); %For simplicity, assuming all meshes are the same.
 
 if isempty(F)
     U = cell(1,nd);
@@ -132,7 +131,7 @@ reverseStr = '';
 addStr = '';
 msg = '';
 
-stopforloop = 0;
+stopforloop = 1;
 useStop = 1;
 e_count = 2;
 e_list(1) = 1;
@@ -222,7 +221,7 @@ for iter = 1:tol_it
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
             [F] = als_onestep_sys(AtA,AtG,F,alpha,debugging);
             err_oldF = err_newF;
-            err_newF = F.lambda; %% TODO some error here for 2d heat
+            err_newF = F.lambda; 
             count = count + 1;
         end
         
@@ -253,7 +252,7 @@ for iter = 1:tol_it
     %%% Variant %%%
     
     if abs(err(iter) - old_err)/old_err < r_tol
-        clear nF U
+%         clear nF U
         
         %%% Variant %%%
         % commented for variant:
@@ -285,7 +284,7 @@ for iter = 1:tol_it
         % debugging:
         %fprintf('Conditioning new term. Error: %f\n', norm(G-SRMultV(A,F)));
         
-        clear F_cell_precond B_cell_precond b_cell_precond
+%         clear F_cell_precond B_cell_precond b_cell_precond
         
         [AtA2, AtG2] = prepareAG_4_als_sys(A, G-SRMultV(A,F));
         

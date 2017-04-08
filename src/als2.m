@@ -24,6 +24,7 @@ function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)
 dim = ndims(op);
 R = ncomponents(op);
 op_len = length(varargin);
+illcond = 0;
 
 if op_len < 3
     Pinit = cell(1,dim);
@@ -55,7 +56,7 @@ noreduce = 0;
 
 e_list = 1;
 
-while (iter < maxit) && (tol > e) && (curr_rank < R)
+while (iter < maxit) && (tol > e) && (curr_rank < R) && ~(illcond)
     
     [P,~,out]= cp_als(op,curr_rank,'init',Pinit,'printitn',0);
     iter = iter + out.iters;

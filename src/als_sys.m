@@ -83,7 +83,6 @@ U = cell(nd,1);
 
 if isempty(F)
     for n = 1:nd
-        %U{n} = abs(ones(sizeG(n),1)+randn(sizeG(n),1));
         U{n} = matrandnorm(sizeG(n),1);
     end
     F = ktensor(U);
@@ -94,7 +93,6 @@ elseif isfloat(F)
     
     for i = 1:terms
         for n = 1:nd
-            %U{n} =  abs(ones(sizeG(n),1)+randn(sizeG(n),terms));
             U{n} = matrandnorm(sizeG(n),1);
         end
         if i == 1
@@ -123,7 +121,7 @@ old_err = norm(SRMultV(A,F)-G)/norA;
 reverseStr = '';
 msg = '';
 
-useStop = 0;
+useStop = 1;
 e_count = 2;
 e_list(1) = 1;
 
@@ -190,7 +188,7 @@ for iter = 1:tol_it
     end
     
     if abs(err(iter) - old_err)/old_err < r_tol
-        clear nF U
+        
         rF = rF + 1;
         
         if( ncomponents(F)+1 > tol_rank )
@@ -211,7 +209,6 @@ for iter = 1:tol_it
             U{n} = matrandnorm(sizeG(n),1);
         end
         nF = ktensor(U);
-        nF1 = nF;
         
         % Precondition the new rank 1 tensor
         count = 1;
@@ -220,8 +217,6 @@ for iter = 1:tol_it
         
         % debugging:
         %fprintf('Conditioning new term. Error: %f\n', norm(G-SRMultV(A,F)));
-        
-        clear F_cell_precond B_cell_precond b_cell_precond
         
         [AtA2, AtG2] = prepareAG_4_als_sys(A, G-SRMultV(A,F));
         

@@ -55,6 +55,7 @@ checklambda(G,B,noise_cov,R,lambda);
 
 if isempty(artdiff_option) == 0
     % add artificial diffusion
+    h = [];
     [op] = addartdiff(op,conv,diff,artdiff_option,h,D2,fTens);  %%% TODO: NEED TO CHECK
 end
 
@@ -90,7 +91,7 @@ end
 [bc] = makebc(bcon,bsca,grid,x,n);
 
 %% Step 8: set up boundary conditions for operator
-[op] = makebcop(op,bcon,bsca,n,fd1);
+[op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
 %% Step 9: incooporate region in boundary conditions and operator
 

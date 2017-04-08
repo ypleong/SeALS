@@ -204,6 +204,7 @@ else
         t_step(iter) = toc;
         
         if ill_cond
+            fprintf('Matrix is ill condition. \n')
             break
         end
     end   
