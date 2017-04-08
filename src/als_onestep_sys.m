@@ -57,54 +57,36 @@ end
 for k = 1:nd
     idx = [1:(k-1) (k+1):nd];
     
-    M = cell(rF,rF);
-    N = cell(rF,1);
+    B = zeros(rF*nf,rF*nf);
+    b = zeros(rF*nf,1);
     
-    %Calculate B matrix    
+    %Calculate B matrix  
     for i=1:rF
-        for j=1:rF
-            
-            M{i,j} = zeros(nf);
-            
-            if i==j
-                M{i,j} = M{i,j}+alpha*eye(nf);
-            end
-            
-%             AtA2 = permute(reshape(AtA,nf,rA,nf,rA,nd),[ 2 4 3 1 5]);
-%             tic
-%             F_i2 = permute(repmat(F_U(:,i,:),1,1,1,rA,rA),[4 5 2 1 3]);
-%             F_j2 = permute(repmat(F_U(:,j,:),1,nf,1,rA,rA),[4 5 1 2 3]);
-%             temp2 = squeeze(dot(dot(F_j2, AtA2,3),F_i2,4));
-%             MM = repmat(prod(temp2(:,:,idx),3),1,1,nf,nf);
-%             M2 = M{i,j}+squeeze(sum(sum(MM.* permute(AtA2(:,:,:,:,k),[1 2 4 3 5]),1),2));
-%             toc
-            
-%             tic
-            F_i = squeeze(F_U(:,i,:));
-            F_j = repmat(F_U(:,j,:),1,nf,1);      
+        F_i = squeeze(F_U(:,i,:));        
+        for j=1:rF       
+            F_j = repmat(F_U(:,j,:),1,nf,1);  
+            Mt = zeros(nf,nf);
             for ia=1:rA
                 for ja=1:rA                    
                     A_ia_ja = AtA((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf),:);
                     temp = dot(squeeze(dot(F_j, A_ia_ja)), F_i);               
-                    Aprod2 = prod(temp(idx));
-                    
-                    M{i,j} = M{i,j} + A_ia_ja(:,:,k)'*Aprod2;
-                    
+                    Aprod2 = prod(temp(idx));                    
+                    Mt = Mt + A_ia_ja(:,:,k)'*Aprod2;                    
                 end
             end
-%             toc
+            
+            if i==j
+                B((i-1)*nf+(1:nf),(j-1)*nf+(1:nf)) = Mt+alpha*eye(nf);
+            else
+                B((i-1)*nf+(1:nf),(j-1)*nf+(1:nf)) = Mt;
+            end
             
         end
-    end
-    
-    %Calculate b matrix
-    for i=1:rF
+        
+        %Calculate b matrix
         temp = dot(repmat(F_U(:,i,:),1,sizeAtG(2),1), AtG);
-        N{i} = sum(AtG(:,:,k).*repmat(prod(temp(:,:,idx),3),nf,1),2);
+        b((i-1)*nf+(1:nf),:) = sum(AtG(:,:,k).*repmat(prod(temp(:,:,idx),3),nf,1),2);
     end
-    
-    B = cell2mat(M);
-    b = cell2mat(N);
     
     %%% Debugging %%%
     if 1==0 %"movie-plot" of ALS matrices
@@ -135,9 +117,7 @@ for k = 1:nd
         warning('error', 'MATLAB:nearlySingularMatrix');
     end
     
-    u = reshape(u,nf,rF);
-    
-    F_U(:,:,k) = u;
+    F_U(:,:,k) = reshape(u,nf,rF);
     
     %%% documentation %%%
     if debugging == 1
@@ -154,11 +134,7 @@ for k = 1:nd
     
 end
 
-U = cell(nd,1);
-for ii = 1:nd
-    U{ii} = F_U(:,:,ii);
-end
-F = ktensor(U);
+F = ktensor(num2cell(F_U,[1 2]));
 F = arrange(F);
 
 warning('on', 'MATLAB:nearlySingularMatrix');
