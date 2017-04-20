@@ -131,7 +131,7 @@ reverseStr = '';
 addStr = '';
 msg = '';
 
-stopforloop = 1;
+stopforloop = 0;
 useStop = 1;
 e_count = 2;
 e_list(1) = 1;
