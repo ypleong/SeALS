@@ -1,4 +1,4 @@
-function [F, grid] = main_run_spectral(input1,input2,input3,input4,run)
+function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)
 % MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,
 % visualizes the result and runs simulations with the obtained controller.
 % Inputs:
@@ -22,7 +22,7 @@ start_whole = tic;
 
 [artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging] = deal(input3{:});
 
-[saveplots,savedata,sim_config] = deal(input4{:});
+[saveplots,savedata,plotdata,sim_config] = deal(input4{:});
 
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
@@ -138,19 +138,21 @@ disp('Solution complete');
 
 %% Step 12: visualize results
 
+if plotdata
 % arrange input data
-F = arrange(F);
-plotsolve = {F,err,enrich,t_step,Fcond,grid};
-plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
-plotdebug = {F_cell,b_cell,B_cell};
+    F = arrange(F);
+    plotsolve = {F,err,enrich,t_step,Fcond,grid};
+    plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
+    plotdebug = {F_cell,b_cell,B_cell};
 
 % plot results from run als and compress operator
-try
-    fprintf('Plotting results \n')
-    visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)
-    fprintf('Plotting complete \n')
-catch
-    fprintf('Could not visualize results \n')
+    try
+        fprintf('Plotting results \n')
+        visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+        fprintf('Plotting complete \n')
+    catch
+        fprintf('Could not visualize results \n')
+    end
 end
 
 %% Step 13. run simulations
@@ -208,9 +210,9 @@ if savedata == 1
     clear F_cell B_cell b_cell
     
     % save rest of the data
-    pathname = fileparts('./saved_data/');
-    matfile = fullfile(pathname,['rundata_run',num2str(run)]);
-    save(matfile);
+%     pathname = fileparts(save_folder);
+%     matfile = fullfile(pathname,[save_folder,'spectral_rundata_run_',num2str(run)]);
+    save([save_folder,'spectral_rundata_run_',num2str(run)]);
     
 end
 
