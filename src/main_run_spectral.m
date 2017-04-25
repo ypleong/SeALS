@@ -1,4 +1,4 @@
-function [F] = main_run_spectral(input1,input2,input3,input4,run)
+function [F, grid] = main_run_spectral(input1,input2,input3,input4,run)
 % MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,
 % visualizes the result and runs simulations with the obtained controller.
 % Inputs:
