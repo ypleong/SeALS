@@ -6,7 +6,7 @@ function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)
 %  matrices D1, D2, ..., DM on Chebyshev nodes. 
 % 
 %  Input:
-%  N:        Size of differentiation matrix.        
+%  N:        Size of differentiation matrix.     
 %  M:        Number of derivatives required (integer).
 %  xmin:     lower bound of the domain
 %  xmax:     upper bound of the domain
@@ -58,19 +58,30 @@ end
        
      else
          Nb = floor((imin-xmin)*N/(xmax-xmin));
-         k1 = (0:Nb-1)';
-         k2 = (0:N-Nb-2)';
-         th1 = k1*pi/(Nb-1);
-         th2 = k2*pi/(N-Nb-2);
+         
+         if imin == imax
+             k1 = (0:Nb)';
+             k2 = (0:N-Nb-1)';
+             th1 = k1*pi/(Nb);
+             th2 = k2*pi/(N-Nb-1);
+         else
+             k1 = (0:Nb-1)';
+             k2 = (0:N-Nb-2)';
+             th1 = k1*pi/(Nb-1);
+             th2 = k2*pi/(N-Nb-2);
+         end
          
          x1 = cos(th1); % Compute Chebyshev points.
          x2 = cos(th2); % Compute Chebyshev points.
          
-         if imin == imax
-             dx = (xmax-xmin)/N;
-             imin = imin-dx/2;
-             imax = imax+dx/2;
+         if imax == imin
+             dx = abs(x1(end-1) - x1(end))*(xmax-imax)/2;
+             imin = imin-dx;
+             imax = imax+dx;
+             x1(1) = [];
+             x2(end) = [];
          end
+               
          x = [((xmax-imax)*x2+imax+xmax)/2; (imax+imin)/2; ((imin-xmin)*x1+imin+xmin)/2;];
          
          DM = computeD(x, (0:N-1)', N, M);
