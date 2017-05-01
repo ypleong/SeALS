@@ -128,7 +128,8 @@ end
 
 if d == 2
     
-    sol = double(F)';
+    sol = double(F);
+    sol = sol(end:-1:1,:);
     [x1mesh,x2mesh] = meshgrid(grid{1},grid{2});
     
     figure;
