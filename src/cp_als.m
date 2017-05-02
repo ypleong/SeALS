@@ -181,7 +181,7 @@ else
         else
             normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
             fit = 1 - (normresidual / normX); %fraction explained by model
-            err(iter) = norm(P-X)/normX;
+            err(iter) = (normresidual^2)/normX;
         end
         fitchange = abs(fitold - fit);
         
