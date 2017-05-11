@@ -14,7 +14,7 @@ function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)
 %   See also MAKEDIFFOP.
 
 % Elis Stefansson, Aug 9 2015
-% This is a new version incorporated for the Toolbox, explaining the
+% This is a new version incorporated for the Toolbox, explaining the 
 % different notation.
 
 d = length(x);
@@ -36,20 +36,20 @@ end
 for ii = 1:d
 
     DCanv = addBCD_each( x{ii}, D{ii}, region(ii,:), ord(ii,:), Dedg{ii}, der);
-        
+    
+    count = 0;
     if d == 1
          opDU{ii,ii} = DCanv(:);
     else
-        for jj = 1:d
+        for jj = 1:d           
             if ii == jj
-                opDU{jj,ii} = [DCanv(:), D{ii}(:)];
+                opDU{jj,ii} = [repmat(D{ii}(:),1,d-1) DCanv(:)];
             else
                 id = eye(size(D{jj}));
-                idRest = addBCD_each( x{jj}, id, region(jj,:), ord(jj,:), id, der);
-                
-                opDU{jj,ii} = [id(:)-idRest(:),  idRest(:)];
-                
-            end
+                idRest = addBCD_each( x{jj}, id, region(jj,:), ord(jj,:), id, der);                
+                opDU{jj,ii} = [repmat(id(:),1,count) idRest(:) repmat(id(:)-idRest(:),1,d-1-count)];
+                count = count + 1;
+            end         
         end
     end
 end
@@ -95,7 +95,7 @@ function [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)
         %For the current direction, set up edge derivatives
         Dfill( (left+1-(ord(1)+der-3)/2):left, (left+1-(ord(2)+der-1)):(left+1) ) = Dedg(end-(ord(1)+der-3)/2:end-1,end-(ord(2)+der-1):end);
         Dfill(right:right+(ord(1)+der-5)/2,right-1:right-1+(ord(2)+der-1)) = Dedg(2:2+(ord(1)+der-5)/2,1:1+(ord(2)+der-1));
-        
+
         Drem = D;
         Drem([d_egd; d_ind],:) = 0; %knock out the parts affecting the interior boundary
         
@@ -103,4 +103,3 @@ function [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)
         
     end
 end
-
