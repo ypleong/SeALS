@@ -23,17 +23,11 @@ warning('error', 'MATLAB:nearlySingularMatrix');
 status = 1;
 
 F = arrange(F);
+nd = length(AtG);
 
-sizeAtG = size(AtG);
-if length(sizeAtG) == 3
-    nd = sizeAtG(3);
-elseif length(sizeAtG) == 2
-    nd = 1;
-end
-nf = sizeAtG(1);
-
+nf = size(AtG{1},1);
 rF = ncomponents(F);
-rA = round(size(AtA,1)/nf);
+rA = round(size(AtA{1},1)/nf);
 
 %%% documentation %%%
 F_cell = {}; %for no documentation, these variabels remain empty.
@@ -42,29 +36,30 @@ b_cell = {};
 %%% documentation %%%
 
 % Distribute normalization factor evenly
-F_U = zeros(nf,rF,nd);
+F_U = cell(nd,1);
 for i = 1:nd
-    F_U(:,:,i) = F.U{i}*diag((F.lambda).^(1/nd));
+    F_U{i} = F.U{i}*diag((F.lambda).^(1/nd));
 end
 
 for k = 1:nd
     idx = [1:(k-1) (k+1):nd];
-    
+    nf = size(F_U{k},1);
     B = zeros(rF*nf,rF*nf);
     b = zeros(rF*nf,1);
     
     %Calculate B matrix  
-    for i=1:rF
-        F_i = squeeze(F_U(:,i,:));        
-        for j=1:rF       
-            F_j = repmat(F_U(:,j,:),1,nf,1);  
+    for i=1:rF      
+        for j=1:rF         
             Mt = zeros(nf,nf);
             for ia=1:rA
-                for ja=1:rA                    
-                    A_ia_ja = AtA((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf),:);
-                    temp = dot(squeeze(dot(F_j, A_ia_ja)), F_i);               
-                    Aprod2 = prod(temp(idx));                    
-                    Mt = Mt + A_ia_ja(:,:,k)'*Aprod2;                    
+                for ja=1:rA 
+                    Aprod2 = 1;
+                    for dd = idx
+                        nnf = size(F_U{dd},1);
+                        A_ia_ja = AtA{dd}((ia-1)*nnf+(1:nnf),(ja-1)*nnf+(1:nnf));
+                        Aprod2 = Aprod2*F_U{dd}(:,j)'*A_ia_ja*F_U{dd}(:,i);
+                    end  
+                    Mt = Mt + AtA{k}((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf))'*Aprod2;                   
                 end
             end
             
@@ -77,8 +72,11 @@ for k = 1:nd
         end
         
         %Calculate b matrix
-        temp = dot(repmat(F_U(:,i,:),1,sizeAtG(2),1), AtG);
-        b((i-1)*nf+(1:nf),:) = sum(AtG(:,:,k).*repmat(prod(temp(:,:,idx),3),nf,1),2);
+        temp = 1;
+        for dd = idx
+            temp = temp.*(F_U{dd}(:,i)'*AtG{dd});
+        end
+        b((i-1)*nf+(1:nf),:) = AtG{k}*temp';
     end
     
     %%% Debugging %%%
@@ -109,8 +107,8 @@ for k = 1:nd
         u = B\b;
         warning('error', 'MATLAB:nearlySingularMatrix');
     end
-    
-    F_U(:,:,k) = reshape(u,nf,rF);
+ 
+    F_U{k} = reshape(u,nf,rF);
     
     %%% documentation %%%
     if debugging == 1
@@ -127,7 +125,7 @@ for k = 1:nd
     
 end
 
-F = ktensor(num2cell(F_U,[1 2]));
+F = ktensor(F_U);
 F = arrange(F);
 
 warning('on', 'MATLAB:nearlySingularMatrix');

@@ -4,15 +4,15 @@ G = arrange(G);
 A = arrange(A);
 
 nd = ndims(G);
-rG = ncomponents(G);
 rA = ncomponents(A);
-nf = size(G,1);
+nn = size(G);
 
-AtA = zeros(nf*rA,nf*rA,nd);
-AtG = zeros(nf,rA*rG,nd);
+AtA = cell(nd,1);
+AtG = cell(nd,1);
 
 for d = 1:nd 
+    nf = nn(d);
     A_Ud = reshape(A.U{d}*diag((A.lambda).^(1/nd)),nf,nf*rA);
-    AtA(:,:,d) = A_Ud'*A_Ud; 
-    AtG(:,:,d) = reshape(A_Ud'*G.U{d}*diag((G.lambda).^(1/nd)),nf,[],1); 
+    AtA{d} = A_Ud'*A_Ud;
+    AtG{d} = reshape(A_Ud'*G.U{d}*diag((G.lambda).^(1/nd)),nf,[],1);
 end
