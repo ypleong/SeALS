@@ -1,4 +1,4 @@
-    function [x, DM] = fourdifn(N,m)
+    function [x, DM] = fourdifn(N,m,xmin, xmax)
 %
 % The function [x, DM] = fourdif(N,m) computes the m'th derivative Fourier 
 % spectral differentiation matrix on grid with N equispaced points in [0,2pi)
@@ -6,6 +6,8 @@
 %  Input:
 %  N:        Size of differentiation matrix.
 %  M:        Derivative required (non-negative integer)
+%  xmin:     lower bound of the domain
+%  xmax:     upper bound of the domain
 %
 %  Output:
 %  x:        Equispaced points 0, 2pi/N, 4pi/N, ... , (N-1)2pi/N
@@ -26,6 +28,11 @@
 %  S.C. Reddy, J.A.C. Weideman 1998.  Corrected for MATLAB R13 
 %  by JACW, April 2003.
  
+if nargin < 3
+    xmin = 0;
+    xmax = 2*pi;
+end
+
 
     x=2*pi*(0:N-1)'/N;                       % gridpoints
     h=2*pi/N;                                % grid spacing
@@ -75,3 +82,8 @@
      L = logical(I);                      % Logical identity matrix.
      DM(L) = zeros(N,1);
      DM(L) = -sum(DM,2);
+     
+    x = xmin+(xmax-xmin)/(2*pi)*x;
+    DM = DM*(xmax-xmin)/(2*pi);
+    
+
