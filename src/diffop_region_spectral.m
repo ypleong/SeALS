@@ -21,19 +21,20 @@ for ii = 1:d
     
     DCanv = D{ii};
     DCanv(d_ind,:) = 0; %knock out the parts affecting the interior boundary    
-        
+    
+    count = 0;
     if d == 1
          opDU{ii,ii} = DCanv(:);
     else
         for jj = 1:d
             if ii == jj
-                opDU{jj,ii} = [DCanv(:), D{ii}(:)];
+                opDU{jj,ii} = [repmat(D{ii}(:),1,d-1) DCanv(:)];
             else
                 id = eye(size(D{jj}));
                 idRest = id;
                 idRest(d_ind,:) = 0;                
-                opDU{jj,ii} = [id(:)-idRest(:),  idRest(:)];
-                
+                opDU{jj,ii} = [repmat(id(:),1,count) idRest(:) repmat(id(:)-idRest(:),1,d-1-count)];
+                count = count + 1;
             end
         end
     end
