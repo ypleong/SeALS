@@ -19,8 +19,9 @@ nd = ndims(A);
 
 LL = blockTransposeV2H(A.lambda*B.lambda',1)';
 AB = cell(nd,1);
-N = round(sqrt(size(B,1)));
+
 for nn = 1:nd
+    N = round(sqrt(size(B,nn)));
     AB{nn} = reshape(blockTransposeV2H(blockTransposeH2V(reshape(A.U{nn},N,N*rA),N)*reshape(B.U{nn},N,N*rB),N),N*N,[]);
 end
 res = ktensor(LL,AB);
