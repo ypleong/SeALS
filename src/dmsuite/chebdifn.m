@@ -57,52 +57,27 @@ end
         DM = computeD(x, (0:N-1)', N, M);
        
      else
-         Nb = floor((imin-xmin)*N/(xmax-xmin));
+         imid = (imax+imin)/2;
+         Nb = floor((imid-xmin)*N/(xmax-xmin));
          
-         if imin == imax
-             k1 = (0:Nb)';
-             k2 = (0:N-Nb-1)';
-             th1 = k1*pi/(Nb);
-             th2 = k2*pi/(N-Nb-1);
-         else
-             k1 = (0:Nb-1)';
-             k2 = (0:N-Nb-2)';
-             th1 = k1*pi/(Nb-1);
-             th2 = k2*pi/(N-Nb-2);
-         end
+         k1 = (0:Nb)';
+         k2 = (0:N-Nb-1)';
+         th1 = k1*pi/(Nb);
+         th2 = k2*pi/(N-Nb-1);
          
          x1 = cos(th1); % Compute Chebyshev points.
          x2 = cos(th2); % Compute Chebyshev points.
          
-         if imax == imin
-             dx = abs(x1(end-1) - x1(end))*(xmax-imax)/2;
-             imin = imin-dx;
-             imax = imax+dx;
-             x1(1) = [];
-             x2(end) = [];
-         end
+         dx = abs(x1(end-1) - x1(end))*(xmax-imid)/2;
+         imin = imid-dx;
+         imax = imid+dx;
+         x1(1) = [];
+         x2(end) = [];
                
-         x = [((xmax-imax)*x2+imax+xmax)/2; (imax+imin)/2; ((imin-xmin)*x1+imin+xmin)/2;];
+         x = [((xmax-imax)*x2+imax+xmax)/2; imid; ((imin-xmin)*x1+imin+xmin)/2;];
          
          DM = computeD(x, (0:N-1)', N, M);
          
-%          xx1 = [((xmax-imax)*x2+imax+xmax)/2; (imax+imin)/2;];
-%          xx2 = [(imax+imin)/2; ((imin-xmin)*x1+imin+xmin)/2;];
-%          nn1 = length(xx1);
-%          nn2 = length(xx2);
-%          
-%          
-%          DM1 = computeD(xx1, 0:nn1-1, nn1, M);
-%          DM2 = computeD(xx2, 0:nn2-1, nn2, M);
-%          
-%          DM = zeros(N,N,M);
-%          for ii = 1:M
-%             DM(:,:,ii) = [DM1(1:end-1,:,ii) zeros(nn1-1,nn2-1); zeros(1,N);
-%                 zeros(nn2-1,nn1-1) DM2(2:end,:,ii)];
-% %             DM(:,:,ii) = [DM1(1:end-1,:,ii) DM2(1:end-1,2:end,ii); zeros(1,N);
-% %                 DM1(2:end,1:end-1,ii) DM2(2:end,:,ii)];
-% 
-%          end
      end
      
      
