@@ -21,7 +21,6 @@ rF = ncomponents(F);
 rG = ncomponents(G);
 
 LL = G.lambda*F.lambda';
-LL = LL(:);
 FG = cell(nd,1);
 for nn = 1:nd
     N = size(F,nn);
@@ -32,4 +31,4 @@ for nn = 1:nd
     end
     FG{nn} = temp;
 end
-res = ktensor(LL,FG);
+res = ktensor(LL(:),FG);
