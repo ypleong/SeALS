@@ -14,10 +14,10 @@ function res = SRMultV(A,F)
 rA = ncomponents(A);
 nd = ndims(F);
 
-LL = blockTransposeV2H(A.lambda*F.lambda',1)';
+LL = F.lambda*A.lambda';
 AU = cell(nd,1);
 for nn = 1:nd
     N = size(F,nn);
     AU{nn} = blockTransposeV2H(blockTransposeH2V(reshape(A.U{nn},N,N*rA),N)*F.U{nn},N);
 end
-res = ktensor(LL,AU);
+res = ktensor(LL(:),AU);
