@@ -28,6 +28,7 @@ nd = length(AtG);
 nf = size(AtG{1},1);
 rF = ncomponents(F);
 rA = round(size(AtA{1},1)/nf);
+rG = size(AtG{1},2);
 
 %%% documentation %%%
 F_cell = {}; %for no documentation, these variabels remain empty.
@@ -72,7 +73,7 @@ for k = 1:nd
         end
         
         %Calculate b matrix
-        temp = 1;
+        temp = ones(1,rG);
         for dd = idx
             temp = temp.*(F_U{dd}(:,i)'*AtG{dd});
         end
