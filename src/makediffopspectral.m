@@ -57,7 +57,11 @@ for i=1:d
         [grid{i}, fd1{i}] = fourdifn(n(i), 1, bdim(i,1),bdim(i,2));
         [grid{i}, fd2{i}] = fourdifn(n(i), 2, bdim(i,1),bdim(i,2));        
     else
-        [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+        if ~isempty(region)
+            [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+        else
+            [grid{i}, sd] = chebdifn(n(i), 2, bdim(i,1),bdim(i,2));
+        end
         fd1{i} = sd(:,:,1);
         fd2{i} = sd(:,:,2);
     end
