@@ -113,11 +113,7 @@ for k = 1:nd
     
     %%% documentation %%%
     if debugging == 1
-        U = cell(nd,1);
-        for ii = 1:nd
-            U{ii} = F_U(:,:,ii);
-        end
-        F = ktensor(U);
+        F = ktensor(F_U);
         F = arrange(F);
         F_cell{k} = F;
     end
