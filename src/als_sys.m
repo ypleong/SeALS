@@ -87,6 +87,7 @@ if isempty(F)
     end
     F = ktensor(U);
     F = arrange(F);
+    F = fixsigns(F);
     
 elseif isfloat(F)
     terms = F;
@@ -103,9 +104,10 @@ elseif isfloat(F)
     end
     
     F = arrange(F);
-    
+    F = fixsigns(F);
 else
     F = arrange(F);
+    F = fixsigns(F);
 end
 
 rF = ncomponents(F);
@@ -179,6 +181,7 @@ for iter = 1:tol_it
     end
     
     F = arrange(F);
+    F = fixsigns(F);
     Fcond(iter) = norm(F.lambda)/norm(F);
     err(iter) = norm(SRMultV(A,F)-G)/norA;
     %err(iter) = norm(SRMultV(A,F)-G);
@@ -254,6 +257,7 @@ for iter = 1:tol_it
         %%% documentation %%%
         
         F = arrange(F + nF);
+        F = fixsigns(F);
         
         %%% documentation %%%
         if debugging == 1
