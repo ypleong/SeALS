@@ -145,7 +145,14 @@ else
             
             % Compute the matrix of coefficients for linear system
             Y = prod(UtU(:,:,[1:n-1 n+1:N]),3);
-            Unew = Unew / Y;
+            try
+                Unew = Unew / Y;
+            catch
+                ill_cond = 1;
+                warning('off', 'MATLAB:nearlySingularMatrix');
+                Unew = Unew / Y;
+                warning('error', 'MATLAB:nearlySingularMatrix');
+            end
             if issparse(Unew)
                 Unew = full(Unew);   % for the case R=1
             end
@@ -177,11 +184,12 @@ else
         P = ktensor(lambda,U);
         if normX == 0
             fit = norm(P)^2 - 2 * innerprod(X,P);
-            err(iter) = fit;
+            err(iter) = 1-fit;
         else
-            normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
-            fit = 1 - (normresidual / normX); %fraction explained by model
-            err(iter) = (normresidual^2)/normX;
+            normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+            err(iter) = normresidual/normX;
+            fit = 1 - err(iter); %fraction explained by model
+            
         end
         fitchange = abs(fitold - fit);
         
@@ -221,10 +229,10 @@ if printitn>0
     if normX == 0
         fit = norm(P)^2 - 2 * innerprod(X,P);
     else
-        normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+        normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
         fit = 1 - (normresidual / normX); %fraction explained by model
     end
-  fprintf(' Final f = %e \n', fit);
+  fprintf(' Final f = %e, error = %e\n', fit, 1-fit);
 end
 
 output = struct;
