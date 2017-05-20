@@ -58,6 +58,7 @@ Dpunch = cell(d,1);
 
 for i=1:d
     Dpunch{i} = ktensor(opDU(:,i));
+    Dpunch{i} = als2(Dpunch{i},10^-8);
 end
 
 end
