@@ -50,7 +50,7 @@ kcell = {{{@(x1)k^2, [1]}}};
 fTens = fcell2ftens(fcell,grid);
 kTens = fcell2ftens(kcell,grid);
 
-op = DiagKTensor(kTens{1}) + D2{1} + D2{2};
+op = DiagKTensor(kTens{1}) + D{1} + D2{1};
 
 %% Create boundary conditions
 
