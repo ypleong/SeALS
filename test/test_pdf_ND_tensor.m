@@ -1,31 +1,68 @@
 
 %% Test Tensor Form PDF Evolution ND
 clear all
-addpath('../src/')
 
 
 %% Create operator in tensor form
 % Initialization
 
-dim = 2; %only dim=2 here
+dim = 3;
 x = sym('x',[dim,1]); %do not change
-n = [201, 301];
+n = [201,301,251];
 
 % Initial distribution
-bdim = [-5 25 ; -5 25];
-dx(1) = (bdim(1,2)-bdim(1,1))/(n(1)-1);
-dx(2) = (bdim(2,2)-bdim(2,1))/(n(2)-1);
-x0 = [7,13];
 sigma02 = 0.5;
-sigma02Matrix = [0.8 0.2; 0.2 sigma02];
-xvector{1} = [-5:dx(1):25]';
-xvector{2} = [-5:dx(2):25]';
-[xgrid,ygrid] = meshgrid(xvector{1},xvector{2});
-xyvector = [xgrid(:) ygrid(:)];%[reshape(xgrid,n(1)*n(2),1),reshape(ygrid,n(1)*n(2),1)];
-p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))';
+for i=1:dim
+    bdim(i,:) = [-5 25 ];
+    x0(i) = 7+i*3;
+    diagSigma(i) = sigma02 + i/dim*0.3;
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+    xvector{i} = [-5:dx(i):25]';
+end
 
-% Tensor parameters
-bcon = { {'d',0,0}, {'d',0,0}};
+
+p0 = zeros(n);
+sigma02Matrix = diag(diagSigma); % [0.8 0.2; 0.2 sigma02];
+
+for i=1:dim
+   p0vector{i} =  normpdf(xvector{i},x0(i),sqrt(diagSigma(i)));
+end
+szargs = cell( 1, dim  ); % We'll use this with ind2sub in the loop
+tic 
+for ii=1:numel(p0)
+    [ szargs{:} ] = ind2sub( size( p0 ), ii ); % Convert linear index back to subscripts
+    prodACC = 1;
+    for k=1:dim
+        prodACC = prodACC*p0vector{k}(szargs{k});
+    end
+    p0(szargs{:}) = prodACC;
+end
+toc
+if dim == 2
+    [xgrid,ygrid] = meshgrid(xvector,xvector);
+    xyvector = [reshape(xgrid,n*n,1),reshape(ygrid,n*n,1)];
+    p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n,n);
+end
+if dim == 2
+    hh = pcolor(xvector{1},xvector{2},squeeze(p0(:,x0(2),:)));
+    colorbar
+    set(hh, 'EdgeColor', 'none');
+    xlabel('x')
+    zlabel('p(x)')
+    grid on
+end
+    
+% Create tensor structure
+rankD = 10;
+[p0compressed] = cp_als(tensor(p0),rankD);
+
+pk{1} = p0compressed;
+
+%% Tensor parameters
+
+for i=1:dim
+   bcon{i} = {'d',0,0};
+end
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -40,23 +77,15 @@ debugging = 0;
 
 run = 1;
 
-if dim == 2
-    hh = pcolor(xvector{1},xvector{2},p0');
-    colorbar
-    set(hh, 'EdgeColor', 'none');
-    xlabel('x')
-    zlabel('p(x)')
-    grid on
-end
-
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 for i=1:dim
     gridT{i} = xvector{i};
     nd(i) = n(i);
     dxd(i) = dx(i);
-    acc(i,:) = [2,2]';
+    acc(i,:) = [2,2]'
 end
+%bcon{1}{1} = 0;
 
 [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
 
@@ -65,15 +94,21 @@ end
 dt = 0.01;
 finalt = 3;
 t = 0:dt:finalt;
-q =  diag([0.3,0.6]); %0.25;
-aspeed = [2;-2]; %[0,3]';
+aspeed = zeros(dim,1);
+qdiag = zeros(dim,1);
+for i=1:dim
+    qdiag(i) = 0.3 + i/dim*0.4;
+    aspeed(i) = 4 - i/dim*3;
+end
+q =  diag( qdiag ); %[0.3,0.6]); %0.25;
+%aspeed = [2;-2]; %[0,3]';
 
 xkalman = zeros(dim,length(t));
 covkalman = zeros(dim,dim,length(t));
 expec = zeros(dim,length(t));
 cov = zeros(dim,dim,length(t));
 
-
+% Step up variables
 cov(:,:,1) = sigma02Matrix;
 expec(:,1) = x0;
 
@@ -84,11 +119,6 @@ covKalman(:,:,1) = sigma02Matrix;
 
 
 %% Create Cell Terms
-%acell = {{{@(x1)aspeed(1), [1]},{@(x2)aspeed(2), [2]}}};
-%aTens = fcell2ftens(acell,gridT);
-
-%dtcell = {{{@(x1)dt, [1]}}};
-%dtTens = fcell2ftens(dtcell,gridT);
 aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
 dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
 qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
@@ -97,11 +127,7 @@ dtTen = DiagKTensor(dtTens{1});
 % Create Operator
 op = create_FP_op ( aTens, qTens, D, D2, dtTen, gridT, tol_err_op);
 
-% Create tensor structure
-rankD = 5;
-[p0compressed] = cp_als(tensor(p0),rankD);
-
-pk{1} = p0compressed;
+% Create weights for integration
 for i=1:dim
     for j = 1:dim
         if i == j
@@ -113,37 +139,60 @@ for i=1:dim
 end
 for i=1:dim
     weones{i} = ones(n(i),1);
- end
+end
+weCov = cell(dim,dim,dim);
+for i=1:dim
+    for j = 1:dim
+        weCov(i,j,:) = weones;
+        if i == j
+            weCov{i,j,i} = xvector{j}.*xvector{j};
+        else
+            weCov{i,j,i} = xvector{i};
+            weCov{i,j,j} = xvector{j};
+        end         
+    end
+end
+
 %% Iterate over 
-tic
+time1 = tic;
 for k = 2:length(t)
     
-     pk{k} = SRMultV( op, pk{k-1});
+    pk{k} = SRMultV( op, pk{k-1});
     [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     
-
     for i=1:dim
         expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
     end
-              
+    for i=1:dim
+        for j = 1:dim
+            cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+        end
+    end
+    
     xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
     covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
     
 end
-toc
+toc(time1)
 %% Check Results
-plot2d(xvector,double(pk{end}))
 
+plot2d(xvector,double(pk{end}))
+pcol
 % Check Kalman 
 figure
 plot(t,xkalman,t,expec,'.')
 xlabel('time')
 zlabel('position')
+% legString = [];
+% for i=1:dim
+%     legString = legString + 'Kalman ' + num2str(i); 
+% end
+    
 legend('KalmaX','KalmanY','FPE X','FPE Y' )
 
 %Compare 2D map kalman and Tensor-FKE
 figure
-plot2d( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))'-double(pk{end}) )
+plot2d( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{end}) )
 title('Difference with kalman')
 
 
@@ -165,13 +214,12 @@ KalmanG = covKalman(:,:,end)*HK'*inv(HK*covKalman(:,:,end)*HK'+Rmes);
 xposKalman = xkalman(:,end) + KalmanG*(zmes - HK*xkalman(:,end));
 covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,end);
 
-for i=1:dim
-    xpos(i)  = intTens(pkpos, [], gridT, we(i,:));
-end
+
 %% animated figure
 figure
-ht_pdf = pcolor(xvector{1},xvector{2},double(pk{k})');
+ht_pdf = pcolor(xvector,xvector,double(pk{k})');
 h = colorbar;
+%set(h, 'ylim', [0 0.25])
 caxis([0 0.25])
 set(ht_pdf, 'EdgeColor', 'none');
 xlabel('x')
@@ -187,8 +235,10 @@ end
 
 %% animated figure difference
 figure
-ht_pdf = pcolor(xvector{1}',xvector{2}',reshape(mvnpdf(xyvector, xkalman(:,1)',covKalman(:,:,1)),n(1),n(2))'-double(pk{1})');
+ht_pdf = pcolor(xvector,xvector,reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{end})');
 h = colorbar;
+%set(h, 'ylim', [0 0.25])
+%caxis([0 0.25])
 set(ht_pdf, 'EdgeColor', 'none');
 xlabel('x')
 ylabel('y')
@@ -196,7 +246,7 @@ grid on
 axis ([0,25,0,25])
 grid on
 for k = 2:10:length(t)
-     set ( ht_pdf, 'CData', reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))-double(pk{k})');
+     set ( ht_pdf, 'CData', reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{k}));
      drawnow
      pause(1.0/10.0);
 end
