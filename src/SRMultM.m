@@ -24,3 +24,4 @@ for nn = 1:nd
     AB{nn} = reshape(blockTransposeV2H(blockTransposeH2V(reshape(A.U{nn},N,N*rA),N)*reshape(B.U{nn},N,N*rB),N),N*N,[]);
 end
 res = ktensor(LL(:),AB);
+res = fixsigns(arrange(res));

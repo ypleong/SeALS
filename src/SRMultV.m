@@ -21,3 +21,4 @@ for nn = 1:nd
     AU{nn} = blockTransposeV2H(blockTransposeH2V(reshape(A.U{nn},N,N*rA),N)*F.U{nn},N);
 end
 res = ktensor(LL(:),AU);
+res = fixsigns(arrange(res));

@@ -109,3 +109,5 @@ if isempty(bc) == 1 %all periodic or vanishing
     
 end
 
+bc = fixsigns(arrange(bc));
+

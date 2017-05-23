@@ -44,7 +44,7 @@ for i=1:d
             dimU(:,jj) = el(:);
         end
         op.U{i} = dimU;
-        op = arrange(op);
+        op = fixsigns(arrange(op));
     else
         error('wrong type of boundary condition')
     end

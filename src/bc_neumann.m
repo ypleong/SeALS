@@ -67,6 +67,6 @@ op.U{dim} = dimU;
 
 %% Combine above
 op = op + ident;
-op = arrange(op);
+op = fixsigns(arrange(op));
 end
 
