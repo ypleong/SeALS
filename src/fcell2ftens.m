@@ -60,9 +60,9 @@ for i = 1:size_fcell(1)
             end
             
             if isempty(fTens{i,j})
-                fTens{i,j} = ktensor(U);
+                fTens{i,j} = fixsigns(arrange(ktensor(U)));
             else
-                fTens{i,j} = fTens{i,j}+ktensor(U);
+                fTens{i,j} = fixsigns(arrange(fTens{i,j}+ktensor(U)));
             end
             
         end
