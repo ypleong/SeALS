@@ -23,9 +23,9 @@ function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)
 % Elis Stefansson, Aug 5 2015
 
 %% create finite-difference matrices
-size_bdim = size(grid);
-d = size_bdim(1);
-%d = length(grid);
+% size_bdim = size(grid);
+% d = size_bdim(1);
+d = length(grid);
 
 fd1 = cell(1,d); %first order der
 fd2 = cell(1,d); %second order der
