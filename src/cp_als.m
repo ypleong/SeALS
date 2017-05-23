@@ -186,7 +186,11 @@ else
             fit = norm(P)^2 - 2 * innerprod(X,P);
             err(iter) = 1-fit;
         else
-            normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+            try 
+                normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+            catch
+                normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+            end
             err(iter) = normresidual/normX;
             fit = 1 - err(iter); %fraction explained by model
             
@@ -229,7 +233,11 @@ if printitn>0
     if normX == 0
         fit = norm(P)^2 - 2 * innerprod(X,P);
     else
-        normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+        try 
+            normresidual = norm(X-P); %sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+        catch
+            normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+        end
         fit = 1 - (normresidual / normX); %fraction explained by model
     end
   fprintf(' Final f = %e, error = %e\n', fit, 1-fit);

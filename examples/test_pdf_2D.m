@@ -63,7 +63,7 @@ end
 
 % Simulation Parameters
 dt = 0.01;
-finalt = 5;
+finalt = 3;
 t = 0:dt:finalt;
 q =  diag([0.3,0.6]); %0.25;
 aspeed = [2;-2]; %[0,3]';
@@ -102,7 +102,18 @@ rankD = 5;
 [p0compressed] = cp_als(tensor(p0),rankD);
 
 pk{1} = p0compressed;
-
+for i=1:dim
+    for j = 1:dim
+        if i == j
+            we{i,j} = xvector{j};
+        else
+            we{i,j} = ones(n(j),1);
+        end         
+    end
+end
+for i=1:dim
+    weones{i} = ones(n(i),1);
+ end
 %% Iterate over 
 tic
 for k = 2:length(t)
@@ -110,18 +121,11 @@ for k = 2:length(t)
      pk{k} = SRMultV( op, pk{k-1});
     [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     
-    for i=1:dim
-        for j = 1:dim
-            if i == j
-                we{i,j} = xvector{j};
-            else
-                we{i,j} = ones(n(j),1);
-            end         
-        end
-    end
 
-    expec(:,k)  = [intTens(pk{k}, [], gridT, we(1,:))
-                  intTens(pk{k}, [], gridT, we(2,:))];
+    for i=1:dim
+        expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+                 % intTens(pk{k}, [], gridT, we(2,:))];
+    end
               
     xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
     covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
@@ -140,20 +144,20 @@ legend('KalmaX','KalmanY','FPE X','FPE Y' )
 
 %Compare 2D map kalman and Tensor-FKE
 figure
-plot2d( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{end}) )
+plot2d( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))'-double(pk{end}) )
 title('Difference with kalman')
 
 
 
 %% Measure
-zmes = [12,17]';
+zmes = [12,6]';
 Rmes = diag([1 1]); %0.5*[3,1;1,2]*[3,1;1,2];
-pz = reshape(mvnpdf(xyvector,zmes',Rmes),n,n);
+pz = reshape(mvnpdf(xyvector,zmes',Rmes),n(2),n(1))';
 rankD = 2;
 [zkcompressed] = cp_als(tensor(pz),rankD);
 
 pkpos = HadTensProd(pk{length(t)},zkcompressed);
-pkpos = pkpos *(1/ intTens(pkpos,we, [1,2] ));
+pkpos = pkpos *(1/  intTens(pkpos, [], gridT, weones));
 
 HK = eye(dim);
 
@@ -162,10 +166,12 @@ KalmanG = covKalman(:,:,end)*HK'*inv(HK*covKalman(:,:,end)*HK'+Rmes);
 xposKalman = xkalman(:,end) + KalmanG*(zmes - HK*xkalman(:,end));
 covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,end);
 
-
+for i=1:dim
+    xpos(i)  = intTens(pkpos, [], gridT, we(i,:));
+end
 %% animated figure
 figure
-ht_pdf = pcolor(xvector,xvector,double(pk{k})');
+ht_pdf = pcolor(xvector{1},xvector{2},double(pk{k})');
 h = colorbar;
 %set(h, 'ylim', [0 0.25])
 caxis([0 0.25])
@@ -183,7 +189,7 @@ end
 
 %% animated figure difference
 figure
-ht_pdf = pcolor(xvector,xvector,reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{end})');
+ht_pdf = pcolor(xvector{1}',xvector{2}',reshape(mvnpdf(xyvector, xkalman(:,1)',covKalman(:,:,1)),n(1),n(2))'-double(pk{1})');
 h = colorbar;
 %set(h, 'ylim', [0 0.25])
 %caxis([0 0.25])
@@ -194,7 +200,7 @@ grid on
 axis ([0,25,0,25])
 grid on
 for k = 2:10:length(t)
-     set ( ht_pdf, 'CData', reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{k}));
+     set ( ht_pdf, 'CData', reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))-double(pk{k})');
      drawnow
      pause(1.0/10.0);
 end
