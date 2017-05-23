@@ -36,11 +36,13 @@ checklambda(G,B,noise_cov,R,lambda);
 
 %% Step 3: calculate differentiation operators and finite difference matrices
 
-[n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region);
+fprintf('Creating differential operators ...\n');
+[n,grid,region,D,D2,D4,fd1,fd2] = makediffopspectral4(bdim,n,bcon,region);
 
 
 %% Step 4: calculate dynamics
 
+fprintf('Creating dynamics operator ...\n');
 %create ktensors
 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid);
 
@@ -49,7 +51,8 @@ checklambda(G,B,noise_cov,R,lambda);
 
 %% Step 5: calculate operator
 
-[op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,lambda);
+fprintf('Creating PDE operator ...\n');
+[op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda);
 
 %% Step 6: add artificial diffusion to operator
 

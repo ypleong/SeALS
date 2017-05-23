@@ -17,6 +17,7 @@
 %   bcon - the boundary conditions. bcon{i} is boundary conditions in
 %   dimension i:
 %   bcon{i} = {'p'}. Periodic
+%   bcon{i} = {'v'}. Vanishing boundary
 %   bcon{i} = {'d',val_lo,val_up}. Dirichlet with val_lo and val_up 
 %   for lower and upper boundary in dimension i.
 %   bcon{i} = {'n',val_lo,val_up}. Neumann with val_lo and val_up for
@@ -134,11 +135,13 @@
 % Elis Stefansson, Aug 4 2015
 
 % Add the scripts to path - run this once before running any setup
-addpath('./scripts/');
+% addpath('./src/');
 
 %% setup
 
-run('./examples/Quadcopter.m')
+% run('./examples/Inverted_Pendulum.m')
+% run('./examples/Smooth_2D_Example.m')
+% run('./examples/Quadcopter.m')
 
 %% arrange input
 input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};

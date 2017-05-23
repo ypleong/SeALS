@@ -11,9 +11,9 @@ start_whole = tic;
 
 %% Initialization
 
-d = 1;
+d = 2;
 x = sym('x',[d,1]); %do not change
-n = 201; % need to be odd
+n = 101; % better be odd
 
 h = pi/(2*n); % time step size
 tend = 8;
@@ -23,7 +23,11 @@ h = tplot/plotgap;
 nplots = round(tend/tplot);
 
 bdim = [-10 10];
-bcon = { {'d',0,0} };
+bcon = {{'d',0,0}};
+for i = 2:d
+    bdim = [bdim; -10 10];
+    bcon{i} = {'d',0,0};
+end
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -56,14 +60,23 @@ k = 0.1;
 ccell = {{{@(x1)ones(size(x1))*-k, 1}}};
 cTens = fcell2ftens(ccell,grid);
 cTen = DiagKTensor(cTens{1});
+
 ucell = {{{@(x1)(exp(-x1.^2/(4*k))/sqrt(4*k)), 1}}};
+for i = 2:d
+    ucell{1,1,i} = {@(x1)(exp(-x1.^2/(4*k))/sqrt(4*k)), i};
+end
 uTens = fcell2ftens(ucell,grid);
 hcell = {{{@(x1)ones(size(x1))*h,1}}};
 hTens = fcell2ftens(hcell,grid);
 icell = {{{@(x1)ones(size(x1)),1}}};
 iTens = fcell2ftens(icell,grid);
 
-op = SRMultM(DiagKTensor(hTens{1}), (SRMultM(cTen, D2{1}))) + DiagKTensor(iTens{1});
+prodkD = SRMultM(cTen, D2{1});
+for i = 2:d
+    prodkD = prodkD + SRMultM(cTen, D2{i});
+end
+
+op = SRMultM(DiagKTensor(hTens{1}), prodkD) + DiagKTensor(iTens{1});
 
 %% Create boundary conditions
 
@@ -115,7 +128,8 @@ F_all{1} = bc;
 data = double(bc)';
 t = 1;
 tdata = t;
-data_true = (exp(-grid{1}.^2/(4*k*t))/sqrt(4*k*t))';
+data_true = data;
+data_err = max(abs(data(:) - data_true(:)));
 iter_time = zeros(1, nplots*plotgap);
 
 for i = 1:nplots
@@ -141,8 +155,16 @@ for i = 1:nplots
     end
     fprintf('\n')
     tdata = [tdata; t];
-    data(i+1,:) = double(bc)';
-    data_true(i+1,:) = (exp(-grid{1}.^2/(4*k*t))/sqrt(4*k*t))';
+    if d ==1
+        data = double(bc)';
+        data_true = (exp(-grid{1}.^2/(4*k))/sqrt(4*k*t));
+    elseif d == 2
+        data = double(bc)';
+        ind = ceil(n/2);
+        data = bc(ind,ind);
+        data_true = (1/sqrt(4*k*t));
+    end
+    data_err(ii+1) = max(abs(data(:) - data_true(:)));
 end
 
 time_solve = toc(start_solve);
@@ -161,6 +183,7 @@ disp('Solution complete');
 try
     fprintf('Plotting results \n')
 %     visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+    if d == 1
     figure;
     hold on
     h1 = waterfall(grid{1},tdata,data);
@@ -175,6 +198,13 @@ try
     waterfall(grid{1},tdata,abs(data-data_true))
     ylabel('t')
     zlabel('abs(error)')
+    
+    else
+        figure;
+        plot(tdata,data_err)
+        xlabel('t')
+        ylabel('Error')
+    end
     
     figure
     plot(iter_time)

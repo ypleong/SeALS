@@ -1,4 +1,4 @@
-function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,lambda)
+function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)
 %MAKEOP creates the operator of the linear HJB equation.
 % (ktensor cell := cell array with ktensors as elements.)
 % Input:
@@ -186,6 +186,14 @@ end
 %error('done')
 % debugging %
 
+%% Stability
+i = 1;
+ep = 10^-4;
+opStab = ep*D4{i};
+for i = 2:d
+    opStab = opStab + ep*D4{i};
+end
+
 %% combine operator terms
 if isempty(opMid) == 1
     if isempty(opRight) == 1
@@ -201,4 +209,5 @@ else
     end
 end
 
+% op = op + opStab;
 

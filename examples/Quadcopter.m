@@ -30,7 +30,6 @@ sca_ver = 1; %first scaling version
 ord_of_acc = 2; %since als error probably is dominant
 
 % 2. dynamics
-lambda = 200;
 g = 9.8;
 f = [0; 0; -g; 0; 0; 0; x(1); x(2); x(3); x(4); x(5); x(6)];
 
@@ -45,9 +44,10 @@ G = [hf1 0 0 0; hf2 0 0 0; hf3 0 0 0; ...
     0 0 0 0; 0 0 0 0; 0 0 0 0];
 
 B = G;
-noise_cov = 100;
-q = 2;
-R = 2;
+noise_cov = 1;
+q = 1;
+R = 1;
+lambda = noise_cov*R;
 
 % 3. artificial diffusion, compress operator and solve als
 artdiff_option = {1,'needed',1};
