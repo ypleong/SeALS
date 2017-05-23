@@ -1,7 +1,7 @@
 
 %% Test Tensor Form PDF Evolution ND
 clear all
-
+addpath('../src/')
 
 
 %% Create operator in tensor form
@@ -9,18 +9,20 @@ clear all
 
 dim = 2; %only dim=2 here
 x = sym('x',[dim,1]); %do not change
-n = 301;
+n = [201, 301];
 
 % Initial distribution
 bdim = [-5 25 ; -5 25];
-dx = (bdim(1,2)-bdim(1,1))/(n-1);
+dx(1) = (bdim(1,2)-bdim(1,1))/(n(1)-1);
+dx(2) = (bdim(2,2)-bdim(2,1))/(n(2)-1);
 x0 = [7,13];
 sigma02 = 0.5;
 sigma02Matrix = [0.8 0.2; 0.2 sigma02];
-xvector = [-5:dx:25]';
-[xgrid,ygrid] = meshgrid(xvector,xvector);
-xyvector = [reshape(xgrid,n*n,1),reshape(ygrid,n*n,1)];
-p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n,n);
+xvector{1} = [-5:dx(1):25]';
+xvector{2} = [-5:dx(2):25]';
+[xgrid,ygrid] = meshgrid(xvector{1},xvector{2});
+xyvector = [xgrid(:) ygrid(:)];%[reshape(xgrid,n(1)*n(2),1),reshape(ygrid,n(1)*n(2),1)];
+p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))';
 
 % Tensor parameters
 bcon = { {'d',0,0}, {'d',0,0}};
@@ -39,7 +41,7 @@ debugging = 0;
 run = 1;
 
 if dim == 2
-    hh = pcolor(xvector,xvector,p0);
+    hh = pcolor(xvector{1},xvector{2},p0');
     colorbar
     set(hh, 'EdgeColor', 'none');
     xlabel('x')
@@ -50,9 +52,9 @@ end
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 for i=1:dim
-    gridT{i} = xvector;
-    nd(i) = n;
-    dxd(i) = dx;
+    gridT{i} = xvector{i};
+    nd(i) = n(i);
+    dxd(i) = dx(i);
     acc(i,:) = [2,2]';
 end
 
@@ -93,7 +95,7 @@ qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
 dtTen = DiagKTensor(dtTens{1}); 
 
 % Create Operator
-op = create_op ( aTens, qTens, D, D2, dtTen, gridT, tol_err_op);
+op = create_FP_op ( aTens, qTens, D, D2, dtTen, gridT, tol_err_op);
 
 % Create tensor structure
 rankD = 5;
@@ -108,23 +110,19 @@ for k = 2:length(t)
      pk{k} = SRMultV( op, pk{k-1});
     [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     
-%     we{1} = ones(1,n)*dx;
-%     we{2} = xvector'*dx;
-%     
     for i=1:dim
-       we{i} = ones(1,n)*dx;
-       wex{i} = xvector'*dx;
+        for j = 1:dim
+            if i == j
+                we{i,j} = xvector{j};
+            else
+                we{i,j} = ones(n(j),1);
+            end         
+        end
     end
-%     intTens(pk{k},we, [1,2] )
-%     intTens(pk{k},we, [2,1] )
-%     expec(:,k) = [ intTens( intTens(pk{k},we, 2 ) ,wex,1)  
-%                    intTens( intTens(pk{k},we, 1 ) ,wex,2)  ]
-               
-    %intTens(pk{k},we, [1,2] );
-    expec(:,k)  = [ trapz( xvector, xvector'.*trapz(xvector,double(pk{k})',1 ) )
-                  trapz( xvector, xvector.*trapz(xvector,double(pk{k})',2 ) )];
+
+    expec(:,k)  = [intTens(pk{k}, [], gridT, we(1,:))
+                  intTens(pk{k}, [], gridT, we(2,:))];
               
- 
     xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
     covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
     
