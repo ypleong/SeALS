@@ -65,10 +65,8 @@ while (iter < maxit) && (tol > e) && (curr_rank < R) && ~(illcond)
     illcond = out.ill_cond;
     err(iter-out.iters+1:iter) = out.err;
     t_step(iter-out.iters+1:iter) = out.t_step;
-    temp = cell(1,dim);
     for ii = 1:dim
-        temp{ii} = matrandnorm(size(P.U{ii},1),1);
-        Pinit{ii} = [P.U{ii} temp{ii}];     
+        Pinit{ii} = [P.U{ii} matrandnorm(size(P.U{ii},1),1)];     
     end
     curr_rank = curr_rank + 1;
     
