@@ -37,14 +37,19 @@ checklambda(G,B,noise_cov,R,lambda);
 %% Step 3: calculate differentiation operators and finite difference matrices
 
 fprintf('Creating differential operators ...\n');
+start_diff = tic;
 [n,grid,region,D,D2,D4,fd1,fd2] = makediffopspectral4(bdim,n,bcon,region);
-
+toc(start_diff)
+end_diff = toc(start_diff);
 
 %% Step 4: calculate dynamics
 
 fprintf('Creating dynamics operator ...\n');
+start_dynamics = tic;
 %create ktensors
 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid);
+toc(start_dynamics)
+end_dynamics = toc(start_dynamics);
 
 %create MATLAB functions
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x);
@@ -52,7 +57,10 @@ fprintf('Creating dynamics operator ...\n');
 %% Step 5: calculate operator
 
 fprintf('Creating PDE operator ...\n');
+start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda);
+toc(start_PDEop)
+end_PDEop = toc(start_PDEop);
 
 %% Step 6: add artificial diffusion to operator
 
@@ -108,22 +116,20 @@ op_uncomp = op; %save uncompressed op
 
 fprintf('Attempt to compress operator, rank(op)=%d\n', ncomponents(op));
 rank_op_uncomp = ncomponents(op);
-tic;
+
 start_compress = tic;
-
 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(op,tol_err_op);
-
+toc(start_compress)
 compress_time = toc(start_compress);
-toc;
+
 rank_op_comp = ncomponents(op);
 fprintf('Number of components after compression, %d\n', ncomponents(op));
 
 %% Step 11: solve system
 
 disp('Beginning Solving');
-tic;
-start_solve = tic;
 
+start_solve = tic;
 if isempty(als_variant) %original    
     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...
         als_sys(op,bc,[],tol_err,als_options,debugging);
@@ -134,9 +140,9 @@ else %variant
         als_sys_var(op,bc,[],tol_err,als_options,als_variant,debugging);
     %save('F','F') %save just incase something does not work later
 end
-
+toc(start_solve)
 time_solve = toc(start_solve);
-toc;
+
 disp('Solution complete');
 
 %% Step 12: visualize results
