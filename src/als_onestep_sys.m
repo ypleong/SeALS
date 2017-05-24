@@ -124,6 +124,6 @@ for k = 1:nd
 end
 
 F = ktensor(F_U);
-F = arrange(F);
+F = fixsigns(arrange(F));
 
 warning('on', 'MATLAB:nearlySingularMatrix');
