@@ -38,8 +38,9 @@ b_cell = {};
 
 % Distribute normalization factor evenly
 F_U = cell(nd,1);
+Flambda = (F.lambda').^(1/nd);
 for i = 1:nd
-    F_U{i} = F.U{i}*diag((F.lambda).^(1/nd));
+    F_U{i} = bsxfun(@times,F.U{i},Flambda);
 end
 
 for k = 1:nd
