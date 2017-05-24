@@ -104,19 +104,16 @@ if isempty(F)
         U{n} = matrandnorm(sizeG(n),1);
     end
     F = ktensor(U);
-    F = arrange(F);
     
 elseif isfloat(F)
-    terms = F;
     U = cell(1,nd);
     for n = 1:nd
-        U{n} = matrandnorm(sizeG(n),terms);
+        U{n} = matrandnorm(sizeG(n),F);
     end
     F = ktensor(U);
-    F = arrange(F);
     
 else
-    F = arrange(F);
+    F = fixsigns(arrange(F));
 end
 
 %%% documentation %%%
@@ -196,7 +193,7 @@ for iter = 1:tol_it
             %save('F_saved','F_saved') %backup if something goes wrong
         end    
         
-        F_saved = arrange(F_saved);
+        F_saved = fixsigns(arrange(F_saved));
         if abs(F_saved.lambda(end)/F_saved.lambda(1)) < w_tol
             stopforloop = 1;
         end
@@ -212,7 +209,7 @@ for iter = 1:tol_it
             U{n} = matrandnorm(sizeG(n),1);
         end
 	    F = ktensor(U);
-        F = arrange(F);
+        F = fixsigns(arrange(F));
         
         % precondition new F
         count = 0;
@@ -230,7 +227,7 @@ for iter = 1:tol_it
     end
     %%% Variant %%%
     
-    F = arrange(F);
+    F = fixsigns(arrange(F));
     Fcond(iter) = norm(F.lambda)/norm(F);
     err(iter) = norm(SRMultV(A,F)-G)/norA;
     %err(iter) = norm(SRMultV(A,F)-G);
@@ -290,7 +287,7 @@ for iter = 1:tol_it
         
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
             
-            [nF, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA2,AtG2,nF,alpha,debugging);
+            [nF, ~, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA2,AtG2,nF,alpha,debugging);
             err_oldF = err_newF;
             err_newF = nF.lambda;
             
@@ -320,7 +317,7 @@ for iter = 1:tol_it
         end
         %%% documentation %%%
         
-        F = arrange(F + nF);
+        F = fixsigns(arrange(F + nF));
         
         %%% documentation %%%
         if debugging == 1
@@ -365,7 +362,7 @@ end
 if isempty(F_saved) == 0
     F = F_saved+F;
 end
-F = arrange(F);
+F = fixsigns(arrange(F));
 %%% Variant %%%
 
 end

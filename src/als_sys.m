@@ -86,25 +86,12 @@ if isempty(F)
         U{n} = matrandnorm(sizeG(n),1);
     end
     F = ktensor(U);
-    F = arrange(F);
-    F = fixsigns(F);
     
 elseif isfloat(F)
-    terms = F;
-    
-    for i = 1:terms
-        for n = 1:nd
-            U{n} = matrandnorm(sizeG(n),1);
-        end
-        if i == 1
-            F = ktensor(U);
-        else
-            F = F+ktensor(U);
-        end
+    for n = 1:nd
+        U{n} = matrandnorm(sizeG(n),F);
     end
-    
-    F = arrange(F);
-    F = fixsigns(F);
+    F = ktensor(U);
 else
     F = arrange(F);
     F = fixsigns(F);
@@ -194,7 +181,7 @@ for iter = 1:tol_it
         
         rF = rF + 1;
         
-        if( ncomponents(F)+1 > tol_rank )
+        if( rF > tol_rank )
             disp('Maximum rank reached. Quitting...');
             maxrank = 1;
             break;
@@ -225,7 +212,7 @@ for iter = 1:tol_it
         
         while count < newcond_it_tol && (abs(err_newF - err_oldF)/err_oldF) > newcond_r_tol
             
-            [nF, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA2,AtG2,nF,alpha,debugging);
+            [nF, ~, F_cell_onestep, B_cell_onestep, b_cell_onestep] = als_onestep_sys(AtA2,AtG2,nF,alpha,debugging);
 
             err_oldF = err_newF;
             err_newF = nF.lambda;
