@@ -209,8 +209,7 @@ for iter = 1:tol_it
             U{n} = matrandnorm(sizeG(n),1);
         end
 	    F = ktensor(U);
-        F = fixsigns(arrange(F));
-        
+
         % precondition new F
         count = 0;
         err_newF = 1;

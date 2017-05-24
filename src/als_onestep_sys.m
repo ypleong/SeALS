@@ -22,7 +22,6 @@ warning('error', 'MATLAB:nearlySingularMatrix');
 
 status = 1;
 
-F = arrange(F);
 nd = length(AtG);
 
 nf = size(AtG{1},1);
