@@ -8,36 +8,40 @@ clear all
 
 dim = 3;
 x = sym('x',[dim,1]); %do not change
-n = [201,301,251];
+%n = [101,111,121,131,101,101];
 
 % Initial distribution
 sigma02 = 0.5;
 for i=1:dim
+    n(i) = 101+10*i;
     bdim(i,:) = [-5 25 ];
-    x0(i) = 7+i*3;
+    x0(i) = 2+i/dim*10;
     diagSigma(i) = sigma02 + i/dim*0.3;
     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
     xvector{i} = [-5:dx(i):25]';
 end
 
 
-p0 = zeros(n);
+%p0 = zeros(n);
 sigma02Matrix = diag(diagSigma); % [0.8 0.2; 0.2 sigma02];
 
 for i=1:dim
    p0vector{i} =  normpdf(xvector{i},x0(i),sqrt(diagSigma(i)));
 end
-szargs = cell( 1, dim  ); % We'll use this with ind2sub in the loop
-tic 
-for ii=1:numel(p0)
-    [ szargs{:} ] = ind2sub( size( p0 ), ii ); % Convert linear index back to subscripts
-    prodACC = 1;
-    for k=1:dim
-        prodACC = prodACC*p0vector{k}(szargs{k});
-    end
-    p0(szargs{:}) = prodACC;
-end
-toc
+
+
+% szargs = cell( 1, dim  ); % We'll use this with ind2sub in the loop
+% tic 
+% for ii=1:numel(p0)
+%     [ szargs{:} ] = ind2sub( size( p0 ), ii ); % Convert linear index back to subscripts
+%     prodACC = 1;
+%     for k=1:dim
+%         prodACC = prodACC*p0vector{k}(szargs{k});
+%     end
+%     p0(szargs{:}) = prodACC;
+% end
+% toc
+
 if dim == 2
     [xgrid,ygrid] = meshgrid(xvector,xvector);
     xyvector = [reshape(xgrid,n*n,1),reshape(ygrid,n*n,1)];
@@ -54,8 +58,11 @@ end
     
 % Create tensor structure
 rankD = 10;
-[p0compressed] = cp_als(tensor(p0),rankD);
 
+%[p0compressed] = cp_als(tensor(p0),rankD);
+
+
+p0compressed = ktensor(p0vector);
 pk{1} = p0compressed;
 
 %% Tensor parameters
@@ -183,12 +190,24 @@ figure
 plot(t,xkalman,t,expec,'.')
 xlabel('time')
 zlabel('position')
-% legString = [];
-% for i=1:dim
-%     legString = legString + 'Kalman ' + num2str(i); 
-% end
-    
-legend('KalmaX','KalmanY','FPE X','FPE Y' )
+%legString = [];
+for i=1:dim
+    legString{i}= strcat('Kalman ' , num2str(i)); 
+end
+for i=1:dim
+    legString{dim+i}=strcat('FPE ' , num2str(i)); 
+end
+legend(legString)
+for k=1:length(t)
+   trCov(k) = det(cov(:,:,k)); 
+   trCovKalman(k) = det(covKalman(:,:,k)); 
+end
+figure
+plot(t,trCov,t,trCovKalman,'.')
+xlabel('time')
+zlabel('cov trace')
+legend('FPE', 'Kalman')
+
 
 %Compare 2D map kalman and Tensor-FKE
 figure
