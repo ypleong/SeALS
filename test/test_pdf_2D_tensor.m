@@ -77,14 +77,23 @@ covKalman(:,:,1) = sigma02Matrix;
 
 
 
+
 %% Create Cell Terms
-aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
+fFPE = sym(aspeed); % constant speed
+
+kpen = 3;
+fFPE = [x(2);-sym(kpen)*sin(x(1))];
+%
+fPFEdiff = jacobian(fFPE,x);
+
+fTens  = fcell2ftens( fsym2fcell(fFPE ,x), gridT);
+f_pTensqTens = fcell2ftens( fsym2fcell(diag(fPFEdiff) ,x), gridT);
 dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
 qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
 dtTen = DiagKTensor(dtTens{1}); 
 
 % Create Operator
-op = create_FP_op ( aTens, qTens, D, D2, dtTen, gridT, tol_err_op);
+op = create_FP_op ( fTens, f_pTensqTens, D, D2, dtTen, gridT, tol_err_op);
 for i=1:dim
     for j = 1:dim
         if i == j
@@ -98,9 +107,11 @@ for i=1:dim
     weones{i} = ones(n(i),1);
  end
 % Create tensor structure
-p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))' + ...
-     reshape(mvnpdf(xyvector,x0+[3;-4]',sigma02Matrix/0.2),n(2),n(1))' + ...
-     reshape(mvnpdf(xyvector,x0+[-1;-6]',sigma02Matrix/1.4),n(2),n(1))';
+p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))';
+
+% p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))' + ...
+%      reshape(mvnpdf(xyvector,x0+[3;-4]',sigma02Matrix/0.2),n(2),n(1))' + ...
+%      reshape(mvnpdf(xyvector,x0+[-1;-6]',sigma02Matrix/1.4),n(2),n(1))';
 
 if dim == 2
     hh = pcolor(xvector{1},xvector{2},p0');

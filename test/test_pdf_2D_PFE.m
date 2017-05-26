@@ -159,6 +159,8 @@ KalmanG = covKalman(:,:,end)*HK'*inv(HK*covKalman(:,:,end)*HK'+Rmes);
 xposKalman = xkalman(:,end) + KalmanG*(zmes - HK*xkalman(:,end));
 covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,end);
 
+fprintf(['Measure update: Mean values ',num2str(xposKalman,4),' Kalman, ',num2str(xpos, 4) , ' Tensor-FPE \n'])
+fprintf(['Measure update: Mean cov ',num2str(covKalmanPos,4),' Kalman, ',num2str(covpos, 4) , ' Tensor-FPE \n'])
 
 %%  animated figure
 figure
