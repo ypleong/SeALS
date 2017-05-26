@@ -1,4 +1,4 @@
-function [ op ] = create_op( fTens, qTens, D, D2, dtTen, gridT, tol_err_op  )
+function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_err_op  )
 % 
 % fTens, vector ktensor 
 % qTens, matrix ktensor
@@ -29,7 +29,20 @@ function [ op ] = create_op( fTens, qTens, D, D2, dtTen, gridT, tol_err_op  )
             end
         end
     end
-
+    
+    %% Create f_i,i*p
+    fiip = [];
+    for i=1:dim
+        if norm(f_pTens{i}) == 0
+            conv(i) = 0; %no convenction term in dimension i.
+        else
+            if isempty(fipi) == 1
+                fiip = DiagKTensor(f_pTens{i});
+            else
+                fiip = fiip + DiagKTensor(f_pTens{i});
+            end
+        end
+    end
     %% create (q_ij*p),ij ::it assumes q_ij constant so it is equivalennt to q_ij*p,ij
     diff = ones(1,dim);
 
@@ -61,7 +74,11 @@ function [ op ] = create_op( fTens, qTens, D, D2, dtTen, gridT, tol_err_op  )
     end
 
     %% combine operator terms 
-    aop = -fipi + qijpij;
+    %aop = -fiip -fipi + qijpij;
+    aop =  -fipi + qijpij;
+    if isempty(fiip) == 0
+       aop = aop -fiip; 
+    end
     icell = {{{@(x1)ones(size(x1)),1}}};
     iTens = fcell2ftens(icell,gridT);
     iTen = DiagKTensor(iTens{1}); 
