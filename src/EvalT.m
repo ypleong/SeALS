@@ -7,15 +7,11 @@ function [y] = EvalT(tens,x,grid)
 % Outputs:
 %   y - the value at x.
 
-d = length(x);
-
-index = cell(d,1);
-for i=1:d
-    bas = grid{i};
-    k = dsearchn(bas,x(i));
-    index{i} = k;
+y = tens.lambda';
+for i=1:length(x);
+    y = y.*eval_plin ( grid{i}, tens.U{i}, x(i) );
 end
 
-y = tens(index{:});
+y = sum(y);
 end
 
