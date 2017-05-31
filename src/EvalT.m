@@ -9,7 +9,7 @@ function [y] = EvalT(tens,x,grid)
 
 y = tens.lambda';
 for i=1:length(x);
-    y = y.*eval_plin ( grid{i}, tens.U{i}, x(i) );
+    y = y.*interp1( grid{i}, tens.U{i}, x(i) );
 end
 
 y = sum(y);
