@@ -48,12 +48,11 @@ for i=1:d
     newBCU(d_out,:) = zeros(sum(d_out),sr_b);
     bcd.U{i} = newBCU;
     bcAdd{i} = zeros(ni,1);
-    hh = abs(gridi(1)-gridi(2));
-    bcAdd{i}(d_ind,1) = linspace(1-hh,1+hh,sum(d_ind));%ones(sum(d_ind),1);%
+    bcAdd{i}(d_ind,1) = ones(sum(d_ind),1);
     
 end
 
-op = op - opRem + regsca*ktensor(opAdd);
-bc = bc - bcd + regsca*regval*ktensor(bcAdd);
+op = fixsigns(arrange(op - opRem + regsca*ktensor(opAdd)));
+bc = fixsigns(arrange(bc - bcd + regsca*regval*ktensor(bcAdd)));
 
 end
