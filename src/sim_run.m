@@ -1,4 +1,4 @@
-function sim_run(sim_config,sim_data,saveplots,savedata,run)
+function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 % SIMULATION simulates trajectories starting from x0_list using results
 % from MAIN_RUN.
 % Inputs:
@@ -53,6 +53,11 @@ function sim_run(sim_config,sim_data,saveplots,savedata,run)
 
 [lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
 
+dirpath = [save_folder, 'saved_data/'];
+if 7~=exist(dirpath,'dir') 
+    mkdir(dirpath); 
+end
+
 d = length(grid);
 ninputs = length(R);
 
@@ -66,6 +71,7 @@ if isempty(new_region) == 0
     region = new_region; %use other goal region
 end
 
+F = F*(1/EvalT(F,zeros(d,1),grid));
 dF = cell(d,1);
 for i = 1:d
     dF{i} = SRMultV(D{i},F);
@@ -110,7 +116,7 @@ for m = 1:n_trial
         c_q = qFunc(current);
         
         c_n = normrnd(0,sigma);
-        c_u = (1/c_F)*lambda*inv(R)*c_G'*c_dF;
+        c_u = (1/c_F)*lambda/R*c_G'*c_dF;
         
         next = current + dt*(c_f+c_G*c_u+c_B*c_n);
         cost = c_q + 0.5*c_u'*R*c_u;
@@ -233,9 +239,21 @@ for i=1:d
 end
 
 if saveplots == 1
-    pathname = fileparts('./saved_data/');
-    matfig = fullfile(pathname,['traj_plot_run',num2str(run)]);
-    saveas(fig,matfig);
+    saveas(fig,[dirpath,'traj_plot_run',num2str(run)]);
+end
+
+% plot trajectories at all dimensions
+
+for i = 1:n_trial
+    [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
+    figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', 'EdgeColor', 'None');
+    ylabel('Coordinates')
+    xlabel('Time, s')
+    title(['Trial ', i])
+end
+
+if saveplots == 1
+    saveas(fig,[dirpath,'traj_plot_all_run',num2str(run)]);
 end
 
 % special case when d = 2, trajectories in one plot.
@@ -275,9 +293,7 @@ if d == 2
     hold off;
     
     if saveplots == 1
-        pathname = fileparts('./saved_data/');
-        matfig = fullfile(pathname,['traj_2Dplot_run',num2str(run)]);
-        saveas(fig,matfig);
+        saveas(fig,[dirpath,'traj_2Dplot_run',num2str(run)]);
     end
     
 end
@@ -303,9 +319,7 @@ for i=1:ninputs
 end
 
 if saveplots == 1
-    pathname = fileparts('./saved_data/');
-    matfig = fullfile(pathname,['traj_u_plot_run',num2str(run)]);
-    saveas(fig,matfig);
+    saveas(fig,[dirpath,'traj_u_plot_run',num2str(run)]);
 end
 
 %% plot cost trajectory
@@ -322,18 +336,14 @@ xlabel('time(s)')
 title('cost trajectories')
 
 if saveplots == 1
-    pathname = fileparts('./saved_data/');
-    matfig = fullfile(pathname,['c_traj_plot_run',num2str(run)]);
-    saveas(fig,matfig);
+    saveas(fig,[dirpath,'c_traj_plot_run',num2str(run)]);
 end
 
 %% save data
 
 if savedata == 1
     clear fig;
-    pathname = fileparts('./saved_data/');
-    matfile = fullfile(pathname,['simdata_run',num2str(run)]);
-    save(matfile);
+    save([save_folder,'simdata_run_',num2str(run)]);
 end
 
 
