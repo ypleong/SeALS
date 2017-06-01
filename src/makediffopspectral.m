@@ -92,24 +92,16 @@ end
 D = cell(1,d);
 D2 = cell(1,d);
 
-if isempty(region)
-    
-    for i=1:d
-        DU = idUop;
-        D2U = idUop;
-        
-        DU{i} = fd1{i}(:);
-        D2U{i} = fd2{i}(:);
-        
-        D{i} = ktensor(DU);
-        D2{i} = ktensor(D2U);
-    end
-    
-else
-    
-    D = diffop_region_spectral(grid,fd1,region);
-    D2 = diffop_region_spectral(grid,fd2,region);
-    
+for i=1:d
+    DU = idUop;
+    D2U = idUop;
+
+    DU{i} = fd1{i}(:);
+    D2U{i} = fd2{i}(:);
+
+    D{i} = ktensor(DU);
+    D2{i} = ktensor(D2U);
 end
+
 
 end
