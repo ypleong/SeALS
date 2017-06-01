@@ -166,15 +166,18 @@ end
 
 %% Step 13. run simulations
 
-% % arrange input data
-% sim_data = {lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+% arrange input data
+% sim_data = {lambda,grid,R,noise_cov,F*(1/EvalT(F,zeros(d,1),grid)),D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 % 
 % % run simulation
 % if isempty(sim_config) == 0
 %     try
+%         start_sim = tic;
 %         fprintf('Starting simulations \n')
-%         sim_run(sim_config,sim_data,saveplots,savedata,run)
+%         sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 %         fprintf('Simulations complete \n')
+%         toc(start_sim)
+%         time_sim = toc(start_sim);
 %     catch
 %         fprintf('Could not run simulation \n')
 %     end
@@ -217,10 +220,7 @@ if savedata == 1
     end
     
     clear F_cell B_cell b_cell
-    
-    % save rest of the data
-%     pathname = fileparts(save_folder);
-%     matfile = fullfile(pathname,[save_folder,'spectral_rundata_run_',num2str(run)]);
+
     save([save_folder,'spectral_rundata_run_',num2str(run)]);
     
 end
