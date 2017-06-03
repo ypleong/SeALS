@@ -32,3 +32,5 @@ for nn = 1:nd
     FG{nn} = temp;
 end
 res = ktensor(LL(:),FG);
+
+res = fixsigns(arrange(res));
