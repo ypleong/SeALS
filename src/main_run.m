@@ -36,20 +36,28 @@ checklambda(G,B,noise_cov,R,lambda);
 
 %% Step 3: calculate differentiation operators and finite difference matrices
 fprintf('Creating differential operators ...\n');
+start_diff = tic;
 [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region);
-
+toc(start_diff)
+end_diff = toc(start_diff);
 
 %% Step 4: calculate dynamics
 fprintf('Creating dynamics operator ...\n');
 %create ktensors
+start_dynamics = tic;
 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid);
+toc(start_dynamics)
+end_dynamics = toc(start_dynamics);
 
 %create MATLAB functions
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x);
 
 %% Step 5: calculate operator
 fprintf('Creating PDE operator ...\n');
+start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
+toc(start_PDEop)
+end_PDEop = toc(start_PDEop);
 
 %% Step 6: add artificial diffusion to operator
 
@@ -104,20 +112,27 @@ op_uncomp = op; %save uncompressed op
 
 fprintf('Attempt to compress operator, rank(op)=%d\n', ncomponents(op));
 rank_op_uncomp = ncomponents(op);
-tic;
+
+start_compress_id = tic;
+fprintf('Target CTD: %d terms above tol\n', length(find(op.lambda>tol_err_op)));
+fprintf('Running TENID with frobenius norm:\n')
+[op,~] = tenid(op,tol_err_op,1,9,'frob',[],fnorm(op),0);
+op = fixsigns(arrange(op));
+compress_time_id = toc(start_compress_id);
+fprintf('Number of components after TENID compression, %d\n', ncomponents(op));
+toc(start_compress_id)
+
 start_compress = tic;
-
+fprintf('Running ALS:\n')
 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(op,tol_err_op);
-
-compress_time = toc(start_compress);
-toc;
 rank_op_comp = ncomponents(op);
-fprintf('Number of components after compression, %d\n', ncomponents(op));
+fprintf('Number of components after ALS compression, %d\n', ncomponents(op));
+compress_time = toc(start_compress);
+toc(start_compress)
 
 %% Step 11: solve system
 
 disp('Beginning Solving');
-tic;
 start_solve = tic;
 
 if isempty(als_variant) %original    
@@ -130,9 +145,9 @@ else %variant
         als_sys_var(op,bc,[],tol_err,als_options,als_variant,debugging);
     %save('F','F') %save just incase something does not work later
 end
-
+toc(start_solve)
 time_solve = toc(start_solve);
-toc;
+
 disp('Solution complete');
 
 %% Step 12: visualize results
@@ -163,7 +178,7 @@ end
 % if isempty(sim_config) == 0
 %     try
 %         fprintf('Starting simulations \n')
-%         sim_run(sim_config,sim_data,saveplots,savedata,run)
+%         sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 %         fprintf('Simulations complete \n')
 %     catch
 %         fprintf('Could not run simulation \n')

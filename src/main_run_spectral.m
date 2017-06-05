@@ -117,13 +117,22 @@ op_uncomp = op; %save uncompressed op
 fprintf('Attempt to compress operator, rank(op)=%d\n', ncomponents(op));
 rank_op_uncomp = ncomponents(op);
 
-start_compress = tic;
-[op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(op,tol_err_op);
-toc(start_compress)
-compress_time = toc(start_compress);
+start_compress_id = tic;
+fprintf('Target CTD: %d terms above tol\n', length(find(op.lambda>tol_err_op)));
+fprintf('Running TENID with frobenius norm:\n')
+[op,~] = tenid(op,tol_err_op,1,9,'frob',[],fnorm(op),0);
+op = fixsigns(arrange(op));
+compress_time_id = toc(start_compress_id);
+fprintf('Number of components after TENID compression, %d\n', ncomponents(op));
+toc(start_compress_id)
 
+start_compress = tic;
+fprintf('Running ALS:\n')
+[op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(op,tol_err_op);
 rank_op_comp = ncomponents(op);
-fprintf('Number of components after compression, %d\n', ncomponents(op));
+fprintf('Number of components after ALS compression, %d\n', ncomponents(op));
+compress_time = toc(start_compress);
+toc(start_compress)
 
 %% Step 11: solve system
 
