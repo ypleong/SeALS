@@ -67,14 +67,8 @@ end
          
          x1 = cos(th1); % Compute Chebyshev points.
          x2 = cos(th2); % Compute Chebyshev points.
-         
-         dx = abs(x1(end-1) - x1(end))*(xmax-imid)/2;
-         imin = imid-dx;
-         imax = imid+dx;
-         x1(1) = [];
-         x2(end) = [];
                
-         x = [((xmax-imax)*x2+imax+xmax)/2; imid; ((imin-xmin)*x1+imin+xmin)/2;];
+         x = [((xmax-imid)*x2+imid+xmax)/2; ((imid-xmin)*x1(2:end)+imid+xmin)/2;];
          
          DM = computeD(x, (0:N-1)', N, M);
          
