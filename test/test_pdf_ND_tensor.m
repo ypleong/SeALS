@@ -6,7 +6,7 @@ clear all
 %% Create operator in tensor form
 % Initialization
 
-dim = 3;
+dim = 2;
 x = sym('x',[dim,1]); %do not change
 %n = [101,111,121,131,101,101];
 
@@ -20,17 +20,23 @@ for i=1:dim
     x0(i) = 2+i/dim*10;
     diagSigma(i) = sigma02 + i/dim*0.3;
 end
-caseNum = 0;
-if caseNum == 1
+
+caseNum = 'pendulum2D';
+
+if strcmp('pendulum2D',caseNum) && dim==2
+   fprintf ('Running case  "%s"  with %d dimensions\n', caseNum, dim)
    dim = 2;
    n(1) = 101;
-   n(2) = 101;
+   n(2) = 201;
    x0 = [0.2, 0.01];
    diagSigma = [0.03 0.001];
    thetadotmax = sqrt(2*(1-cos(x0(1)))) + x0(2);
    bdim = [-pi pi;-thetadotmax*3 +3*thetadotmax];
+else
+    fprintf ('Running generic case with %d dimensions\n', caseNum, dim)
 end
 
+fprintf ('The grid size is %d in dimension %d \n', [n,(1:dim)']')
 for i=1:dim
     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
     xvector{i} =  (bdim(i,1):dx(i):bdim(i,2))';
@@ -81,22 +87,24 @@ for i=1:dim
     gridT{i} = xvector{i};
     nd(i) = n(i);
     dxd(i) = dx(i);
-    acc(i,:) = [2,2]';
+    acc(:,i) = [2,2]';
 end
 [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
 
 % Simulation Parameters
-dt = 0.01;
+dt = 0.001;
 finalt = 2*pi*2;
 t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
 for i=1:dim
-    qdiag(i) = 0.3 + i/dim*0.4;
-    aspeed(i) = 4 - i/dim*3;
+    qdiag(i) = 0; % 0.3 + i/dim*0.4;
+    aspeed(i) = 0;% 4 - i/dim*3;
 end
-qdiag = [0.01 0.001];
+%qdiag = [0.01 0.001];
 q =  diag( qdiag ); %[0.3,0.6]); %0.25;
+q(2,2) = 0.2; 
+q(1,1) = 0.02;
 %aspeed = [2;-2]; %[0,3]';
 
 xkalman = zeros(dim,length(t));
@@ -117,13 +125,15 @@ covKalman(:,:,1) = sigma02Matrix;
 %% Create Cell Terms
 %fFPE = sym(aspeed); % constant speed
 
-kpen = 1; %(2*pi/1)^2;
-fFPE = [x(2);-sym(kpen)*(x(1))];
+kpen = (2*pi/3)^2;
+fFPE = [x(2);-kpen*sin(x(1))];
+
+%fFPE = 2;
 
 
 fPFEdiff = jacobian(fFPE,x);
 
-fTens  = fcell2ftens( fsym2fcell(fFPE ,x), gridT);
+fTens  = fcell2ftens( fsym2fcell(sym(fFPE) ,x), gridT);
 f_pTensqTens = fcell2ftens( fsym2fcell(diag(fPFEdiff) ,x), gridT);
 aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
 dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
@@ -168,6 +178,7 @@ for k = 2:length(t)
     if length(pk{k}.lambda) > 1
         [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     end
+        
     for i=1:dim
         expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
     end
@@ -177,9 +188,14 @@ for k = 2:length(t)
         end
     end
     
-    xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
-    covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
     
+    
+    %xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
+    %xkalman(:,k)  = deval(ode45( @(t,x), fFPE,[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
+    xkalman(:,k)  = deval(ode45( @(tt,xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)], [t(k-1) t(k)], xkalman(:,k-1)'),t(k));
+    %eval(fFPE)
+    %covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
+    [xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
 end
 toc(time1)
 %% Check Results
@@ -276,11 +292,12 @@ if dim==2
     grid on
     axis ([bdim(1,:),bdim(2,:)])
     grid on
-    for k = 2:1:length(t)
+    for k = 2:100:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
          drawnow
-         pause(1.0/100.0);
+         pause(1.0/100);
     end
+    
 
     %% animated figure difference
     figure
@@ -299,4 +316,16 @@ if dim==2
          drawnow
          pause(1.0/10.0);
     end
+elseif dim ==1
+    for k=1:length(t)
+       px(:,k) = double(pk{k}); 
+    end
+    figure
+    h = pcolor(xvector{1},t,px') %,'EdgeColor','none')
+    set(h, 'EdgeColor', 'none');
+    xlabel('X(m)')
+    ylabel('Time(s)')
+    zlabel('Pdf(x,t)')
+    title('Pdf Evolution')
+    colorbar
 end

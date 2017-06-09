@@ -44,12 +44,12 @@ bcon{1}{1} = 0;
 
 
 % Simulation Parameters
-dt = 0.01;
+dt = 0.0001;
 finalt = 15;
 t = 0:dt:finalt;
 px = zeros(length(xvector),length(t));
 xkalman = zeros(length(t),1);
-covkalman = zeros(length(t),1);
+covKalman = zeros(length(t),1);
 exp = zeros(length(t),1);
 exp2 = zeros(length(t),1);
 cov = zeros(length(t),1);
@@ -133,6 +133,14 @@ end
 figure
 plot(xvector,px(:,end),xvector,normpdf(xvector,xkalman(end),sqrt(covKalman(end))))
 legend('px','Kalman')
+
+%% Error
+RMS_mean = sqrt(mean((xkalman-exp).^2));
+RMS_cov  = sqrt(mean((covKalman-cov).^2))
+
+figure
+plot(t,covKalman,t,cov)
+
 
 % Measure
 zmes = 11;
