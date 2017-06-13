@@ -36,7 +36,7 @@ function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_
         if norm(f_pTens{i}) == 0
             conv(i) = 0; %no convenction term in dimension i.
         else
-            if isempty(fipi) == 1
+            if isempty(fiip) == 1
                 fiip = DiagKTensor(f_pTens{i});
             else
                 fiip = fiip + DiagKTensor(f_pTens{i});
