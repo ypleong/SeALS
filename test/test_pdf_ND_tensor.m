@@ -6,7 +6,7 @@ clear all
 %% Create operator in tensor form
 % Initialization
 
-dim = 2;
+dim = 1;
 x = sym('x',[dim,1]); %do not change
 %n = [101,111,121,131,101,101];
 
@@ -26,8 +26,8 @@ caseNum = 'pendulum2D';
 if strcmp('pendulum2D',caseNum) && dim==2
    fprintf ('Running case  "%s"  with %d dimensions\n', caseNum, dim)
    dim = 2;
-   n(1) = 101;
-   n(2) = 201;
+   n(1) = 401;
+   n(2) = 401;
    x0 = [0.2, 0.01];
    diagSigma = [0.03 0.001];
    thetadotmax = sqrt(2*(1-cos(x0(1)))) + x0(2);
@@ -126,7 +126,7 @@ covKalman(:,:,1) = sigma02Matrix;
 %fFPE = sym(aspeed); % constant speed
 
 kpen = (2*pi/3)^2;
-fFPE = [x(2);-kpen*sin(x(1))];
+fFPE = [x(2);-kpen*(x(1))];
 
 %fFPE = 2;
 

@@ -21,7 +21,7 @@ dt = 0.01;
 t = 0:dt:15;
 px = zeros(length(x),length(t));
 xkalman = zeros(length(t),1);
-covkalman = zeros(length(t),1);
+covKalman = zeros(length(t),1);
 exp = zeros(length(t),1);
 exp2 = zeros(length(t),1);
 cov = zeros(length(t),1);
@@ -59,7 +59,15 @@ plot(x,normpdf(x,exp(end),sqrt(cov(end))),x,px(:,end),x,normpdf(x,xkalman(end),s
 legend('recoverNormal','px','Kalman')
 
 
-% Measure
+%% Error
+RMS_mean = sqrt(mean((xkalman-exp).^2));
+RMS_cov  = sqrt(mean((covKalman-cov).^2));
+
+figure
+plot(t,covKalman,t,cov)
+
+
+%% Measurement
 zmes = 11;
 Rmes = 2;
 pz = normpdf(x,zmes,sqrt(Rmes));
