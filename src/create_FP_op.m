@@ -74,10 +74,12 @@ function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_
     end
 
     %% combine operator terms 
-    %aop = -fiip -fipi + qijpij;
-    aop =  -fipi + qijpij;
+    aop =  -fipi;
     if isempty(fiip) == 0
        aop = aop -fiip; 
+    end
+    if isempty(qijpij) == 0
+       aop = aop + qijpij; 
     end
     icell = {{{@(x1)ones(size(x1)),1}}};
     iTens = fcell2ftens(icell,gridT);
