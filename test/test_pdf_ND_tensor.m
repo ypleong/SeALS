@@ -16,12 +16,13 @@ x0 = zeros(dim,1);
 n = zeros(dim,1);
 for i=1:dim
     n(i) = 101+10*i;
-    bdim(i,:) = [-5  25];
-    x0(i) = 2+i/dim*10;
+    bdim(i,:) = [-pi  pi];
+    x0(i) = 1;%2+i/dim*10;
     diagSigma(i) = sigma02 + i/dim*0.3;
 end
+bdim(2,:) = [-10  10];
 
-caseNum = 'pendulum2D';
+caseNum = 0;%'pendulum2D';
 
 if strcmp('pendulum2D',caseNum) && dim==2
    fprintf ('Running case  "%s"  with %d dimensions\n', caseNum, dim)
@@ -31,7 +32,7 @@ if strcmp('pendulum2D',caseNum) && dim==2
    x0 = [0.2, 0.01];
    diagSigma = [0.03 0.001];
    thetadotmax = sqrt(2*(1-cos(x0(1)))) + x0(2);
-   bdim = [-pi pi;-thetadotmax*3 +3*thetadotmax];
+   bdim = [-2*pi 2*pi;-thetadotmax*3 +3*thetadotmax];
 else
     fprintf ('Running generic case with %d dimensions\n', caseNum, dim)
 end
@@ -67,6 +68,7 @@ pk{1} = p0compressed;
 for i=1:dim
    bcon{i} = {'d',0,0};
 end
+bcon{1} = {'p'};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -98,13 +100,13 @@ t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
 for i=1:dim
-    qdiag(i) = 0; % 0.3 + i/dim*0.4;
-    aspeed(i) = 0;% 4 - i/dim*3;
+    qdiag(i) = 0.25; % 0.3 + i/dim*0.4;
+    aspeed(i) = 0.5;% 4 - i/dim*3;
 end
 %qdiag = [0.01 0.001];
 q =  diag( qdiag ); %[0.3,0.6]); %0.25;
-q(2,2) = 0.2; 
-q(1,1) = 0.02;
+% q(2,2) = 0.2; 
+% q(1,1) = 0.02;
 %aspeed = [2;-2]; %[0,3]';
 
 xkalman = zeros(dim,length(t));
@@ -126,8 +128,8 @@ covKalman(:,:,1) = sigma02Matrix;
 %fFPE = sym(aspeed); % constant speed
 
 kpen = (2*pi/3)^2;
-fFPE = [x(2);-kpen*(x(1))];
-
+fFPE = [x(2);-kpen*sin(x(1))];
+% fFPE = [-x(2);x(1)];
 %fFPE = 2;
 
 
@@ -135,7 +137,7 @@ fPFEdiff = jacobian(fFPE,x);
 
 fTens  = fcell2ftens( fsym2fcell(sym(fFPE) ,x), gridT);
 f_pTensqTens = fcell2ftens( fsym2fcell(diag(fPFEdiff) ,x), gridT);
-aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
+% aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
 dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
 qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
 dtTen = DiagKTensor(dtTens{1}); 
@@ -176,26 +178,28 @@ for k = 2:length(t)
     pk{k} = SRMultV( op, pk{k-1});
     
     if length(pk{k}.lambda) > 1
+        [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
+        pk{k} = fixsigns(arrange(pk{k}));
         [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     end
-        
-    for i=1:dim
-        expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
-    end
-    for i=1:dim
-        for j = 1:dim
-            cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
-        end
-    end
-    
+%         
+%     for i=1:dim
+%         expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+%     end
+%     for i=1:dim
+%         for j = 1:dim
+%             cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+%         end
+%     end
+%     
     
     
     %xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
     %xkalman(:,k)  = deval(ode45( @(t,x), fFPE,[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    xkalman(:,k)  = deval(ode45( @(tt,xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)], [t(k-1) t(k)], xkalman(:,k-1)'),t(k));
+%     xkalman(:,k)  = deval(ode45( @(tt,xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)], [t(k-1) t(k)], xkalman(:,k-1)'),t(k));
     %eval(fFPE)
     %covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
-    [xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
+%     [xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
 end
 toc(time1)
 %% Check Results
@@ -292,10 +296,10 @@ if dim==2
     grid on
     axis ([bdim(1,:),bdim(2,:)])
     grid on
-    for k = 2:100:length(t)
+    for k = 2:10:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
          drawnow
-         pause(1.0/100);
+         pause(1.0/1000);
     end
     
 
