@@ -9,7 +9,7 @@ addpath(genpath('../src'));
 clear all
 
 %%
-run = 1;
+run = 3;
 dirpath = ['./test_run/test_finite_horizon_hjb_euler/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -22,16 +22,16 @@ start_whole = tic;
 
 %% Initialization
 
-d = 2;
+d = 1;
 x = sym('x',[d,1]); %do not change
-n = [151;201]; 
+n = [201;]; 
 
-h = 0.005;%pi/(2*n); % time step size
-tend = 8;
+h = 0.001;%pi/(2*n); % time step size
+tend = 3;
 tt = 0:h:tend;
 
-bdim = [-20 20;-20 20];
-bcon = { {'d', 0, 0},{'d', 0, 0}};
+bdim = [-5 5;-5 5];
+bcon = { {'d', exp(-6*25), exp(-6*25)},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -53,18 +53,18 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 AA = randn(d,d);% 
 BB = eye(d);%ones(d,1); 
 QQ = eye(d);
-PP = care(AA,BB,QQ);
+PP = 6;%care(AA,BB,QQ);
 
 % full dynamics
-% f = x.^3 + 5*x.^2 + x; 
-f = AA*x;
+f = x.^3 + 5*x.^2 + x; 
+% f = AA*x;
 G = BB;
 B = BB;
 
-noise_cov = diag([2 2]);
+noise_cov = 1;%diag([2 2]);
 q = x'*QQ*x;
-R = diag([1 1]);
-lambda = 2;%noise_cov*R;
+R = 1;%diag([1 1]);
+lambda = 1;%noise_cov*R;
 
 %% Calculate differentiation operators and finite difference matrices
 
@@ -182,7 +182,11 @@ for ind = 2:length(tt)
 %                 als_sys_var(op,bc,F_all{ind-1},tol_err,als_options,als_variant,debugging, 0);
 %         end
     F = SRMultV(op,F_all{ind-1});
-    [F_all{ind}, ~] = als2(F,tol_err_op);
+    if ncomponents(F) > ncomponents(F_all{ind-1})
+        [F_all{ind}, ~] = als2(F,tol_err_op);
+    else
+        F_all{ind} = F;
+    end
     if mod(ind,10) == 0
         fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
     end
@@ -225,11 +229,11 @@ if d == 1
        px(:,k) = double(F_all{k}); 
     end
 
-    plottend = length(tt);
+    plottend = length(tt);%-length(tt)+20;
     figure
     hold on
     surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)','EdgeColor','none');
-    scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
+%     scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
     zlim([-0.2 1.2])
     % ylim([7.8 8])
     xlabel('X(m)')
