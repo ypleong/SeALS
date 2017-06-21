@@ -44,8 +44,6 @@ als_options = [];
 als_variant = []; %{10,50};
 debugging = 0;
 
-run = 1;
-
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 %% Define dynamics
