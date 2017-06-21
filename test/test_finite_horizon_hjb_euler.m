@@ -24,14 +24,14 @@ start_whole = tic;
 
 d = 2;
 x = sym('x',[d,1]); %do not change
-n = [151, 201]; 
+n = [151;201]; 
 
 h = 0.005;%pi/(2*n); % time step size
 tend = 8;
 tt = 0:h:tend;
 
 bdim = [-20 20;-20 20];
-bcon = { {'d', 0, 0},{'d', 0, 0} };
+bcon = { {'d', 0, 0},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -52,20 +52,21 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 % f = 2*[x(1)^5-x(1)^3-x(1)+x(1)*x(2)^4; x(2)^5-x(2)^3-x(2)+x(2)*x(1)^4]; % dynamics
 % linearized dynamics
-AA = -eye(d); 
-BB = ones(d,1); 
+AA = randn(d,d);% 
+BB = eye(d);%ones(d,1); 
 QQ = eye(d);
 PP = care(AA,BB,QQ);
 
 % full dynamics
-f = AA*x; 
+% f = x.^3 + 5*x.^2 + x; 
+f = AA*x;
 G = BB;
 B = BB;
 
-noise_cov = 1;
+noise_cov = diag([2 2]);
 q = x'*QQ*x;
-R = 1;
-lambda = noise_cov*R;
+R = diag([1 1]);
+lambda = 2;%noise_cov*R;
 
 %% Calculate differentiation operators and finite difference matrices
 
@@ -200,6 +201,8 @@ fprintf(['Run ',num2str(run),' with main_run is complete \n'])
 
 diary off
 
+save([dirpath,'run_',num2str(run),'data'])
+    
 %% Visualize results
 
 %% Dimension = 1 
@@ -214,12 +217,8 @@ if d == 1
 % noise = 1;
 % lambda = 1;
 
-    xx_nn = 47;
     ts_grid = csvread([dirpath,'grid.csv']);
-    x_grid = ts_grid(1:xx_nn:end,1);
-    t_grid = ts_grid(1:xx_nn,2);
     ts_value = csvread([dirpath,'value.csv']);
-    ts_value_square = reshape(ts_value,xx_nn,size(ts_grid,1)/xx_nn)';
 
 %% Plot result
 
@@ -245,8 +244,19 @@ end
 %% Dimension = 2
 
 if d == 2
-%% Plot result
+%% True solutions for linear system
     
+% AA = eye(d);
+% BB = eye(d);
+% QQ = eye(d);
+% PP = diag([6 6]);
+% noise = diag([1 1]);
+% lambda = 1; 
+
+    ts_grid = csvread([dirpath,'grid 2.csv']);
+    ts_value = csvread([dirpath,'value 2.csv']);
+
+%% Plot result
     figure
     ht_pdf = pcolor(gridT{1},gridT{2},double(F_all{1})');
     h = colorbar;
@@ -260,10 +270,43 @@ if d == 2
     axis ([bdim(1,:),bdim(2,:)])
     grid on
     for k = 2:10:length(tt)
-         set ( ht_pdf, 'CData', double(F_all{k})' );
+         set(ht_pdf, 'CData', double(F_all{k})' );
          title(['Time = ',num2str(tt(k))]);
          drawnow
          pause(1.0/1000);
+    end
+    
+%%  
+    timenn = 115;
+    k = 1;
+    figure
+    hold on
+    surf(gridT{1},gridT{2},double(F_all{end})','EdgeColor', 'none');
+    scatter3(ts_grid(1:timenn:end,1),ts_grid(1:timenn:end,2),ts_value(k-1+(1:timenn:end)),10,'filled');
+    colorbar;
+    xlabel('x')
+    ylabel('y')
+    xlim([-5 5])
+    ylim([-5 5])
+
+%%
+    timenn = 115;
+    figure
+    ht_true = scatter3(ts_grid(1:timenn:end,1),ts_grid(1:timenn:end,2),ts_value(1:timenn:end),10,'filled');
+    h = colorbar;
+    %set(h, 'ylim', [0 0.25])
+    caxis([0 1])
+    xlabel('x')
+    ylabel('y')
+    title(['Time = ',num2str(tt(1))]);
+    grid on
+    axis ([bdim(1,:),bdim(2,:)])
+    grid on
+    for k = 2:1:timenn
+         set(ht_true,'ZData', ts_value(k-1+(1:timenn:end)));
+         title(['Time = ',num2str(ts_grid(k,3))]);
+         drawnow
+         pause(1.0/10);
     end
 
 end
