@@ -2,13 +2,15 @@
 % June 20, 2017
 
 % Note:
-% - Spectral work with backward euler
+% - Spectral work with backward euler, but in 2D ALS can be ill-conditioned
+% - Domain needs to be really large to work properly for both finite
+% difference and spectral
 
 addpath(genpath('../src'));
 clear all
 
 %%
-run = 1;
+run = 4;
 dirpath = ['./test_run/test_finite_horizon_hjb_backward_euler/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -21,16 +23,16 @@ start_whole = tic;
 
 %% Initialization
 
-d = 1;
+d = 2;
 x = sym('x',[d,1]); %do not change
-n = [151]; 
+n = [201; 401;]; 
 
-h = 0.005;%pi/(2*n); % time step size
-tend = 8;
+h = 0.001;%pi/(2*n); % time step size
+tend = 2;
 tt = 0:h:tend;
 
-bdim = [-4 4];
-bcon = { {'d', 0, 0}};
+bdim = [-pi pi; -10 10];
+bcon = { {'p'},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
@@ -39,49 +41,62 @@ sca_ver = 1;
 
 tol_err_op = 1e-6;
 tol_err = 1e-9;
-als_options = [];
+als_options = {100,20,'average',1e-7,1e-12,0.01,15};
 als_variant = []; %{10,50};
 debugging = 0;
-
-run = 1;
 
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 %% Define dynamics
 
-% f = 2*[x(1)^5-x(1)^3-x(1)+x(1)*x(2)^4; x(2)^5-x(2)^3-x(2)+x(2)*x(1)^4]; % dynamics
-% linearized dynamics
-AA = -1; %randn(d,d);% 
-BB = eye(d);%ones(d,1); 
-QQ = eye(d);
-PP = care(AA,BB,QQ);
-
 % full dynamics
 % f = x.^3 + 5*x.^2 + x; 
-f = AA*x;
-G = BB;
-B = BB;
+% f = AA*x;
 
-noise_cov = 1;%diag([2 2]);
-q = x'*QQ*x;
-R = 1;%diag([1 1]);
-lambda = 1;%noise_cov*R;
+% Smooth 2D
+% f = 2*[x(1)^5-x(1)^3-x(1)+x(1)*x(2)^4; x(2)^5-x(2)^3-x(2)+x(2)*x(1)^4];
+% G = [x(1) 0; 0 x(2)];
+% B = BB;
+% noise_cov = diag([1 1]);
+% q = x'*QQ*x;
+% R = diag([1 1]);
+% lambda = 1;%noise_cov*R;
+
+
+% Inverted Pendulum
+m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
+f1 = (g/l)*sin(x(1))/den;
+f2 = -0.5*mr*x(2)^2*sin(2*x(1))/den;
+f = [x(2) ; f1+f2];
+G = [0.01 ; -mr/(m*l)*cos(x(1))/den];
+B = G;
+noise_cov = 10*pi;
+q = 0.1*x(1)^2+0.05*x(2)^2;
+R = 0.02;
+lambda = noise_cov*R;
+
+% linearized dynamics
+AA = [0 1; (g/l)/(4/3-mr) 0];%randn(d,d);% 
+BB = [0.01; -mr/(m*l)/(4/3-mr)]; %eye(d);%
+QQ = diag([0.1 0.05]);
+PP = care(AA,BB,QQ)/1000;
+
 
 %% Calculate differentiation operators and finite difference matrices
 
 fprintf('Creating differential operators ...\n');
 start_diff = tic;
-% 
-% for i=1:d
-%     gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
-%     nd(i) = n(i);
-%     dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
-%     acc(:,i) = [2,2]';
-% end
-% 
-% [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
 
-[n,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[]);
+for i=1:d
+    gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+    nd(i) = n(i);
+    dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+    acc(:,i) = [2,2]';
+end
+
+[D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
+
+% [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[]);
 toc(start_diff)
 end_diff = toc(start_diff);
 
@@ -96,7 +111,7 @@ end_dynamics = toc(start_dynamics);
 fprintf('Creating PDE operator ...\n');
 start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
-op = DiagKTensor(oneTens(d, n)) - op*h;
+op = DiagKTensor(oneTens(d, n)) + op*h;
 toc(start_PDEop)
 end_PDEop = toc(start_PDEop);
 
@@ -119,7 +134,7 @@ if isempty(bsca)
 end
 
 % make bc
-% [op] = makebcop(op,bcon,bsca,n,fd1);
+[op] = makebcop(op,bcon,bsca,n,fd1);
 % [op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
 %% Create initial conditions
@@ -172,23 +187,26 @@ data = double(initTens{1})';
 t = 0;
 
 iter_time = zeros(length(tt),1);
-for ind = 2:length(tt)
+%%
+for ind = 421:length(tt)
     start_iter = tic;
-    [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
-%         if isempty(als_variant) %original    
-%             [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...
-%                 als_sys(op,bc,F_all{ind-1},tol_err,als_options,debugging, 0);
-%             restart = []; %no restarts for original
-%         else %variant
-%             [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell, restart] = ...
-%                 als_sys_var(op,bc,F_all{ind-1},tol_err,als_options,als_variant,debugging, 0);
-%         end
-%     F = SRMultV(op,F_all{ind-1});
-    [F_all{ind}, ~] = als2(F,tol_err_op);
+%     [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
+    F = SRMultV(op,F_all{ind-1});
+    
+    if ncomponents(F) > ncomponents(F_all{ind-1})
+        [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
+        [F_all{ind}, ~] = als2(F,tol_err_op);
+    else
+        F_all{ind} = F;
+    end
+    iter_time(ind-1) = toc(start_iter);
+    
     if mod(ind,10) == 0
         fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
     end
-    iter_time(ind-1) = toc(start_iter);
+    if norm(F)/prod(n) < tol_err_op/10
+        break
+    end
 end
 
 time_solve = toc(start_solve);
@@ -210,30 +228,23 @@ save([dirpath,'run_',num2str(run),'data'])
 if d == 1
 %% True solution
 
-% AA = -1;
-% BB = 1;
-% QQ = 1;
-% PP = 0.4142;
-% noise = 1;
-% lambda = 1;
-
     ts_grid = csvread([dirpath,'grid.csv']);
     ts_value = csvread([dirpath,'value.csv']);
 
 %% Plot result
 
     px = zeros(n,length(tt));
-    for k=1:length(tt)
+    for k=1:ind-1;%length(tt)
        px(:,k) = double(F_all{k}); 
     end
 
-    plottend = length(tt);
+    plottend = length(tt)-length(tt)+ind-1;
     figure
     hold on
     surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)','EdgeColor','none');
     scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
     zlim([-0.2 1.2])
-%     ylim([7.8 8])
+%     ylim([2.5 3])
     xlabel('X(m)')
     ylabel('Time(s)')
     zlabel('Desirability(x,t)')
@@ -258,10 +269,10 @@ if d == 2
 
 %% Plot result
     figure
-    ht_pdf = pcolor(gridT{1},gridT{2},double(F_all{1})');
+    ht_pdf = surf(gridT{1},gridT{2},double(F_all{1})');
     h = colorbar;
     %set(h, 'ylim', [0 0.25])
-    caxis([0 1])
+%     caxis([0 1])
     set(ht_pdf, 'EdgeColor', 'none');
     xlabel('x')
     ylabel('y')
@@ -269,8 +280,8 @@ if d == 2
     grid on
     axis ([bdim(1,:),bdim(2,:)])
     grid on
-    for k = 2:10:length(tt)
-         set(ht_pdf, 'CData', double(F_all{k})' );
+    for k = 2:10:ind%length(tt)
+         set(ht_pdf, 'ZData', double(F_all{k})' );
          title(['Time = ',num2str(tt(k))]);
          drawnow
          pause(1.0/1000);
