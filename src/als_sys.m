@@ -114,7 +114,7 @@ useStop = 1;
 e_count = 2;
 e_list(1) = 1;
 
-if useStop
+if useStop && verbose
     FS = stoploop({'Exit execution at current iteration?', 'Stop'}) ;
 end
 
@@ -257,7 +257,7 @@ for iter = 1:tol_it
     old_err = err(iter);
     
     %Check quit option
-    if useStop
+    if useStop && verbose
         if FS.Stop()
             break;
         end
@@ -268,7 +268,7 @@ if iter == tol_it
     maxit = 1;
 end
 
-if useStop
+if useStop && verbose
     FS.Clear() ;  % Clear up the box
     clear FS ;    % this structure has no use anymore
 end
