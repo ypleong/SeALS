@@ -11,16 +11,16 @@ function plot2Dslice(F,slices_dim,coordinates,grid)
 
     
     d = ndims(F);
-    factors = Fsub.lambda;
+    factors = F.lambda;
     
     for i = 1:d
         if all(i ~= slices_dim)
-            factors = factors.*Fsub.U{i}(coordinates(i),:)';
+            factors = factors.*F.U{i}(coordinates(i),:)';
         end
     end
     
-    kkksubU{1} = Fsub.U{slices_dim(1)};
-    kkksubU{2} = Fsub.U{slices_dim(2)};
+    kkksubU{1} = F.U{slices_dim(1)};
+    kkksubU{2} = F.U{slices_dim(2)};
     kkksub = double(ktensor(factors, kkksubU));
     
     figure; 
