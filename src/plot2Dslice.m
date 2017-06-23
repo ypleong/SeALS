@@ -23,8 +23,7 @@ function plot2Dslice(F,slices_dim,coordinates,grid)
     kkksubU{2} = F.U{slices_dim(2)};
     kkksub = double(ktensor(factors, kkksubU));
     
-    figure; 
-    surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub,'EdgeColor','none')
+    surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none')
     xlabel(['x_',num2str(slices_dim(1))])
     ylabel(['x_',num2str(slices_dim(2))])
 end
