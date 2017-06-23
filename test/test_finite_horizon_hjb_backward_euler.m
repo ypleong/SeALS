@@ -10,7 +10,7 @@ addpath(genpath('../src'));
 clear all
 
 %%
-run = 4;
+run = 5;
 dirpath = ['./test_run/test_finite_horizon_hjb_backward_euler/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -23,23 +23,23 @@ start_whole = tic;
 
 %% Initialization
 
-d = 2;
+d = 6;
 x = sym('x',[d,1]); %do not change
-n = [201; 401;]; 
+n = [111; 107; 105; 113; 101; 103;]; 
 
 h = 0.001;%pi/(2*n); % time step size
 tend = 2;
 tt = 0:h:tend;
 
-bdim = [-pi pi; -10 10];
-bcon = { {'p'},{'d', 0, 0}};
+bdim = [-5 5 ; -5 5 ; -5 5; -5 5; -pi pi; -5 5];%[-pi pi; -10 10];
+bcon = { {'d',0,0} , {'d',0,0}, {'d',0,0}, {'d',0,0}, {'p'}, {'d',0,0} }; %{ {'p'},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
 regsca = [];
 sca_ver = 1;
 
-tol_err_op = 1e-6;
+tol_err_op = 1e-5;
 tol_err = 1e-9;
 als_options = {100,20,'average',1e-7,1e-12,0.01,15};
 als_variant = []; %{10,50};
@@ -64,23 +64,38 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 
 % Inverted Pendulum
-m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
-f1 = (g/l)*sin(x(1))/den;
-f2 = -0.5*mr*x(2)^2*sin(2*x(1))/den;
-f = [x(2) ; f1+f2];
-G = [0.01 ; -mr/(m*l)*cos(x(1))/den];
+% m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
+% f1 = (g/l)*sin(x(1))/den;
+% f2 = -0.5*mr*x(2)^2*sin(2*x(1))/den;
+% f = [x(2) ; f1+f2];
+% G = [0.01 ; -mr/(m*l)*cos(x(1))/den];
+% B = G;
+% noise_cov = 10*pi;
+% q = 0.1*x(1)^2+0.05*x(2)^2;
+% R = 0.02;
+% lambda = noise_cov*R;
+% 
+% % linearized dynamics
+% AA = [0 1; (g/l)/(4/3-mr) 0];%randn(d,d);% 
+% BB = [0.01; -mr/(m*l)/(4/3-mr)]; %eye(d);%
+% QQ = diag([0.1 0.05]);
+% PP = care(AA,BB,QQ)/1000;
+
+% VTOL
+g = 9.8; eps = 0.01;
+f = [x(2); 0; x(4); -g; x(6); 0];
+G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
 B = G;
-noise_cov = 10*pi;
-q = 0.1*x(1)^2+0.05*x(2)^2;
-R = 0.02;
-lambda = noise_cov*R;
+noise_cov = diag([3 3]);
+q = x'*x;
+R = diag([2 2]);
+lambda = 6;%noise_cov*R;
 
 % linearized dynamics
-AA = [0 1; (g/l)/(4/3-mr) 0];%randn(d,d);% 
-BB = [0.01; -mr/(m*l)/(4/3-mr)]; %eye(d);%
-QQ = diag([0.1 0.05]);
-PP = care(AA,BB,QQ)/1000;
-
+% AA = [0 1 0 0 0 0; 0 0 0 0 0 0; 0 0 0 1 0 0; 0 0 0 0 0 0; 0 0 0 0 0 1; 0 0 0 0 0 0];%randn(d,d);% 
+% BB = [0 0; 0 eps; 0 0; 1 0; 0 0; 0 1]; %eye(d);%
+% QQ = diag([1 1 1 1 1 1]);
+PP = 10*diag([1 1 1 1 1 1]); %care(AA,BB,QQ);
 
 %% Calculate differentiation operators and finite difference matrices
 
@@ -140,12 +155,21 @@ end
 %% Create initial conditions
 fprintf('Creating initial conditions ...\n');
 start_PDEinit = tic;
-if d == 2
-    init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
-elseif d == 1
-    init = exp(-x(1)'*PP(1,1)*x(1)/lambda);
+if d <= 2
+    if d == 2
+        init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
+    elseif d == 1
+        init = exp(-x(1)'*PP(1,1)*x(1)/lambda);
+    end
+    initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
+else
+    U = cell(d,1);
+    for i = 1:d
+        U{i} = exp(-gridT{i}.^2*PP(i,i)/lambda);
+    end
+    initTens = {ktensor(U)};
 end
-initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
+    
 toc(start_PDEinit)
 end_PDEinit = toc(start_PDEinit);
 
@@ -182,13 +206,11 @@ start_solve = tic;
 F_all = cell(1,tend+1);
 F_all{1} = initTens{1};
 
-tdata = 0;
-data = double(initTens{1})';
 t = 0;
 
 iter_time = zeros(length(tt),1);
 %%
-for ind = 421:length(tt)
+for ind = 2:length(tt)
     start_iter = tic;
 %     [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
     F = SRMultV(op,F_all{ind-1});
@@ -204,7 +226,7 @@ for ind = 421:length(tt)
     if mod(ind,10) == 0
         fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
     end
-    if norm(F)/prod(n) < tol_err_op/10
+    if norm(F)/(sum(n)*ncomponents(F)) < tol_err_op/10
         break
     end
 end
@@ -321,3 +343,25 @@ if d == 2
     end
 
 end
+
+%% Dimension > 2
+
+% if d > 2
+%     
+% %%    
+%     dim_plot = [2 4];
+% %     total_plot = factorial(d);
+% %     row = ceil(sqrt(d));
+% %     column = 
+%     figure
+% %     subplot(
+%     for k = 1:1:ind-1%length(tt)
+%          plot2Dslice(F_all{k},dim_plot,ceil(n/2),gridT);
+%          h = colorbar;
+%          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
+%          title(['Time = ',num2str(tt(k))]);
+% %          drawnow
+%          pause(1.0/10);
+%     end
+%     
+% end

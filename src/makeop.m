@@ -187,12 +187,12 @@ end
 % debugging %
 
 %% Stability
-i = 1;
-ep = 10^-4;
-opStab = ep*D4{i};
-for i = 2:d
-    opStab = opStab + ep*D4{i};
-end
+% i = 1;
+% ep = 10^-4;
+% opStab = ep*D4{i};
+% for i = 2:d
+%     opStab = opStab + ep*D4{i};
+% end
 
 %% combine operator terms
 if isempty(opMid) == 1
