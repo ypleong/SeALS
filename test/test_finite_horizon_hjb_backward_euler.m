@@ -10,7 +10,7 @@ addpath(genpath('../src'));
 clear all
 
 %%
-run = 5;
+run = 7;
 dirpath = ['./test_run/test_finite_horizon_hjb_backward_euler/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -23,23 +23,24 @@ start_whole = tic;
 
 %% Initialization
 
-d = 6;
+d = 2;
 x = sym('x',[d,1]); %do not change
-n = [111; 107; 105; 113; 101; 103;]; 
+n = [101; 103;];%155; 153; 161; 165;]; 
 
-h = 0.001;%pi/(2*n); % time step size
+h = 0.0001;%pi/(2*n); % time step size
 tend = 2;
 tt = 0:h:tend;
 
-bdim = [-5 5 ; -5 5 ; -5 5; -5 5; -pi pi; -5 5];%[-pi pi; -10 10];
-bcon = { {'d',0,0} , {'d',0,0}, {'d',0,0}, {'d',0,0}, {'p'}, {'d',0,0} }; %{ {'p'},{'d', 0, 0}};
+bdim = [-10 10;-10 10;];%[-5 5 ; -5 5 ; -5 5; -5 5; -5 5; -5 5];%[-pi pi; -10 10];
+bcon = {{'d',0,0},{'d',0,0}}; %{{'d',0,0},{'d', 0, 0}};
+% bcon = { {'d',0,0} , {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0} }; %{ {'p'},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
 regval = 1;
 regsca = [];
 sca_ver = 1;
 
-tol_err_op = 1e-5;
+tol_err_op = 1e-6;
 tol_err = 1e-9;
 als_options = {100,20,'average',1e-7,1e-12,0.01,15};
 als_variant = []; %{10,50};
@@ -49,9 +50,38 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 %% Define dynamics
 
-% full dynamics
-% f = x.^3 + 5*x.^2 + x; 
+% Linear system
+% AA = [
+%    -1.2488    0.5746    1.0903    1.3607    0.3494   -0.6191;
+%    -0.0884   -1.3094   -0.8831    1.6346    0.4975   -0.3493;
+%     1.4093    0.2445   -0.6672    0.0464    0.8427    1.4036;
+%     0.6186   -0.1546    1.5360   -0.1142    0.1509    0.1451;
+%     0.3676    0.0292   -1.1329   -0.4568   -0.8125   -1.5609;
+%     0.9457   -1.6709   -0.3731   -0.0540   -0.6918    2.0096];%randn(d,d);
+% BB = eye(d,2);
+% QQ = diag(ones(d,1));
+% PP = care(AA,BB,QQ);
+% B = BB;
+% G = B;
 % f = AA*x;
+% noise_cov = diag(ones(2,1));
+% q = x'*QQ*x;
+% R = diag(ones(2,1));
+% lambda = 1;%noise_cov*R;
+
+% Linear system
+AA = [-1 0; 0.2 0];%randn(d,d);
+BB = ones(d,1);
+QQ = diag(ones(d,1));
+PP = care(AA,BB,QQ,1/2);
+B = BB;
+G = B;
+f = AA*x;
+noise_cov = diag(ones(1,1));
+q = x'*QQ*x;
+R = diag(ones(1,1));
+lambda = 1;%noise_cov*R;
+
 
 % Smooth 2D
 % f = 2*[x(1)^5-x(1)^3-x(1)+x(1)*x(2)^4; x(2)^5-x(2)^3-x(2)+x(2)*x(1)^4];
@@ -82,36 +112,36 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 % PP = care(AA,BB,QQ)/1000;
 
 % VTOL
-g = 9.8; eps = 0.01;
-f = [x(2); 0; x(4); -g; x(6); 0];
-G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
-B = G;
-noise_cov = diag([3 3]);
-q = x'*x;
-R = diag([2 2]);
-lambda = 6;%noise_cov*R;
+% g = 9.8; eps = 0.01;
+% f = [x(2); 0; x(4); -g; x(6); 0];
+% G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
+% B = G;
+% noise_cov = diag([3 3]);
+% q = x'*x;
+% R = diag([2 2]);
+% lambda = 6;%noise_cov*R;
 
 % linearized dynamics
 % AA = [0 1 0 0 0 0; 0 0 0 0 0 0; 0 0 0 1 0 0; 0 0 0 0 0 0; 0 0 0 0 0 1; 0 0 0 0 0 0];%randn(d,d);% 
 % BB = [0 0; 0 eps; 0 0; 1 0; 0 0; 0 1]; %eye(d);%
 % QQ = diag([1 1 1 1 1 1]);
-PP = 10*diag([1 1 1 1 1 1]); %care(AA,BB,QQ);
+% PP = 10*diag([1 1 1 1 1 1]); %care(AA,BB,QQ);
 
 %% Calculate differentiation operators and finite difference matrices
 
 fprintf('Creating differential operators ...\n');
 start_diff = tic;
+% 
+% for i=1:d
+%     gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+%     nd(i) = n(i);
+%     dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+%     acc(:,i) = [2,2]';
+% end
+% 
+% [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
 
-for i=1:d
-    gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
-    nd(i) = n(i);
-    dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
-    acc(:,i) = [2,2]';
-end
-
-[D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
-
-% [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[]);
+[~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);
 toc(start_diff)
 end_diff = toc(start_diff);
 
@@ -126,7 +156,8 @@ end_dynamics = toc(start_dynamics);
 fprintf('Creating PDE operator ...\n');
 start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
-op = DiagKTensor(oneTens(d, n)) + op*h;
+% op = DiagKTensor(oneTens(d, n)) + op*h;
+op = DiagKTensor(oneTens(d, n)) - op*h;
 toc(start_PDEop)
 end_PDEop = toc(start_PDEop);
 
@@ -148,8 +179,8 @@ if isempty(bsca)
     bsca = bscat;
 end
 
-% make bc
-[op] = makebcop(op,bcon,bsca,n,fd1);
+% NOTE: This is bad for backward euler
+% [op] = makebcop(op,bcon,bsca,n,fd1);
 % [op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
 %% Create initial conditions
@@ -157,11 +188,15 @@ fprintf('Creating initial conditions ...\n');
 start_PDEinit = tic;
 if d <= 2
     if d == 2
-        init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
+        [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+        init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
+%         init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
+        initTens  = {cp_als(tensor(init'),4)};
     elseif d == 1
-        init = exp(-x(1)'*PP(1,1)*x(1)/lambda);
+        init = exp(-x(1)'*PP*x(1)/lambda);
+        initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
     end
-    initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
+    
 else
     U = cell(d,1);
     for i = 1:d
@@ -210,25 +245,25 @@ t = 0;
 
 iter_time = zeros(length(tt),1);
 %%
-for ind = 2:length(tt)
+for ind = 2:length(tt)+1
     start_iter = tic;
-%     [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
-    F = SRMultV(op,F_all{ind-1});
+    [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
+%     F = SRMultV(op,F_all{ind-1});
     
     if ncomponents(F) > ncomponents(F_all{ind-1})
-        [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
+%         [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
         [F_all{ind}, ~] = als2(F,tol_err_op);
     else
         F_all{ind} = F;
     end
     iter_time(ind-1) = toc(start_iter);
     
-    if mod(ind,10) == 0
+    if mod(ind,100) == 0
         fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
     end
-    if norm(F)/(sum(n)*ncomponents(F)) < tol_err_op/10
-        break
-    end
+%     if norm(F)/(sum(n)*ncomponents(F)) < tol_err_op
+%         break
+%     end
 end
 
 time_solve = toc(start_solve);
@@ -242,7 +277,7 @@ fprintf(['Run ',num2str(run),' with main_run is complete \n'])
 diary off
 
 save([dirpath,'run_',num2str(run),'data'])
-    
+
 %% Visualize results
 
 %% Dimension = 1 
@@ -264,7 +299,7 @@ if d == 1
     figure
     hold on
     surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)','EdgeColor','none');
-    scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
+%     scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
     zlim([-0.2 1.2])
 %     ylim([2.5 3])
     xlabel('X(m)')
@@ -292,16 +327,14 @@ if d == 2
 %% Plot result
     figure
     ht_pdf = surf(gridT{1},gridT{2},double(F_all{1})');
-    h = colorbar;
+    colorbar;
     %set(h, 'ylim', [0 0.25])
 %     caxis([0 1])
     set(ht_pdf, 'EdgeColor', 'none');
     xlabel('x')
     ylabel('y')
     title(['Time = ',num2str(tt(1))]);
-    grid on
     axis ([bdim(1,:),bdim(2,:)])
-    grid on
     for k = 2:10:ind%length(tt)
          set(ht_pdf, 'ZData', double(F_all{k})' );
          title(['Time = ',num2str(tt(k))]);
@@ -326,7 +359,7 @@ if d == 2
     timenn = 115;
     figure
     ht_true = scatter3(ts_grid(1:timenn:end,1),ts_grid(1:timenn:end,2),ts_value(1:timenn:end),10,'filled');
-    h = colorbar;
+    colorbar;
     %set(h, 'ylim', [0 0.25])
     caxis([0 1])
     xlabel('x')
@@ -346,22 +379,107 @@ end
 
 %% Dimension > 2
 
-% if d > 2
-%     
-% %%    
-%     dim_plot = [2 4];
-% %     total_plot = factorial(d);
+if d > 2
+    
+%%    
+    dim_plot = [5 6];
+%     total_plot = factorial(d);
 % %     row = ceil(sqrt(d));
-% %     column = 
-%     figure
-% %     subplot(
-%     for k = 1:1:ind-1%length(tt)
-%          plot2Dslice(F_all{k},dim_plot,ceil(n/2),gridT);
-%          h = colorbar;
-%          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
-%          title(['Time = ',num2str(tt(k))]);
-% %          drawnow
-%          pause(1.0/10);
-%     end
-%     
-% end
+%     column = 
+    figure
+%     subplot(
+    coord = ceil(n/2);
+%     coord(4) = ceil(n(4)/2);
+    for k = 1:1:ind-1%length(tt)
+         plot2Dslice(F_all{k},dim_plot,coord,gridT);
+         colorbar;
+         axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
+         title(['Time = ',num2str(tt(k))]);
+%          drawnow
+         pause(1.0/1000);
+    end
+    
+end
+
+
+%% Simulations
+
+saveplots = 0;
+savedata = 0;
+
+[fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x);
+sim_config = {tend,h,repmat([3; 1],1,1),[],[]};
+sim_data = {lambda,gridT,R,noise_cov,F_all,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+
+sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)
+
+%% LQR
+
+SS = zeros(d,d,length(tt));
+qq = zeros(length(tt),1);
+SS(:,:,1) = PP;
+qq(1) = 0;
+for ind = 1:length(tt)-1
+    SS(:,:,ind+1) = SS(:,:,ind)+(AA'*SS(:,:,ind)+SS(:,:,ind)*AA-2*SS(:,:,ind)*BB/R*BB'*SS(:,:,ind)+QQ)*h;
+    qq(ind+1) = qq(ind) + trace(SS(:,:,ind)*BB*noise_cov*BB')*h;
+end
+
+%% dimension = 2
+if d == 2
+    
+%% Plot result
+    
+    [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+    lqr_values = exp(-(sum(([gridx(:) gridy(:)]*SS(:,:,1)).*[gridx(:) gridy(:)],2)+qq(1))/lambda);
+    
+    figure
+    ht_pdf = surf(gridT{1},gridT{2},reshape(lqr_values,n(2),n(1)));
+    colorbar;
+    %set(h, 'ylim', [0 0.25])
+%     caxis([0 1])
+    set(ht_pdf, 'EdgeColor', 'none');
+    xlabel('x')
+    ylabel('y')
+    title(['Time = ',num2str(tt(1))]);
+    axis ([bdim(1,:),bdim(2,:)])
+    for k = 2:10:ind%length(tt)
+         lqr_values = exp(-(sum(([gridx(:) gridy(:)]*SS(:,:,ind)).*[gridx(:) gridy(:)],2)+qq(k))/lambda);
+         set(ht_pdf, 'ZData', reshape(lqr_values,n(2),n(1)) );
+         title(['Time = ',num2str(tt(k))]);
+         drawnow
+         pause(1.0/1000);
+    end
+    
+ %%   
+    px = zeros(n,length(tt));
+    for k=1:ind-1;%length(tt)
+       px(:,k) = exp(-(gridT{1}.*squeeze(SS(:,:,k)).*gridT{1}+qq(k))/lambda); 
+    end
+
+    plottend = length(tt)-length(tt)+ind-1;
+    figure
+    hold on
+    surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)','EdgeColor','none');
+%     scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');
+    zlim([-0.2 1.2])
+%     ylim([2.5 3])
+    xlabel('X(m)')
+    ylabel('Time(s)')
+    zlabel('Desirability(x,t)')
+    title('Desirability function evolution')
+    colorbar
+    
+    %%
+    
+    ten_ori = zeros(length(tt),1);
+    for k = 1:length(tt)
+        ten_ori(k) = EvalT(F_all{k},[0], gridT);% max(double(F_all{k}));%
+    end
+    
+    figure
+    plot(tt,[-lambda*log(ten_ori) qq])
+    
+    figure
+    plot(tt,[ten_ori exp(-qq/lambda)])
+    
+end
