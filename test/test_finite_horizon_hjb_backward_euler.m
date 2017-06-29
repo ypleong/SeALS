@@ -23,16 +23,16 @@ start_whole = tic;
 
 %% Initialization
 
-d = 2;
+d = 1;
 x = sym('x',[d,1]); %do not change
-n = [101; 103;];%155; 153; 161; 165;]; 
+n = [201;];%155; 153; 161; 165;]; 
 
-h = 0.0001;%pi/(2*n); % time step size
-tend = 2;
+h = 0.001;%pi/(2*n); % time step size
+tend = 5;
 tt = 0:h:tend;
 
-bdim = [-10 10;-10 10;];%[-5 5 ; -5 5 ; -5 5; -5 5; -5 5; -5 5];%[-pi pi; -10 10];
-bcon = {{'d',0,0},{'d',0,0}}; %{{'d',0,0},{'d', 0, 0}};
+bdim = [-10 10;];%[-5 5 ; -5 5 ; -5 5; -5 5; -5 5; -5 5];%[-pi pi; -10 10];
+bcon = {{'d',0,0}}; %{{'d',0,0},{'d', 0, 0}};
 % bcon = { {'d',0,0} , {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0} }; %{ {'p'},{'d', 0, 0}};
 bsca = []; %no manual scaling
 region = [];
@@ -70,7 +70,7 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 % lambda = 1;%noise_cov*R;
 
 % Linear system
-AA = [-1 0; 0.2 0];%randn(d,d);
+AA = 1;%[-1 0; 0.2 0];%randn(d,d);
 BB = ones(d,1);
 QQ = diag(ones(d,1));
 PP = care(AA,BB,QQ,1/2);
@@ -131,17 +131,17 @@ lambda = 1;%noise_cov*R;
 
 fprintf('Creating differential operators ...\n');
 start_diff = tic;
-% 
-% for i=1:d
-%     gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
-%     nd(i) = n(i);
-%     dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
-%     acc(:,i) = [2,2]';
-% end
-% 
-% [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
 
-[~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);
+for i=1:d
+    gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+    nd(i) = n(i);
+    dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+    acc(:,i) = [2,2]';
+end
+
+[D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
+
+% [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);
 toc(start_diff)
 end_diff = toc(start_diff);
 
@@ -251,8 +251,8 @@ for ind = 2:length(tt)+1
 %     F = SRMultV(op,F_all{ind-1});
     
     if ncomponents(F) > ncomponents(F_all{ind-1})
-%         [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
-        [F_all{ind}, ~] = als2(F,tol_err_op);
+        [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
+%         [F_all{ind}, ~] = als2(F,tol_err_op);
     else
         F_all{ind} = F;
     end
@@ -408,7 +408,7 @@ saveplots = 0;
 savedata = 0;
 
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x);
-sim_config = {tend,h,repmat([3; 1],1,1),[],[]};
+sim_config = {tend,h,repmat([4],1,1),[],[]};
 sim_data = {lambda,gridT,R,noise_cov,F_all,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 
 sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)
@@ -481,5 +481,8 @@ if d == 2
     
     figure
     plot(tt,[ten_ori exp(-qq/lambda)])
+    
+    figure
+    plot(tt,(-lambda*log(ten_ori)-qq))
     
 end
