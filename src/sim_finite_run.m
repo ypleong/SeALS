@@ -1,6 +1,6 @@
-function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
+function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 % SIMULATION simulates trajectories starting from x0_list using results
-% from MAIN_RUN.
+% from MAIN_RUN for finite horizon control.
 % Inputs:
 %   sim_config is cell with the following data:
 %      T - end time for simulations.
@@ -71,12 +71,6 @@ if isempty(new_region) == 0
     region = new_region; %use other goal region
 end
 
-F = F*(1/EvalT(F,zeros(d,1),grid));
-dF = cell(d,1);
-for i = 1:d
-    dF{i} = SRMultV(D{i},F);
-end
-
 %% simulation
 
 size_x0_list = size(x0_list);
@@ -107,11 +101,17 @@ for m = 1:n_trial
     
     for k = 1:t_length-1
         
+        Fiter = F{t_length-k};
+        dF = cell(d,1);
+        for i = 1:d
+            dF{i} = SRMultV(D{i},Fiter);
+        end
+        
         % calculate current values
         c_f = fFunc(current);
         c_G = GFunc(current);
         c_B = BFunc(current);
-        c_F = EvalT(F,current,grid);
+        c_F = EvalT(Fiter,current,grid);
         c_dF = EvalTMat(dF,current,grid);
         c_q = qFunc(current);
         
@@ -243,13 +243,14 @@ if saveplots == 1
 end
 
 % plot trajectories at all dimensions
-
+if d > 1
 for i = 1:n_trial
     [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
     figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', 'EdgeColor', 'None');
     ylabel('Coordinates')
     xlabel('Time, s')
     title(['Trial ', i])
+end
 end
 
 if saveplots == 1
