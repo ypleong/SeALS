@@ -51,6 +51,11 @@ for i=1:d
         fd2{i} = fdmatrix(n(i),2,ord_of_acc(2,:));
         fd2{i} = 1/(h(i)^2)*fd2{i};
         
+        if bcon{i}{1} == 'd'
+            fd1{i}([1 end],:) = zeros(2,n(i));
+            fd2{i}([1 end],:) = zeros(2,n(i));
+        end
+        
     end
     
     if isempty(region) == 0
