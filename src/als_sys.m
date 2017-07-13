@@ -168,7 +168,7 @@ for iter = 1:tol_it
     end
     
     Fcond(iter) = norm(F.lambda)/norm(F);
-    err(iter) = norm(SRMultV(A,F)-G)/norA;
+    err(iter) = full(norm(SRMultV(A,F)-G)/norA);
     %err(iter) = norm(SRMultV(A,F)-G);
     
     if err(iter) <= e
