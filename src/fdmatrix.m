@@ -64,14 +64,10 @@ DD = toeplitz(dc2,dc1);
 
 if per ~= 1
     for ii = 1:(ord(1)+der-1)/2
-        if ii == 0
-            cc = fdcoeffF(der,ii,1:ord(2)+der);
-        end
         cc = fdcoeffF(der,ii,1:ord(2)+der);
         cc = [cc zeros(1,n-length(cc))];
         DD(ii,:) = cc;
-        DD(n-ii+1,:) = ((-1)^der)*cc(end:-1:1); %since "f(-x)".
-            
+        DD(n-ii+1,:) = ((-1)^der)*cc(end:-1:1); %since "f(-x)".           
     end
 end
 
