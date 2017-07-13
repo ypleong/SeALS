@@ -64,6 +64,11 @@ for i=1:d
         end
         fd1{i} = sd(:,:,1);
         fd2{i} = sd(:,:,2);
+        
+        if bcon{i}{1} == 'd'
+            fd1{i}([1 end],:) = zeros(2,n(i));
+            fd2{i}([1 end],:) = zeros(2,n(i));
+        end
     end
     
 end
