@@ -6,19 +6,19 @@ clear all
 %% Create operator in tensor form
 % Initialization
 
-dim = 2;
+dim = 5;
 x = sym('x',[dim,1]); %do not change
 %n = [101,111,121,131,101,101];
 
 % Initial distribution
-sigma02 = 0.55;
+sigma02 = 0.25;
 x0 = zeros(dim,1);
 n = zeros(dim,1);
 for i=1:dim
     n(i) = 101+10*i;
     bdim(i,:) = [-pi  pi];
     x0(i) = 1;%2+i/dim*10;
-    diagSigma(i) = sigma02 + i/dim*0.3;
+    diagSigma(i) = sigma02 + i/dim*0.1;
 end
 bdim(2,:) = [-10  10];
 
@@ -95,7 +95,7 @@ end
 
 % Simulation Parameters
 dt = 0.001;
-finalt = 2*pi*20;
+finalt = 2*pi*1;
 t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
@@ -122,22 +122,23 @@ expec(:,1) = x0;
 xkalman(:,1) = x0;
 covKalman(:,:,1) = sigma02Matrix;
 
-
+alinear = 1:dim;
 
 %% Create Cell Terms
 %fFPE = sym(aspeed); % constant speed
 
 kpen = (2*pi/3)^2;
-fFPE = [x(2);-kpen*((x(1))^3-x(1))];
-% fFPE = [-x(2);x(1)];
-%fFPE = 2;
+%fFPE = [x(2);-kpen*sin(x(1))];
+
+% fFPE = [-x(2);-kpen*x(1)]; % Linear Pendulum
+fFPE = alinear';
 
 
+fFPE_function = @(x1,x2,x3,x4,x5) fFPE;  %matlabFunction(fFPE);
 fPFEdiff = jacobian(fFPE,x);
 
 fTens  = fcell2ftens( fsym2fcell(sym(fFPE) ,x), gridT);
 f_pTensqTens = fcell2ftens( fsym2fcell(diag(fPFEdiff) ,x), gridT);
-% aTens  = fcell2ftens( fsym2fcell(sym(aspeed) ,x), gridT);
 dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
 qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
 dtTen = DiagKTensor(dtTens{1}); 
@@ -172,6 +173,8 @@ for i=1:dim
 end
 
 %% Iterate over 
+
+
 time1 = tic;
 for k = 2:length(t)
     
@@ -183,23 +186,27 @@ for k = 2:length(t)
         [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     end
 %         
-%     for i=1:dim
-%         expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
-%     end
-%     for i=1:dim
-%         for j = 1:dim
-%             cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
-%         end
-%     end
-%     
-    
-    
-    %xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
-    %xkalman(:,k)  = deval(ode45( @(t,x), fFPE,[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-%     xkalman(:,k)  = deval(ode45( @(tt,xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)], [t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    %eval(fFPE)
+    %% KF 
+    xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
     %covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
-%     [xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
+    %[xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
+    
+    %% Measure
+    zmes = xkalman(:,k) + randn(dim,1).*sqrt(diagSigma)';
+    %diagSigma = sigma02 + 0.2*(0:1/(dim-1):1);
+    %Rmes = diag(diagSigma); % [0.8 0.2; 0.2 sigma02];
+    for i=1:dim
+       pz{i} =  normpdf(xvector{i},zmes(i),sqrt(diagSigma(i))); %*0.5 + normpdf(xvector{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
+    end
+    zkcompressed = ktensor(pz);
+    
+    if (k<10000 )
+        % Direct PDF Bayesian Measurement
+        pk{k} = HadTensProd(pk{k},zkcompressed);
+        pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
+    end
+    
+
 end
 toc(time1)
 %% Check Results
@@ -287,10 +294,12 @@ fprintf(['Measure update: Mean cov ',num2str(covKalmanPos,4),' Kalman, ',num2str
 %% animated figure
 if dim==2
     hf = figure
-    ht_pdf = pcolor(xvector{1},xvector{2},double(pk{1})');
+    hold on
+    ht_pdf = pcolor(xvector{1},xvector{2},double(pk{1})');    
+    ht_kf = scatter(xkalman(1,1) ,xkalman(2,1) );
     h = colorbar;
     %set(h, 'ylim', [0 0.25])
-    %caxis([0 0.25])
+    %caxis([0 15])
     set(ht_pdf, 'EdgeColor', 'none');
     xlabel('x')
     ylabel('y')
@@ -309,8 +318,9 @@ if dim==2
         set(gcf,'Renderer','OpenGL'); %to save to file
     end
     
-    for k = 2:1:length(t)
+    for k = 2:15:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
+         set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
          drawnow
          pause(1.0/1000);
          if (save_to_file )
@@ -321,35 +331,6 @@ if dim==2
     if (save_to_file  )
         close(writerObj);
     end
-
-
-    %% animated figure difference
-    figure
-    ht_pdf = pcolor(xvector,xvector,reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-double(pk{end})');
-    h = colorbar;
-    %set(h, 'ylim', [0 0.25])
-    %caxis([0 0.25])
-    set(ht_pdf, 'EdgeColor', 'none');
-    xlabel('x')
-    ylabel('y')
-    grid on
-    axis ([0,25,0,25])
-    grid on
-    for k = 2:10:length(t)
-         set ( ht_pdf, 'CData', reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))-double(pk{k}));
-         drawnow
-         pause(1.0/10.0);
-    end
-elseif dim ==1
-    for k=1:length(t)
-       px(:,k) = double(pk{k}); 
-    end
-    figure
-    h = pcolor(xvector{1},t,px') %,'EdgeColor','none')
-    set(h, 'EdgeColor', 'none');
-    xlabel('X(m)')
-    ylabel('Time(s)')
-    zlabel('Pdf(x,t)')
-    title('Pdf Evolution')
-    colorbar
 end
+
+ 
