@@ -8,10 +8,24 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
     % F - ktensor (n dims)
     % point - (nx1 vector) 
     % grid - cell of grid points of {n vectors}
-
+    % handleInput - handles to generate animation
+    
     % Outputs:
     % Slice Representation
-
+    %
+    % Usage: 
+    %  - Static Plot: call the function without the handleInput
+    %  - Animation: load the plot first using a static plot and then call
+    %  the function in a loop, example code:
+    %      
+    %      figure
+    %      handleSlices = plot2DslicesAroundPoint( Ftensor{1}, point(1,:), gridT);
+    %      for k = 2:30:length(t)
+    %          plot2DslicesAroundPoint( Ftensor{k}, point(:,k), gridT, handleSlices)    
+    %      end
+    %
+    %
+    
     dim = ndims(Ftensor);
     indexT = zeros(dim,1);
     for i=1:dim
@@ -19,7 +33,7 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
     end
     if nargin == 3
         handleOutput = {};
-        %figure
+        
         for i=1:dim 
             handleOutput{i,i} = subplot(dim,dim,dim*(i-1)+i);
             hold on
@@ -43,10 +57,9 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
             sizeU = size(Ftensor.U{i});
             for k = 1:sizeU(2)
                 plot(gridT{i},Ftensor.U{i}(:,k));
-                %set(handleInput{i,i,k}, 'YData', Ftensor.U{i}(:,k) );
+                
             end
             for j=(i+1):dim
-                %subplot(dim,dim,dim*(i-1)+j)
                 plot2Dslice(Ftensor,[i,j],indexT,gridT,handleInput{i,j});
             end
         end 
