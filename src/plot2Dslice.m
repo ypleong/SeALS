@@ -1,9 +1,9 @@
-function plot2Dslice(F,slices_dim,coordinates,grid)
+function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput)
     
 % Inputs:
-% F - ktensor
-% slices_dim - dimensions to plot
-% coordinates - coordinates of other dimensions
+% F - ktensor (n dims)
+% slices_dim - (2x1 vector) dimensions to plot
+% coordinates - (nx1 vector) coordinates of other dimensions
 % grid - cell of grid points
 
 % Outputs:
@@ -23,7 +23,13 @@ function plot2Dslice(F,slices_dim,coordinates,grid)
     kkksubU{2} = F.U{slices_dim(2)};
     kkksub = double(ktensor(factors, kkksubU));
     
-    surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none')
-    xlabel(['x_',num2str(slices_dim(1))])
-    ylabel(['x_',num2str(slices_dim(2))])
+    if nargin == 4
+        handleOutput = surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none');
+        view(0,90)
+        xlabel(['x_',num2str(slices_dim(1))])
+        ylabel(['x_',num2str(slices_dim(2))])
+    else 
+       set( handleInput, 'ZData', kkksub' )
+    end
+        
 end

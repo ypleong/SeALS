@@ -6,18 +6,18 @@ clear all
 %% Create operator in tensor form
 % Initialization
 
-dim = 5;
+dim = 4;
 x = sym('x',[dim,1]); %do not change
 %n = [101,111,121,131,101,101];
 
 % Initial distribution
-sigma02 = 0.25;
+sigma02 = 0.55;
 x0 = zeros(dim,1);
 n = zeros(dim,1);
 for i=1:dim
     n(i) = 101+10*i;
     bdim(i,:) = [-pi  pi];
-    x0(i) = 1;%2+i/dim*10;
+    x0(i) = -1;%2+i/dim*10;
     diagSigma(i) = sigma02 + i/dim*0.1;
 end
 bdim(2,:) = [-10  10];
@@ -95,7 +95,7 @@ end
 
 % Simulation Parameters
 dt = 0.001;
-finalt = 2*pi*1;
+finalt = 1% 2*pi*0.5/;
 t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
@@ -172,21 +172,33 @@ for i=1:dim
     end
 end
 
+
 %% Iterate over 
 
 
 time1 = tic;
 for k = 2:length(t)
     
+    % 
     pk{k} = SRMultV( op, pk{k-1});
-    
     if length(pk{k}.lambda) > 1
         [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
         pk{k} = fixsigns(arrange(pk{k}));
         [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
     end
-%         
-    %% KF 
+
+    
+    % Get Mean and Covariance values
+    for i=1:dim
+        expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+    end
+    for i=1:dim
+        for j = 1:dim
+            cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+        end
+    end
+
+    % Integrate the GT
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
     %covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
     %[xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
@@ -200,13 +212,17 @@ for k = 2:length(t)
     end
     zkcompressed = ktensor(pz);
     
-    if (k<10000 )
+    if (k<-1 )
         % Direct PDF Bayesian Measurement
         pk{k} = HadTensProd(pk{k},zkcompressed);
         pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
     end
     
-
+    % Kalman Measurement
+%     HK = eye(dim);
+%     KalmanG = covKalman(:,:,1)*HK'*inv(HK*covKalman(:,:,1)*HK'+Rmes);
+%     xposKalman = xkalman(:,1) + KalmanG*(zmes - HK*xkalman(:,1));
+%     covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,1);
 end
 toc(time1)
 %% Check Results
@@ -225,15 +241,15 @@ for i=1:dim
     legString{dim+i}=strcat('FPE ' , num2str(i)); 
 end
 legend(legString)
-for k=1:length(t)
-   trCov(k) = det(cov(:,:,k)); 
-   trCovKalman(k) = det(covKalman(:,:,k)); 
-end
-figure
-plot(t,trCov,t,trCovKalman,'.')
-xlabel('time')
-ylabel('cov det')
-legend('FPE','Kalman')
+% for k=1:length(t)
+%    trCov(k) = det(cov(:,:,k)); 
+%    trCovKalman(k) = det(covKalman(:,:,k)); 
+% end
+% figure
+% plot(t,trCov,t,trCovKalman,'.')
+% xlabel('time')
+% ylabel('cov det')
+% legend('FPE','Kalman')
 
 figure
 plot(t,sqrt(sum((xkalman-expec).^2)))
@@ -250,48 +266,22 @@ end
 
 
 
-%% Measure
-zmes = zeros(dim,1);
-if dim==2
-    zmes = x0+ [1;1];
-    Rmes = diag([1 1]); %0.5*[3,1;1,2]*[3,1;1,2];
-    pz = reshape(mvnpdf(xyvector,zmes',Rmes),n(2),n(1))';
-    rankD = 2;
-    zkcompressed = cp_als(tensor(pz),rankD);
-else
-    zmes = x0 + 1.3*(1:1/(dim-1):2)';
-    diagSigma = sigma02 + 0.2*(0:1/(dim-1):1);
-    Rmes = diag(diagSigma); % [0.8 0.2; 0.2 sigma02];
-    for i=1:dim
-       pz{i} =  normpdf(xvector{i},zmes(i),sqrt(diagSigma(i))); %*0.5 + normpdf(xvector{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
-    end
-    zkcompressed = ktensor(pz);
-end
-
-
-% Direct PDF Bayesian Measurement
-pkpos = HadTensProd(pk{1},zkcompressed);
-pkpos = pkpos *(1/  intTens(pkpos, [], gridT, weones));
-
-for i=1:dim
-    expecPpos(i)  = intTens(pkpos, [], gridT, we(i,:));
-end
-for i=1:dim
-    for j = 1:dim
-        covPos(i,j) = intTens(pkpos, [], gridT, weCov(i,j,:)) - expecPpos(i)*expec(j);
-    end
-end
-
-% Kalman Measurement
-HK = eye(dim);
-KalmanG = covKalman(:,:,1)*HK'*inv(HK*covKalman(:,:,1)*HK'+Rmes);
-xposKalman = xkalman(:,1) + KalmanG*(zmes - HK*xkalman(:,1));
-covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,1);
-
-fprintf(['Measure update: Mean values ',num2str(xposKalman',4),' Kalman, ',num2str(expecPpos, 4) , ' Tensor-FPE \n'])
-fprintf(['Measure update: Mean cov ',num2str(covKalmanPos,4),' Kalman, ',num2str(covPos, 4) , ' Tensor-FPE \n'])
 
 %% animated figure
+hf = figure
+save_to_file = 1;
+if (save_to_file  )
+    FPS = 25;  
+    pause(1)
+    str_title = ['Probability Density Function Evolution. f(x) = sin(x)'];
+    writerObj = VideoWriter('pdf_gaussian_.avi');
+    writerObj.FrameRate = FPS;
+    myVideo.Quality = 100;
+    set(hf,'Visible','on');
+    open(writerObj);
+    set(gcf,'Renderer','OpenGL'); %to save to file
+    pause(5)
+end
 if dim==2
     hf = figure
     hold on
@@ -306,17 +296,7 @@ if dim==2
     grid on
     axis ([bdim(1,:),bdim(2,:)])
     grid on
-    save_to_file = 1;
-    if (save_to_file  )
-        FPS = 25;  
-        str_title = ['Probability Density Function Evolution. f(x) = sin(x)'];
-        writerObj = VideoWriter('pdf_gaussian_.avi');
-        writerObj.FrameRate = FPS;
-        myVideo.Quality = 100;
-        set(hf,'Visible','on');
-        open(writerObj);
-        set(gcf,'Renderer','OpenGL'); %to save to file
-    end
+
     
     for k = 2:15:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
@@ -328,9 +308,20 @@ if dim==2
              writeVideo(writerObj, M);
          end
     end
-    if (save_to_file  )
-        close(writerObj);
+
+else
+    handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
+    for k = 2:30:length(t)
+        plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
+        if (save_to_file )
+            M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
+            writeVideo(writerObj, M);
+        end        
     end
+end
+
+if (save_to_file  )
+    close(writerObj);
 end
 
  
