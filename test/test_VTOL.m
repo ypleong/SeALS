@@ -9,8 +9,8 @@ epsilon = 0.01;
 
 % Simulation Parameters
 dt = 0.01;
-t = 0:dt:10;
-x = zeros(6,length(t));
+t = 0:dt:15;
+x = zeros(6,length(t)); % State: x,vx,y,vy,theta,vtheta
 %x(:,1) = [1, 0.1, 5, 0.2, 0.1, -0.01]'; % some movement
 x(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
 
@@ -28,7 +28,6 @@ G = [0 0 0
  0 0 0
  0 0 1];
 
-
 Q = 0.01*diag([0.1^2, 0.1^2, 0.01^2]);
 
 GQGp = G*Q*G';
@@ -38,26 +37,25 @@ R = diag([sigmaX2,sigmaY2]);
 zmes = zeros(2,length(t));
 HK = [1 0 0 0 0 0
       0 0 1 0 0 0];
-  
-  
 
+xref = 2; %+ cos(t(i)*2*pi/20);
+yref = 6; %+ sin(t(i)*2*pi/20);
+  
+%% Time Evolution 
 for i = 2:length(t)
-    xref = 2; %+ cos(t(i)*2*pi/20);
-    yref = 6; %+ sin(t(i)*2*pi/20);
-    u = g - 0.2*(x(3,i-1)-yref)  - 0.7*x(4,i-1);
-    uu(i) = u;
-    tau = -6*x(5,i-1) - 6*x(6,i-1) + 0.2*(x(1,i-1)-xref) + 0.9*x(2,i-1);
-    tautau(i) = tau;
+   
+    uControl(i) =  g - 0.3*(x(3,i-1)-yref)  - 0.9*x(4,i-1);
+    tauControl(i) = -6*x(5,i-1) - 6*x(6,i-1) + 0.2*(x(1,i-1)-xref) + 1.0*x(2,i-1);
     % Propagate 
-    x(:,i) =  x(:,i-1)  + dt*fVTOL( x(:,i-1), u, tau, epsilon, g );
+    x(:,i) =  x(:,i-1)  + dt*fVTOL( x(:,i-1), uControl(i), tauControl(i), epsilon, g );
     % Kalman
     F = [0 1 0 0 0 0
-         0 0 0 0 (-u*cos(x(5,i-1))-epsilon*tau*sin(x(5,i-1))) 0
+         0 0 0 0 (-tauControl(i)*cos(x(5,i-1))-epsilon*tauControl(i)*sin(x(5,i-1))) 0
          0 0 0 1 0 0
-         0 0 0 0 (-u*sin(x(5,i-1))+epsilon*tau*cos(x(5,i-1))) 0
+         0 0 0 0 (-tauControl(i)*sin(x(5,i-1))+epsilon*tauControl(i)*cos(x(5,i-1))) 0
          0 0 0 0 0 1
          0 0 0 0 0 0];
-    xhat(:,i) =  xhat(:,i-1)  + dt*fVTOL( xhat(:,i-1), u, tau, epsilon, g );
+    xhat(:,i) =  xhat(:,i-1)  + dt*fVTOL( xhat(:,i-1), uControl(i), tauControl(i), epsilon, g );
     Phat(:,:,i) = F*Phat(:,:,i-1)*F' + dt*GQGp;
     
     % assume measure with noise R
@@ -75,8 +73,9 @@ end
 
 
 %% Plot
+%afigure;
 
-figure
+afigure
 subplot(2,4,1)
 plot(t,x(1,:))
 grid on
@@ -108,35 +107,52 @@ grid on
 xlabel('Time(s)')
 ylabel('Theta Dot')
 subplot(2,4,7)
-plot(t,uu)
+plot(t,uControl)
 grid on
 xlabel('Time(s)')
 ylabel('u input')
 subplot(2,4,8)
-plot(t,tautau)
+plot(t,tauControl)
 grid on
 xlabel('Time(s)')
 ylabel('\tau input')
 
-figure
+afigure
 hold on
 plot( x(1,:), x(3,:) ,xhat(1,:), xhat(3,:) )
 scatter ( zmes(1,:), zmes(2,:))
 legend('truth','kalman')
 
-figure
+afigure
 plot( t, sqrt( (x(1,:)-xhat(1,:)).^2 + (x(3,:)- xhat(3,:)).^2) )
 grid on
 xlabel('Time(s)')
 ylabel('Estimation Error(m)')
 
-figure
+hf = figure
 hold on
 axis ([0,4,3,8])
 scatter(xref,yref)
+xlabel('X')
+ylabel('Y')
+title('VTOL Simulation')
 ht_pdf = quiver(x(1,1),x(3,1),-sin(x(5,1)),cos(x(5,1)));
+set(ht_pdf,'linewidth',2);
 ht_scatter = plot(x(1,1),x(3,1));
+set(ht_scatter,'linewidth',2);
 grid on
+
+
+save_to_file = 0;
+if (save_to_file  )
+    FPS = 25;  
+    writerObj = VideoWriter('pdf_gaussian_.avi');
+    writerObj.FrameRate = FPS;
+    set(hf,'Visible','on');
+    open(writerObj);
+    set(gcf,'Renderer','OpenGL'); %to save to file
+    pause(5)
+end
 for i = 2:5:length(t)
      set ( ht_pdf, 'XData', x(1,i), ...
                    'YData', x(3,i), ...
@@ -146,19 +162,11 @@ for i = 2:5:length(t)
                    'YData', x(3,1:i)  );
      drawnow
      pause(1.0/100.0);
+    if (save_to_file )
+        M = getframe(gcf); 
+        writeVideo(writerObj, M);
+    end  
 end
-
-% close all
-% axis tight
-% set(gca,'nextplot','replacechildren')
-% set(gcf,'Renderer', 'zbuffer')
-% f = getframe;
-% [im,map] = rgb2ind(f.cdata,256,'nodither');
-% im(1,1,1,length(t)) = 0;
-% for i = 2:5:length(t)
-%     quiver(x(1,i),x(3,i),-sin(x(5,i)),cos(x(5,i)));
-%     axis ([0,4,3,8])
-%     frame = getframe;
-%     im(:,:,1,i) = rgb2ind(f.cdata,map,'nodither');
-% end
-%imwrite(im,map,'DancingPeaks.gif','DelayTime',0,'LoopCount',inf) %g443800
+if (save_to_file  )
+    close(writerObj);
+end
