@@ -1,4 +1,4 @@
-function plot2Dslice(F,slices_dim,coordinates,grid)
+function plot2Dslice(F,slices_dim,coordinates,grid,lambda)
     
 % Inputs:
 % F - ktensor
@@ -9,7 +9,11 @@ function plot2Dslice(F,slices_dim,coordinates,grid)
 % Outputs:
 % 3D surface plot
 
-    
+    if nargin < 5
+        vv = 0;
+    else
+        vv = 1;
+    end
     d = ndims(F);
     factors = F.lambda;
     
@@ -21,9 +25,13 @@ function plot2Dslice(F,slices_dim,coordinates,grid)
     
     kkksubU{1} = F.U{slices_dim(1)};
     kkksubU{2} = F.U{slices_dim(2)};
-    kkksub = double(ktensor(factors, kkksubU));
+    if vv
+        kkksub = -log(abs(double(ktensor(factors, kkksubU)))*lambda);
+    else
+        kkksub = abs(double(ktensor(factors, kkksubU)));
+    end
     
     surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none')
-    xlabel(['x_',num2str(slices_dim(1))])
-    ylabel(['x_',num2str(slices_dim(2))])
+    xlabel(['x_{',num2str(slices_dim(1)),'}'])
+    ylabel(['x_{',num2str(slices_dim(2)),'}'])
 end
