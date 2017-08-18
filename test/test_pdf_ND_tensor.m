@@ -6,12 +6,12 @@ clear all
 %% Create operator in tensor form
 % Initialization
 
-dim = 1;
+dim = 2;
 x = sym('x',[dim,1]); %do not change
 %n = [101,111,121,131,101,101];
 
 % Initial distribution
-sigma02 = 0.5;
+sigma02 = 0.55;
 x0 = zeros(dim,1);
 n = zeros(dim,1);
 for i=1:dim
@@ -95,7 +95,7 @@ end
 
 % Simulation Parameters
 dt = 0.001;
-finalt = 2*pi*2;
+finalt = 2*pi*20;
 t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
@@ -128,7 +128,7 @@ covKalman(:,:,1) = sigma02Matrix;
 %fFPE = sym(aspeed); % constant speed
 
 kpen = (2*pi/3)^2;
-fFPE = [x(2);-kpen*sin(x(1))];
+fFPE = [x(2);-kpen*((x(1))^3-x(1))];
 % fFPE = [-x(2);x(1)];
 %fFPE = 2;
 
@@ -283,9 +283,10 @@ covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,1);
 
 fprintf(['Measure update: Mean values ',num2str(xposKalman',4),' Kalman, ',num2str(expecPpos, 4) , ' Tensor-FPE \n'])
 fprintf(['Measure update: Mean cov ',num2str(covKalmanPos,4),' Kalman, ',num2str(covPos, 4) , ' Tensor-FPE \n'])
+
 %% animated figure
 if dim==2
-    figure
+    hf = figure
     ht_pdf = pcolor(xvector{1},xvector{2},double(pk{1})');
     h = colorbar;
     %set(h, 'ylim', [0 0.25])
@@ -296,12 +297,31 @@ if dim==2
     grid on
     axis ([bdim(1,:),bdim(2,:)])
     grid on
-    for k = 2:10:length(t)
+    save_to_file = 1;
+    if (save_to_file  )
+        FPS = 25;  
+        str_title = ['Probability Density Function Evolution. f(x) = sin(x)'];
+        writerObj = VideoWriter('pdf_gaussian_.avi');
+        writerObj.FrameRate = FPS;
+        myVideo.Quality = 100;
+        set(hf,'Visible','on');
+        open(writerObj);
+        set(gcf,'Renderer','OpenGL'); %to save to file
+    end
+    
+    for k = 2:1:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
          drawnow
          pause(1.0/1000);
+         if (save_to_file )
+             M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
+             writeVideo(writerObj, M);
+         end
     end
-    
+    if (save_to_file  )
+        close(writerObj);
+    end
+
 
     %% animated figure difference
     figure
