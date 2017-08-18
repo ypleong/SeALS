@@ -10,7 +10,7 @@ addpath(genpath('../src'));
 clear all
 
 %%
-run = 7;
+run = 8;
 dirpath = ['./test_run/test_finite_horizon_hjb_backward_euler/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -23,18 +23,18 @@ start_whole = tic;
 
 %% Initialization
 
-d = 1;
+d = 2;
 x = sym('x',[d,1]); %do not change
-n = [201;];%155; 153; 161; 165;]; 
+n = [50;103];%155; 153; 161; 165;]; 
 
 h = 0.001;%pi/(2*n); % time step size
 tend = 5;
 tt = 0:h:tend;
 
-bdim = [-10 10;];%[-5 5 ; -5 5 ; -5 5; -5 5; -5 5; -5 5];%[-pi pi; -10 10];
-bcon = {{'d',0,0}}; %{{'d',0,0},{'d', 0, 0}};
+bdim = [-pi pi-(2*pi/n(1));-10 10;];%[-5 5 ; -5 5 ; -5 5; -5 5; -5 5; -5 5];%[-pi pi; -10 10];
+bcon = {{'p'},{'d',0,0}}; %{{'d',0,0},{'d', 0, 0}};
 % bcon = { {'d',0,0} , {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0}, {'d',0,0} }; %{ {'p'},{'d', 0, 0}};
-bsca = []; %no manual scaling
+bsca = [1 1; 1 1; 1 1]; %no manual scaling
 region = [];
 regval = 1;
 regsca = [];
@@ -70,17 +70,18 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 % lambda = 1;%noise_cov*R;
 
 % Linear system
-AA = 1;%[-1 0; 0.2 0];%randn(d,d);
-BB = ones(d,1);
-QQ = diag(ones(d,1));
-PP = care(AA,BB,QQ,1/2);
-B = BB;
-G = B;
-f = AA*x;
-noise_cov = diag(ones(1,1));
-q = x'*QQ*x;
-R = diag(ones(1,1));
-lambda = 1;%noise_cov*R;
+% AA = 0.1*randn(d,d);
+% BB = ones(d,2);
+% QQ = diag(ones(d,1));
+% RR = 1/2*diag(ones(1,2));
+% PP = care(AA,BB,QQ,RR);
+% B = BB;
+% G = B;
+% f = AA*x;
+% noise_cov = diag(ones(1,2));
+% q = x'*QQ*x;
+% R = RR;
+% lambda = 1;%noise_cov*R;
 
 
 % Smooth 2D
@@ -92,6 +93,15 @@ lambda = 1;%noise_cov*R;
 % R = diag([1 1]);
 % lambda = 1;%noise_cov*R;
 
+% Simple Pendulum
+f1 = sin(x(1));
+f = [x(2) ; f1];
+G = [0.01 ; 1];
+B = G;
+noise_cov = 1;
+q = 0.1*x(1)^2+0.05*x(2)^2;
+R = 0.02;
+lambda = noise_cov*R;
 
 % Inverted Pendulum
 % m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
@@ -109,7 +119,7 @@ lambda = 1;%noise_cov*R;
 % AA = [0 1; (g/l)/(4/3-mr) 0];%randn(d,d);% 
 % BB = [0.01; -mr/(m*l)/(4/3-mr)]; %eye(d);%
 % QQ = diag([0.1 0.05]);
-% PP = care(AA,BB,QQ)/1000;
+% PP = care(AA,BB,QQ);
 
 % VTOL
 % g = 9.8; eps = 0.01;
@@ -156,8 +166,8 @@ end_dynamics = toc(start_dynamics);
 fprintf('Creating PDE operator ...\n');
 start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
-% op = DiagKTensor(oneTens(d, n)) + op*h;
-op = DiagKTensor(oneTens(d, n)) - op*h;
+op = DiagKTensor(oneTens(d, n)) + op*h;
+% op = DiagKTensor(oneTens(d, n)) - op*h;
 toc(start_PDEop)
 end_PDEop = toc(start_PDEop);
 
@@ -179,19 +189,22 @@ if isempty(bsca)
     bsca = bscat;
 end
 
-% NOTE: This is bad for backward euler
+% NOTE: This is bad for backward euler. Not if the boundary condition
+% scaling is 1 for Dirichlet BC. For periodic and neumann, need to adjust 
+% the boundary of F_all as well.
 % [op] = makebcop(op,bcon,bsca,n,fd1);
+[op] = makebcopforward(op,bcon,n);
 % [op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
 %% Create initial conditions
 fprintf('Creating initial conditions ...\n');
 start_PDEinit = tic;
-if d <= 2
+if d < 2
     if d == 2
         [gridx, gridy] = meshgrid(gridT{1},gridT{2});
         init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
 %         init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
-        initTens  = {cp_als(tensor(init'),4)};
+        initTens  = {cp_als(tensor(init'),10)};
     elseif d == 1
         init = exp(-x(1)'*PP*x(1)/lambda);
         initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
@@ -200,7 +213,7 @@ if d <= 2
 else
     U = cell(d,1);
     for i = 1:d
-        U{i} = exp(-gridT{i}.^2*PP(i,i)/lambda);
+        U{i} = exp(-gridT{i}.^2);
     end
     initTens = {ktensor(U)};
 end
@@ -247,18 +260,20 @@ iter_time = zeros(length(tt),1);
 %%
 for ind = 2:length(tt)+1
     start_iter = tic;
-    [F, ~] = als_sys(op,F_all{ind-1},F_all{ind-1},tol_err_op,als_options,debugging, 0);
-%     F = SRMultV(op,F_all{ind-1});
+%     [bc] = makebcbackward(F_all{ind-1},bcon,n);
+%     [F, ~] = als_sys(op,bc,bc,tol_err_op,als_options,debugging, 0);
+    [bc] = makebcforward(bcon,n);
+    F = SRMultV(op,F_all{ind-1}) + bc;
     
     if ncomponents(F) > ncomponents(F_all{ind-1})
-        [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
-%         [F_all{ind}, ~] = als2(F,tol_err_op);
+%         [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
+        [F_all{ind}, ~] = als2(F,tol_err_op);
     else
         F_all{ind} = F;
     end
     iter_time(ind-1) = toc(start_iter);
     
-    if mod(ind,100) == 0
+    if mod(ind,20) == 0
         fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
     end
 %     if norm(F)/(sum(n)*ncomponents(F)) < tol_err_op
@@ -335,7 +350,7 @@ if d == 2
     ylabel('y')
     title(['Time = ',num2str(tt(1))]);
     axis ([bdim(1,:),bdim(2,:)])
-    for k = 2:10:ind%length(tt)
+    for k = 2:1:ind%length(tt)
          set(ht_pdf, 'ZData', double(F_all{k})' );
          title(['Time = ',num2str(tt(k))]);
          drawnow
@@ -343,17 +358,17 @@ if d == 2
     end
     
 %%  
-    timenn = 115;
+%     timenn = 115;
     k = 1;
     figure
     hold on
-    surf(gridT{1},gridT{2},double(F_all{end})','EdgeColor', 'none');
-    scatter3(ts_grid(1:timenn:end,1),ts_grid(1:timenn:end,2),ts_value(k-1+(1:timenn:end)),10,'filled');
+    surf(gridT{1},gridT{2},double(F_all{1})','EdgeColor', 'none');
+%     scatter3(ts_grid(1:timenn:end,1),ts_grid(1:timenn:end,2),ts_value(k-1+(1:timenn:end)),10,'filled');
     colorbar;
     xlabel('x')
     ylabel('y')
-    xlim([-5 5])
-    ylim([-5 5])
+%     xlim([-5 5])
+%     ylim([-5 5])
 
 %%
     timenn = 115;
@@ -382,7 +397,7 @@ end
 if d > 2
     
 %%    
-    dim_plot = [5 6];
+    dim_plot = [3 4];
 %     total_plot = factorial(d);
 % %     row = ceil(sqrt(d));
 %     column = 
@@ -390,12 +405,14 @@ if d > 2
 %     subplot(
     coord = ceil(n/2);
 %     coord(4) = ceil(n(4)/2);
-    for k = 1:1:ind-1%length(tt)
+    for k = 1:10:ind-1%length(tt)
          plot2Dslice(F_all{k},dim_plot,coord,gridT);
          colorbar;
          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
          title(['Time = ',num2str(tt(k))]);
 %          drawnow
+         caxis([0 1])
+         zlim([0 1])
          pause(1.0/1000);
     end
     
@@ -406,10 +423,12 @@ end
 
 saveplots = 0;
 savedata = 0;
+% ninputs = 2;
+% uref = zeros(ninputs,1);
 
-[fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x);
-sim_config = {tend,h,repmat([4],1,1),[],[]};
-sim_data = {lambda,gridT,R,noise_cov,F_all,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+[fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f1,G,B,noise_cov,q,R,x);
+sim_config = {h*(ind-1),h,repmat([1; 0; 0.8; -1.5; 0.1; 0;],1,1),[],[]};
+sim_data = {lambda,gridT,R,noise_cov,F_all,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 
 sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)
 
@@ -473,7 +492,7 @@ if d == 2
     
     ten_ori = zeros(length(tt),1);
     for k = 1:length(tt)
-        ten_ori(k) = EvalT(F_all{k},[0], gridT);% max(double(F_all{k}));%
+        ten_ori(k) = EvalT(F_all{k},[0,0], gridT);% max(double(F_all{k}));%
     end
     
     figure
