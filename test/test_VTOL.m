@@ -44,15 +44,15 @@ yref = 6; %+ sin(t(i)*2*pi/20);
 %% Time Evolution 
 for i = 2:length(t)
    
-    uControl(i) =  g - 0.3*(x(3,i-1)-yref)  - 0.9*x(4,i-1);
-    tauControl(i) = -6*x(5,i-1) - 6*x(6,i-1) + 0.2*(x(1,i-1)-xref) + 1.0*x(2,i-1);
+    uControl(i) =  g - 0.3*(xhat(3,i-1)-yref)  - 0.9*xhat(4,i-1);
+    tauControl(i) = -6*xhat(5,i-1) - 6*xhat(6,i-1) + 0.2*(xhat(1,i-1)-xref) + 1.0*xhat(2,i-1);
     % Propagate 
     x(:,i) =  x(:,i-1)  + dt*fVTOL( x(:,i-1), uControl(i), tauControl(i), epsilon, g );
     % Kalman
     F = [0 1 0 0 0 0
-         0 0 0 0 (-tauControl(i)*cos(x(5,i-1))-epsilon*tauControl(i)*sin(x(5,i-1))) 0
+         0 0 0 0 (-tauControl(i)*cos(xhat(5,i-1))-epsilon*tauControl(i)*sin(xhat(5,i-1))) 0
          0 0 0 1 0 0
-         0 0 0 0 (-tauControl(i)*sin(x(5,i-1))+epsilon*tauControl(i)*cos(x(5,i-1))) 0
+         0 0 0 0 (-tauControl(i)*sin(xhat(5,i-1))+epsilon*tauControl(i)*cos(xhat(5,i-1))) 0
          0 0 0 0 0 1
          0 0 0 0 0 0];
     xhat(:,i) =  xhat(:,i-1)  + dt*fVTOL( xhat(:,i-1), uControl(i), tauControl(i), epsilon, g );
