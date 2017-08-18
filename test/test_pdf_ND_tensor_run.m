@@ -17,10 +17,13 @@ n = zeros(dim,1);
 for i=1:dim
     n(i) = 101+10*i;
     bdim(i,:) = [-pi  pi];
-    x0(i) = -1;%2+i/dim*10;
+    x0(i) = 1;%2+i/dim*10;
     diagSigma(i) = sigma02 + i/dim*0.1;
 end
 bdim(2,:) = [-10  10];
+bdim(3,:) = [-10  10];
+bdim(4,:) = [-10  10];
+
 
 caseNum = 0;%'pendulum2D';
 
@@ -52,16 +55,8 @@ end
 if dim == 2
     [xgrid,ygrid] = meshgrid(xvector{1},xvector{2});
     xyvector = [reshape(xgrid,n(1)*n(2),1),reshape(ygrid,n(1)*n(2),1)];
-end    
-    %p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1));
-    %rankD = 10;
-    %[p0compressed] = cp_als(tensor(p0),rankD);
-%else
-    p0compressed = ktensor(p0vector);
-%end
-
-% Create tensor structure
-pk{1} = p0compressed;
+end
+pk{1} =  ktensor(p0vector);
 
 %% Tensor parameters
 
@@ -75,8 +70,8 @@ regval = 1;
 regsca = [];
 sca_ver = 1;
 
-tol_err_op = 1e-6;
-tol_err = 1e-9;
+tol_err_op = 1e-5;
+tol_err = 1e-6;
 als_options = [];
 als_variant = []; %{10,50};
 debugging = 0;
@@ -87,27 +82,23 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
 for i=1:dim
     gridT{i} = xvector{i};
-    nd(i) = n(i);
-    dxd(i) = dx(i);
     acc(:,i) = [2,2]';
 end
-[D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
+[D,D2,fd1,fd2] = makediffop(gridT,n,dx,acc,bcon,region);
 
 % Simulation Parameters
 dt = 0.001;
-finalt = 1% 2*pi*0.5/;
+finalt = 6;% 2*pi*0.5/;
 t = 0:dt:finalt;
 aspeed = zeros(dim,1);
 qdiag = zeros(dim,1);
 for i=1:dim
-    qdiag(i) = 0.25; % 0.3 + i/dim*0.4;
+    qdiag(i) = 0.5; % 0.3 + i/dim*0.4;
     aspeed(i) = 0.5;% 4 - i/dim*3;
 end
 %qdiag = [0.01 0.001];
 q =  diag( qdiag ); %[0.3,0.6]); %0.25;
-% q(2,2) = 0.2; 
-% q(1,1) = 0.02;
-%aspeed = [2;-2]; %[0,3]';
+
 
 xkalman = zeros(dim,length(t));
 covkalman = zeros(dim,dim,length(t));
@@ -126,20 +117,28 @@ alinear = 1:dim;
 
 %% Create Cell Terms
 %fFPE = sym(aspeed); % constant speed
+kpen1 = (2*pi/3)^2; 
+kpen2 = (2*pi/5)^2;
 
-kpen = (2*pi/3)^2;
+%kpen = (2*pi/3)^2;
 %fFPE = [x(2);-kpen*sin(x(1))];
+fFPE = [x(2);x(3);x(4);-x(3)*(kpen1+kpen2)-sin(x(1))*kpen1*kpen2];
 
+explicit = 1;
 % fFPE = [-x(2);-kpen*x(1)]; % Linear Pendulum
-fFPE = alinear';
+%fFPE = alinear';
 
-
-fFPE_function = @(x1,x2,x3,x4,x5) fFPE;  %matlabFunction(fFPE);
+fFPE_function = matlabFunction(fFPE);
+%fFPE_function = @(x1,x2,x3,x4,x5) fFPE;  %matlabFunction(fFPE);
 fPFEdiff = jacobian(fFPE,x);
 
 fTens  = fcell2ftens( fsym2fcell(sym(fFPE) ,x), gridT);
 f_pTensqTens = fcell2ftens( fsym2fcell(diag(fPFEdiff) ,x), gridT);
-dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
+if ( explicit == 1)
+    dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
+else 
+	dtTens = fcell2ftens( fsym2fcell(sym(-dt)     ,x), gridT);
+end
 qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
 dtTen = DiagKTensor(dtTens{1}); 
 
@@ -179,15 +178,20 @@ end
 time1 = tic;
 for k = 2:length(t)
     
-    % 
-    pk{k} = SRMultV( op, pk{k-1});
-    if length(pk{k}.lambda) > 1
-        [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
-        pk{k} = fixsigns(arrange(pk{k}));
-        [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
-    end
+    if ( explicit == 1 )
+        pk{k} = SRMultV( op, pk{k-1});
+        %length(pk{k}.lambda)
+        if length(pk{k}.lambda) > 1
+            [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
 
-    
+            pk{k} = fixsigns(arrange(pk{k}));
+            [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
+
+        end
+    else 
+        [pk{k}, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...
+        als_sys(op,pk{k-1},[],tol_err,als_options,debugging)
+    end
     % Get Mean and Covariance values
     for i=1:dim
         expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
@@ -200,9 +204,7 @@ for k = 2:length(t)
 
     % Integrate the GT
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    %covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
-    %[xkalman(:,k),covKalman(:,:,k)]=ukf( @(xx) [xx(2);-kpen.*sin(xx(1))-0.0*xx(2)],xkalman(:,k-1),covKalman(:,:,k-1),0,0,q,0);
-    
+
     %% Measure
     zmes = xkalman(:,k) + randn(dim,1).*sqrt(diagSigma)';
     %diagSigma = sigma02 + 0.2*(0:1/(dim-1):1);
@@ -212,7 +214,7 @@ for k = 2:length(t)
     end
     zkcompressed = ktensor(pz);
     
-    if (k<-1 )
+    if ( false )%mod(k,100)==0 )
         % Direct PDF Bayesian Measurement
         pk{k} = HadTensProd(pk{k},zkcompressed);
         pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
@@ -229,7 +231,7 @@ toc(time1)
 
 
 % Check Kalman 
-figure
+afigure
 plot(t,xkalman,t,expec,'.')
 xlabel('time')
 zlabel('position')
@@ -268,7 +270,7 @@ end
 
 
 %% animated figure
-hf = figure
+hf = figure;
 save_to_file = 1;
 if (save_to_file  )
     FPS = 25;  
@@ -280,9 +282,9 @@ if (save_to_file  )
     set(hf,'Visible','on');
     open(writerObj);
     set(gcf,'Renderer','OpenGL'); %to save to file
-    pause(5)
+    pause(2)
 end
-if dim==2
+if dim==1
     hf = figure
     hold on
     ht_pdf = pcolor(xvector{1},xvector{2},double(pk{1})');    
@@ -298,7 +300,7 @@ if dim==2
     grid on
 
     
-    for k = 2:15:length(t)
+    for k = 2:10:length(t)
          set ( ht_pdf, 'CData', double(pk{k})' );
          set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
          drawnow
@@ -313,6 +315,7 @@ else
     handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
     for k = 2:30:length(t)
         plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
+        pause(1.0/1000);
         if (save_to_file )
             M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
             writeVideo(writerObj, M);
@@ -324,4 +327,10 @@ if (save_to_file  )
     close(writerObj);
 end
 
- 
+qLambda = zeros(length(t),1);
+for k = 1:1:length(t)    
+    nLambda(k) = length(pk{k}.lambda);
+    normLambda(k) = sum(pk{k}.lambda);
+    qLambda(k) = pk{k}.lambda(1)/normLambda(k);
+end
+plot(t,qLambda)
