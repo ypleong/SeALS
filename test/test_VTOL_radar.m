@@ -10,9 +10,9 @@ epsilon = 0.01;
 % Simulation Parameters
 dt = 0.01;
 t = 0:dt:20;
-x = zeros(6,length(t));
+xGT = zeros(6,length(t));
 %x(:,1) = [1, 0.1, 5, 0.2, 0.1, -0.01]'; % some movement
-x(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
+xGT(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
 
 
 % Kalman Estimation
@@ -21,7 +21,7 @@ xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
 Phat = zeros(6,6,length(t));
 Phat(:,:,1) = diag([3^2,0.2^2,3^2,0.2^2,0.1^2,0.01^2]);
 
-G = [0 0 0
+GK = [0 0 0
  1 0 0
  0 0 0
  0 1 0
@@ -29,9 +29,9 @@ G = [0 0 0
  0 0 1];
 
 
-Q = 1*diag([0.1^2, 0.1^2, 0.01^2]);
+QK = 1*diag([0.1^2, 0.1^2, 0.01^2]);
 
-GQGp = G*Q*G';
+GQGp = GK*QK*GK';
 sigmaX2 = 0.3^2;
 sigmaY2 = 0.3^2;
 R = diag([sigmaX2,sigmaY2]);
@@ -45,32 +45,32 @@ r2 = [2,4]';
 for i = 2:length(t)
     xref = 2; %+ cos(t(i)*2*pi/20);
     yref = 6; %+ sin(t(i)*2*pi/20);
-    u = g - 0.2*(x(3,i-1)-yref)  - 0.7*x(4,i-1);
+    u = g - 0.2*(xGT(3,i-1)-yref)  - 0.7*xGT(4,i-1);
     uu(i) = u;
-    tau = -6*x(5,i-1) - 6*x(6,i-1) + 0.2*(x(1,i-1)-xref) + 0.9*x(2,i-1);
+    tau = -6*xGT(5,i-1) - 6*xGT(6,i-1) + 0.2*(xGT(1,i-1)-xref) + 0.9*xGT(2,i-1);
     tautau(i) = tau;
     % Propagate 
-    x(:,i) =  x(:,i-1)  + dt*fVTOL( x(:,i-1), u, tau, epsilon, g );
+    xGT(:,i) =  xGT(:,i-1)  + dt*fVTOL( xGT(:,i-1), u, tau, epsilon, g );
     % Kalman
     F = [0 1 0 0 0 0
-         0 0 0 0 (-u*cos(x(5,i-1))-epsilon*tau*sin(x(5,i-1))) 0
+         0 0 0 0 (-u*cos(xGT(5,i-1))-epsilon*tau*sin(xGT(5,i-1))) 0
          0 0 0 1 0 0
-         0 0 0 0 (-u*sin(x(5,i-1))+epsilon*tau*cos(x(5,i-1))) 0
+         0 0 0 0 (-u*sin(xGT(5,i-1))+epsilon*tau*cos(xGT(5,i-1))) 0
          0 0 0 0 0 1
          0 0 0 0 0 0];
     xhat(:,i) =  xhat(:,i-1)  + dt*fVTOL( xhat(:,i-1), u, tau, epsilon, g );
     Phat(:,:,i) = F*Phat(:,:,i-1)*F' + dt*GQGp;
     
     % assume measure with noise R
-    z = [x(1,i) + randn(1)*sqrt(sigmaX2) 
-         x(3,i) + randn(1)*sqrt(sigmaY2)];
+    z = [xGT(1,i) + randn(1)*sqrt(sigmaX2) 
+         xGT(3,i) + randn(1)*sqrt(sigmaY2)];
      
-    zradar = [(x(1,i)-r1(1))^2+(x(3,i)-r1(2))^2 + randn(1)*sqrt(sigmaX2)
-              (x(1,i)-r2(1))^2+(x(3,i)-r2(2))^2 + randn(1)*sqrt(sigmaY2)];
+    zradar = [(xGT(1,i)-r1(1))^2+(xGT(3,i)-r1(2))^2 + randn(1)*sqrt(sigmaX2)
+              (xGT(1,i)-r2(1))^2+(xGT(3,i)-r2(2))^2 + randn(1)*sqrt(sigmaY2)];
     hradar = [(xhat(1,i)-r1(1))^2+(xhat(3,i)-r1(2))^2
               (xhat(1,i)-r2(1))^2+(xhat(3,i)-r2(2))^2];
-    HK = [2*(x(1,i)-r1(1)) 0 2*(x(3,i)-r1(2)) 0 0 0
-          2*(x(1,i)-r2(1)) 0 2*(x(3,i)-r2(2)) 0 0 0];
+    HK = [2*(xGT(1,i)-r1(1)) 0 2*(xGT(3,i)-r1(2)) 0 0 0
+          2*(xGT(1,i)-r2(1)) 0 2*(xGT(3,i)-r2(2)) 0 0 0];
     zmes(:,i) = zradar;
     SG = HK*Phat(:,:,i)*HK' + R;
     KG = Phat(:,:,i)*HK'/(SG);
@@ -83,32 +83,32 @@ end
 
 figure
 subplot(2,4,1)
-plot(t,x(1,:))
+plot(t,xGT(1,:))
 grid on
 xlabel('Time(s)')
 ylabel('X')
 subplot(2,4,2)
-plot(t,x(2,:))
+plot(t,xGT(2,:))
 grid on
 xlabel('Time(s)')
 ylabel('VX')
 subplot(2,4,3)
-plot(t,x(3,:))
+plot(t,xGT(3,:))
 grid on
 xlabel('Time(s)')
 ylabel('Y')
 subplot(2,4,4)
-plot(t,x(4,:))
+plot(t,xGT(4,:))
 grid on
 xlabel('Time(s)')
 ylabel('VY')
 subplot(2,4,5)
-plot(t,x(5,:))
+plot(t,xGT(5,:))
 grid on
 xlabel('Time(s)')
 ylabel('\theta')
 subplot(2,4,6)
-plot(t,x(6,:))
+plot(t,xGT(6,:))
 grid on
 xlabel('Time(s)')
 ylabel('Theta Dot')
@@ -125,14 +125,14 @@ ylabel('\tau input')
 
 figure
 hold on
-plot( x(1,:), x(3,:) ,xhat(1,:), xhat(3,:) )
+plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:) )
 scatter (r1(1),r1(2))
 scatter (r2(1),r2(2))
 %scatter ( zmes(1,:), zmes(2,:))
 legend('truth','kalman','radar1','radar2')
 
 figure
-plot( t, sqrt( (x(1,:)-xhat(1,:)).^2 + (x(3,:)- xhat(3,:)).^2) )
+plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
 grid on
 xlabel('Time(s)')
 ylabel('Estimation Error(m)')

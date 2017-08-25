@@ -11,8 +11,8 @@ epsilon = 0.01;
 % Simulation Parameters
 dt = 0.01;
 t = 0:dt:15;
-xtr = zeros(dim,length(t)); % State: x,vx,y,vy,theta,vtheta
-xtr(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
+xGT = zeros(dim,length(t)); % State: x,vx,y,vy,theta,vtheta
+xGT(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
 
 xref = 2; %+ cos(t(i)*2*pi/20);
 yref = 6; %+ sin(t(i)*2*pi/20);
@@ -33,8 +33,8 @@ G = [0 0 0
 Q = 0.01*diag([0.1^2, 0.1^2, 0.01^2]);
 
 GQGp = G*Q*G';
-sigmaX2 = 0.01^2;
-sigmaY2 = 0.01^2;
+sigmaX2 = 0.1^2;
+sigmaY2 = 0.1^2;
 R = diag([sigmaX2,sigmaY2]);
 zmes = zeros(2,length(t));
 HK = [1 0 0 0 0 0
@@ -43,8 +43,8 @@ HK = [1 0 0 0 0 0
 %% Tensor Estimation Preparation
 
 % Initial distribution
-n = [151 101 151 101 151 101];
-bdim = [-2 4; -0.4 0.4;3 7; -0.2 0.4;-0.06 0.06; -0.05 0.05]; 
+n = [251 101 251 101 151 101];
+bdim = [-4 5; -0.5 0.5;1 9; -0.6 0.6;-0.08 0.08; -0.06 0.06]; 
 diagSigma = diag(Phat(:,:,1));
 qdiag = diag(GQGp)+ones(dim,1)*0.01^2;
 q =  diag( qdiag );
@@ -55,7 +55,6 @@ for i=1:dim
    bcon{i} = {'d',0,0};
 end
 bcon{5} = {'p'}; % angle
-
 
 % Grid Configuration
 fprintf ('The grid size is %d in dimension %d \n', [n',(1:dim)']')
@@ -125,7 +124,7 @@ for k = 2:length(t)
     uControl(k) =  g - 0.3*(xhat(3,k-1)-yref)  - 0.9*xhat(4,k-1);
     tauControl(k) = -6*xhat(5,k-1) - 6*xhat(6,k-1) + 0.2*(xhat(1,k-1)-xref) + 1.0*xhat(2,k-1);
     % Propagate 
-    xtr(:,k) =  xtr(:,k-1)  + dt*fVTOL( xtr(:,k-1), uControl(k), tauControl(k), epsilon, g );
+    xGT(:,k) =  xGT(:,k-1)  + dt*fVTOL( xGT(:,k-1), uControl(k), tauControl(k), epsilon, g );
     % Kalman
     F = [0 1 0 0 0 0
          0 0 0 0 (-tauControl(k)*cos(xhat(5,k-1))-epsilon*tauControl(k)*sin(xhat(5,k-1))) 0
@@ -137,8 +136,8 @@ for k = 2:length(t)
     Phat(:,:,k) = F*Phat(:,:,k-1)*F' + dt*GQGp;
     
     % assume measure wkth nokse R
-    z = [xtr(1,k) + randn(1)*sqrt(sigmaX2) 
-         xtr(3,k) + randn(1)*sqrt(sigmaY2)];
+    z = [xGT(1,k) + randn(1)*sqrt(sigmaX2) 
+         xGT(3,k) + randn(1)*sqrt(sigmaY2)];
     zmes(:,k) = z;
     SG = HK*Phat(:,:,k)*HK' + R;
     KG = Phat(:,:,k)*HK'/(SG);
@@ -167,60 +166,77 @@ for k = 2:length(t)
         end
     end
     
-    %diagSigma = sigma02 + 0.2*(0:1/(dim-1):1);
-    %Rmes = diag(diagSigma); % [0.8 0.2; 0.2 sigma02];
-
-    
-    if ( false )%mod(k,100)==0 )
+    if ( true ) %mod(k,100)==0 )
+        
         for i=1:dim
-            pz{i} =  normpdf(gridT{i},zmes(i),sqrt(diagSigma(i))); %*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
+            for j=1:length(z)
+                if ( HK(j,i) == 1 )
+                    pz{i} =  normpdf(gridT{i},z(j),sqrt(R(j,j))); %*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
+                elseif (all(HK(:,i)==0) )
+                    pz{i} = ones(n(i),1);
+                end
+            end
         end
+        
+        
         zkcompressed = ktensor(pz);
         % Direct PDF Bayesian Measurement
         pk{k} = HadTensProd(pk{k},zkcompressed);
         pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
+        
+        for i=1:dim
+            expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+        end
+        for i=1:dim
+            for j = 1:dim
+                cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+            end
+        end
+        
     end
     
 end
+
+
 
 %% Tensor plot
 
 handleSlices = plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT);
 for k = 2:10:length(t)
     plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
-    pause(1.0/1000);      
+    pause(1.0/1);      
 end
 %% Plot
 %afigure;
 
 afigure
 subplot(2,4,1)
-plot(t,xtr(1,:))
+plot(t,xGT(1,:))
 grid on
 xlabel('Time(s)')
 ylabel('X')
 subplot(2,4,2)
-plot(t,xtr(2,:))
+plot(t,xGT(2,:))
 grid on
 xlabel('Time(s)')
 ylabel('VX')
 subplot(2,4,3)
-plot(t,xtr(3,:))
+plot(t,xGT(3,:))
 grid on
 xlabel('Time(s)')
 ylabel('Y')
 subplot(2,4,4)
-plot(t,xtr(4,:))
+plot(t,xGT(4,:))
 grid on
 xlabel('Time(s)')
 ylabel('VY')
 subplot(2,4,5)
-plot(t,xtr(5,:))
+plot(t,xGT(5,:))
 grid on
 xlabel('Time(s)')
 ylabel('\theta')
 subplot(2,4,6)
-plot(t,xtr(6,:))
+plot(t,xGT(6,:))
 grid on
 xlabel('Time(s)')
 ylabel('Theta Dot')
@@ -237,12 +253,12 @@ ylabel('\tau input')
 
 afigure
 hold on
-plot( xtr(1,:), xtr(3,:) ,xhat(1,:), xhat(3,:) )
+plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:) )
 scatter ( zmes(1,:), zmes(2,:))
 legend('truth','kalman')
 
 afigure
-plot( t, sqrt( (xtr(1,:)-xhat(1,:)).^2 + (xtr(3,:)- xhat(3,:)).^2) )
+plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
 grid on
 xlabel('Time(s)')
 ylabel('Estimation Error(m)')
@@ -254,9 +270,9 @@ scatter(xref,yref)
 xlabel('X')
 ylabel('Y')
 title('VTOL Simulation')
-ht_pdf = quiver(xtr(1,1),xtr(3,1),-sin(xtr(5,1)),cos(xtr(5,1)));
+ht_pdf = quiver(xGT(1,1),xGT(3,1),-sin(xGT(5,1)),cos(xGT(5,1)));
 set(ht_pdf,'linewidth',2);
-ht_scatter = plot(xtr(1,1),xtr(3,1));
+ht_scatter = plot(xGT(1,1),xGT(3,1));
 set(ht_scatter,'linewidth',2);
 grid on
 
@@ -264,7 +280,7 @@ grid on
 save_to_file = 0;
 if (save_to_file  )
     FPS = 25;  
-    writerObj = VideoWriter('pdf_gaussian_.avi');
+    writerObj = VideoWriter('pdf_gaussian_VTOL_.avi');
     writerObj.FrameRate = FPS;
     set(hf,'Visible','on');
     open(writerObj);
@@ -272,12 +288,12 @@ if (save_to_file  )
     pause(5)
 end
 for i = 2:5:length(t)
-     set ( ht_pdf, 'XData', xtr(1,i), ...
-                   'YData', xtr(3,i), ...
-                   'UData', -sin(xtr(5,i)), ... 
-                   'VData', cos(xtr(5,i)) );
-     set ( ht_scatter, 'XData', xtr(1,1:i), ...
-                   'YData', xtr(3,1:i)  );
+     set ( ht_pdf, 'XData', xGT(1,i), ...
+                   'YData', xGT(3,i), ...
+                   'UData', -sin(xGT(5,i)), ... 
+                   'VData', cos(xGT(5,i)) );
+     set ( ht_scatter, 'XData', xGT(1,1:i), ...
+                   'YData', xGT(3,1:i)  );
      drawnow
      pause(1.0/100.0);
     if (save_to_file )
