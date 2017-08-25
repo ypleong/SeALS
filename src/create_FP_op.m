@@ -1,4 +1,4 @@
-function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_err_op  )
+function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)
 % 
 % fTens, vector ktensor 
 % qTens, matrix ktensor
@@ -9,10 +9,23 @@ function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_
 % Write the operator H = Idendity + dt=(f*d/dx_i + q/2*d^2/dx_i/dx_j)
 
 %% 
+    
+    fFPEdiff = jacobian(fFPE,x);
+    
+
+    fTens  = fcell2ftens( fsym2fcell(sym(fFPE) ,x), gridT);
+    f_pTens = fcell2ftens( fsym2fcell(diag(fFPEdiff) ,x), gridT);
+    if ( explicit == 1)
+        dtTens = fcell2ftens( fsym2fcell(sym(dt)     ,x), gridT);
+    else 
+        dtTens = fcell2ftens( fsym2fcell(sym(-dt)     ,x), gridT);
+    end
+    qTens  = fcell2ftens( fsym2fcell(sym(q)      ,x), gridT);
+    dtTen = DiagKTensor(dtTens{1}); 
+    
     sizef = size(fTens);
     dim = sizef(1);
-
-
+    
     %% create (fi*p),i ::it assumes f_i constant so it is equivalennt to f_i*p,i. If f_i is not constant add f_i,i*p at the end
     %% TODO: add f_i,i for the general case.
     
@@ -51,8 +64,6 @@ function [ op ] = create_FP_op( fTens, f_pTens, qTens, D, D2, dtTen, gridT, tol_
 
     noise_covTensOp = DiagMatKTensor(qTens);
 
-
-    % create opRight = 0.5*Tr(Hess*Sigma_t)
     qijpij = [];
     for i=1:dim
         for j=1:dim
