@@ -36,12 +36,13 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
         
         for i=1:dim 
             handleOutput{i,i} = subplot(dim,dim,dim*(i-1)+i);
+            grid on
             hold on
             xlabel(['x_',num2str(i)])
-            title('Basis Function')
+            title('     Basis Function')
             sizeU = size(Ftensor.U{i});
             for k = 1:sizeU(2)
-                plot(gridT{i},Ftensor.lambda(k)*Ftensor.U{i}(:,k));
+                plot(gridT{i},Ftensor.lambda(k)*Ftensor.U{i}(:,k),'black');
             end
             for j=(i+1):dim
                 subplot(dim,dim,dim*(i-1)+j)
