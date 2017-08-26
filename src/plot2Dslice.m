@@ -9,7 +9,7 @@ function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput
 % Outputs:
 % 3D surface plot
 
-    if nargin < 5
+    if nargin < 6
         vv = 0;
     else
         vv = 1;
