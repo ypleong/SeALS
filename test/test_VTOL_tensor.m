@@ -9,7 +9,7 @@ g = 9.81;
 epsilon = 0.01;
 
 % Simulation Parameters
-dt = 0.01;
+dt = 0.001;
 t = 0:dt:15;
 xGT = zeros(dim,length(t)); % State: x,vx,y,vy,theta,vtheta
 xGT(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; % static
@@ -21,7 +21,7 @@ yref = 6; %+ sin(t(i)*2*pi/20);
 xhat = zeros(dim,length(t));
 xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
 Phat = zeros(dim,dim,length(t));
-Phat(:,:,1) = diag([2^2,0.2^2,2^2,0.2^2,0.03^2,0.01^2]);
+Phat(:,:,1) = diag([1^2,0.1^2,1^2,0.1^2,0.01^2,0.005^2]);
 
 G = [0 0 0
  1 0 0
@@ -30,11 +30,11 @@ G = [0 0 0
  0 0 0
  0 0 1];
 
-Q = 0.01*diag([0.1^2, 0.1^2, 0.01^2]);
+Q = 1.0*diag([0.1^2, 0.1^2, 0.01^2]);
 
 GQGp = G*Q*G';
-sigmaX2 = 0.1^2;
-sigmaY2 = 0.1^2;
+sigmaX2 = 0.04^2;
+sigmaY2 = 0.04^2;
 R = diag([sigmaX2,sigmaY2]);
 zmes = zeros(2,length(t));
 HK = [1 0 0 0 0 0
@@ -116,7 +116,7 @@ for i=1:dim
         end         
     end
 end
-
+use_tensor = 0;
 %% Time Evolution 
 for k = 2:length(t)
    
@@ -135,61 +135,65 @@ for k = 2:length(t)
     xhat(:,k) =  xhat(:,k-1)  + dt*fVTOL( xhat(:,k-1), uControl(k), tauControl(k), epsilon, g );
     Phat(:,:,k) = F*Phat(:,:,k-1)*F' + dt*GQGp;
     
-    % assume measure wkth nokse R
-    z = [xGT(1,k) + randn(1)*sqrt(sigmaX2) 
-         xGT(3,k) + randn(1)*sqrt(sigmaY2)];
-    zmes(:,k) = z;
-    SG = HK*Phat(:,:,k)*HK' + R;
-    KG = Phat(:,:,k)*HK'/(SG);
-    xhat(:,k) = xhat(:,k) + KG*(z - HK*xhat(:,k));
-    Phat(:,:,k) = (eye(6) - KG*HK)*Phat(:,:,k);
     
-    %% Tensor
-    op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
-    pk{k} = SRMultV( op, pk{k-1});
-    %length(pk{k}.lambda)
-    if length(pk{k}.lambda) > 1
-        [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
-        
-        pk{k} = fixsigns(arrange(pk{k}));
-        [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
-        
-    end
-    
-    % Get Mean and Covariance values
-    for i=1:dim
-        expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
-    end
-    for i=1:dim
-        for j = 1:dim
-            cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+    % Tensor
+    if (use_tensor)
+        op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
+        pk{k} = SRMultV( op, pk{k-1});
+        %length(pk{k}.lambda)
+        if length(pk{k}.lambda) > 1
+            [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
+
+            pk{k} = fixsigns(arrange(pk{k}));
+            [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
+
         end
-    end
-    
-    if ( true ) %mod(k,100)==0 )
-        
-        for i=1:dim
-            for j=1:length(z)
-                if ( HK(j,i) == 1 )
-                    pz{i} =  normpdf(gridT{i},z(j),sqrt(R(j,j))); %*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
-                elseif (all(HK(:,i)==0) )
-                    pz{i} = ones(n(i),1);
-                end
-            end
-        end
-        
-        
-        zkcompressed = ktensor(pz);
-        % Direct PDF Bayesian Measurement
-        pk{k} = HadTensProd(pk{k},zkcompressed);
-        pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
-        
+
+        % Get Mean and Covariance values
         for i=1:dim
             expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
         end
         for i=1:dim
             for j = 1:dim
                 cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+            end
+        end
+    end
+    
+    if ( mod(k,10)==0 )
+        
+        % assume measure wkth nokse R
+        z = [xGT(1,k) + randn(1)*sqrt(sigmaX2) 
+             xGT(3,k) + randn(1)*sqrt(sigmaY2)];
+        zmes(:,k) = z;
+        SG = HK*Phat(:,:,k)*HK' + R;
+        KG = Phat(:,:,k)*HK'/(SG);
+        xhat(:,k) = xhat(:,k) + KG*(z - HK*xhat(:,k));
+        Phat(:,:,k) = (eye(6) - KG*HK)*Phat(:,:,k);
+        
+        if (use_tensor)
+            for i=1:dim
+                for j=1:length(z)
+                    if ( HK(j,i) == 1 )
+                        pz{i} =  normpdf(gridT{i},z(j),sqrt(R(j,j))); %*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;
+                    elseif (all(HK(:,i)==0) )
+                        pz{i} = ones(n(i),1);
+                    end
+                end
+            end
+
+            zkcompressed = ktensor(pz);
+            % Direct PDF Bayesian Measurement
+            pk{k} = HadTensProd(pk{k},zkcompressed);
+            pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
+
+            for i=1:dim
+                expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+            end
+            for i=1:dim
+                for j = 1:dim
+                    cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+                end
             end
         end
         
@@ -276,8 +280,11 @@ ht_scatter = plot(xGT(1,1),xGT(3,1));
 set(ht_scatter,'linewidth',2);
 grid on
 
+for k=1:length(t)
+   detPhat(k) = det(Phat(:,:,k)); 
+end
 
-save_to_file = 0;
+save_to_file = 1;
 if (save_to_file  )
     FPS = 25;  
     writerObj = VideoWriter('pdf_gaussian_VTOL_.avi');

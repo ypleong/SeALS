@@ -4,7 +4,7 @@ clear all
 
 %% Initialization, User-defined variables
 
-caseStr = '2d_pos';
+caseStr = '3d_pos';
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
@@ -168,7 +168,7 @@ end
 
 % Simulation Parameters
 dt = 0.001;
-finalt = 2;
+finalt = 5;
 t = 0:dt:finalt;
 
 pk = cell(length(t),1);
@@ -310,18 +310,18 @@ if (exist('saveResults','var'))
     folderName = [caseStr,'_',num2str(caseNum)];
     mkdir(folderName)
     try
-        save([folderName,'/case: ', caseStr, datestr(now, 'dd-mmm-yyyy'),'.mat'],'caseStr','x' ...
+        save([folderName,'/case_', caseStr, datestr(now, 'dd-mmm-yyyy'),'.mat'],'caseStr','x' ...
              ,'cov','covKalman','dt','fFPE','op','x0','x0hat','xkalman','xGT','bdim','t','q','expec','n'  ...
-             ,'dim','gridT','n','bcon','','pk')
+             ,'dim','gridT','n','bcon','zkcompressed','pk','-v7.3')
     catch
-        save([folderName,'/case: ', caseStr, datestr(now, 'dd-mmm-yyyy'),'.mat'])
+        save([folderName,'\case_', caseStr, datestr(now, 'dd-mmm-yyyy'),'.mat'],'-v7.3')
     end
     
 end
 %% Check Plots
 
 % State Vector
-afigure
+figure
 plot(t,xGT,t,expec,'.')
 xlabel('time(s)')
 zlabel('position')
@@ -338,7 +338,7 @@ for k=1:length(t)
 end
 
 % Covariance
-afigure
+figure
 plot(t,trCov,t,trCovKalman,'.')
 xlabel('time')
 ylabel('cov det')
@@ -351,7 +351,7 @@ if (exist('saveResults','var'))
 end
 
 % Error
-afigure
+figure
 plot(t,sqrt(sum((expec-xGT).^2)),t,sqrt(sum((xkalman-xGT).^2)))
 xlabel('time(s)')
 ylabel('mean error')
@@ -371,7 +371,7 @@ end
 hf = figure;
 save_to_file = 1;
 if (save_to_file && exist('saveResults','var') )
-    FPS = 15;  
+    FPS = 25;  
     pause(1)
     str_title = ['Probability Density Function Evolution'];
     writerObj = VideoWriter([folderName,'/pdf_gaussian_.avi']);
@@ -412,28 +412,36 @@ if dim==1
 else
     hold on
     handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
+%     for i=1:dim
+%        ylim(handleSlices{i,i},[-40 250]);
+%     end
     %ht_kf = scatter3(handleSlices{1,2}, xkalman(1,1) ,xkalman(2,1),5 );
-    for k = 2:1:length(t)
+    for k = 2:5:length(t)
         plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
         %set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
+        
+        
         pause(1.0/1000);
-        if (save_to_file )
+        if (save_to_file  && exist('saveResults','var') )
             M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
             writeVideo(writerObj, M);
         end        
     end
 end
 
-if (save_to_file  )
+if (save_to_file   && exist('saveResults','var') )
     close(writerObj);
 end
 %%
 
-
+kend = k
 %%
+figure
 for k=1:kend
+    
     if (~isempty(zkcompressed{k}))
         plot2DslicesAroundPoint( zkcompressed{k}, x0, gridT);
+        ee
     end
 end
 

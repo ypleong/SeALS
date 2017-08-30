@@ -1,7 +1,7 @@
 function [ xdot ] = fVTOL( x, u, tau, epsilon, g )
 % x:[6,1] state ( x, xdot, y, ydot, theta, thetadot)
 % u and tau are control inputs
-% epsilon is a parameter, 0.01
+% epsilon is a parameter, ~0.01
 % g is gravity 9.8
     xdot = zeros(6,1);
 

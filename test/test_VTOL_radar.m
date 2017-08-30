@@ -125,11 +125,11 @@ ylabel('\tau input')
 
 figure
 hold on
-plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:) )
+plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:), expec(1,:),expec(3,:) )
 scatter (r1(1),r1(2))
 scatter (r2(1),r2(2))
 %scatter ( zmes(1,:), zmes(2,:))
-legend('truth','kalman','radar1','radar2')
+legend('truth','kalman','tensor','radar1','radar2')
 
 figure
 plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
