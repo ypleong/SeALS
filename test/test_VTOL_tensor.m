@@ -311,3 +311,25 @@ end
 if (save_to_file  )
     close(writerObj);
 end
+
+
+
+%%
+k = 1;
+for i=1:dim
+    bdim(i,:) = [xhat(i,k)-10*sqrt(Phat(i,i,k)) xhat(i,k)+10*sqrt(Phat(i,i,k))]
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+    gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+end
+handleSlices = plot2DslicesAroundPointGaussian(Phat(:,:,1), xhat(:,1), gridT);
+for k = 2:30:length(t)
+    for i=1:dim
+        bdim(i,:) = [xhat(i,k)-4*sqrt(Phat(i,i,k)) xhat(i,k)+4*sqrt(Phat(i,i,k))]
+        dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+        gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+    end
+    plot2DslicesAroundPointGaussian(Phat(:,:,k), xhat(:,k), gridT, handleSlices);
+    drawnow
+    pause(1.0/100.0); 
+    k/length(t)
+end
