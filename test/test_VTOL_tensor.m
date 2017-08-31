@@ -21,7 +21,7 @@ yref = 6; %+ sin(t(i)*2*pi/20);
 xhat = zeros(dim,length(t));
 xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
 Phat = zeros(dim,dim,length(t));
-Phat(:,:,1) = diag([1^2,0.1^2,1^2,0.1^2,0.01^2,0.005^2]);
+Phat(:,:,1) = diag([0.5^2,0.1^2,0.5^2,0.1^2,0.01^2,0.005^2]);
 
 G = [0 0 0
  1 0 0
@@ -43,8 +43,8 @@ HK = [1 0 0 0 0 0
 %% Tensor Estimation Preparation
 
 % Initial distribution
-n = [251 101 251 101 151 101];
-bdim = [-4 5; -0.5 0.5;1 9; -0.6 0.6;-0.08 0.08; -0.06 0.06]; 
+n = [351 251 351 251 151 151];
+bdim = [-1 3; -0.5 0.5;3 7; -0.6 0.6;-0.08 0.08; -0.06 0.06]; 
 diagSigma = diag(Phat(:,:,1));
 qdiag = diag(GQGp)+ones(dim,1)*0.01^2;
 q =  diag( qdiag );
@@ -116,8 +116,9 @@ for i=1:dim
         end         
     end
 end
-use_tensor = 0;
+use_tensor = 1;
 %% Time Evolution 
+time1 = tic;
 for k = 2:length(t)
    
     % Get Control
@@ -138,6 +139,12 @@ for k = 2:length(t)
     
     % Tensor
     if (use_tensor)
+%         for i=1:dim % rebuild the grid
+%             bdim(i,:) = [xhat(i,k)-10*sqrt(Phat(i,i,k)) xhat(i,k)+10*sqrt(Phat(i,i,k))]
+%             dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+%             gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+%         end
+        
         op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
         pk{k} = SRMultV( op, pk{k-1});
         %length(pk{k}.lambda)
@@ -200,7 +207,7 @@ for k = 2:length(t)
     end
     
 end
-
+toc(time1)
 
 
 %% Tensor plot

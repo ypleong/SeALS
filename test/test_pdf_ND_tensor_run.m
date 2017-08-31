@@ -89,7 +89,7 @@ elseif strcmp('3d_pos',caseStr)
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
     
     measure = 1;
-    mesureFreq = 1000;
+    mesureFreq = 10;
     HK = [1 0 0];
     fFPE = [x(2);x(3);0];
     n = [201 201 301];
@@ -191,7 +191,13 @@ xGT(:,1) = x0;
 xkalman(:,1) = x0hat;
 covKalman(:,:,1) = sigma02Matrix;
 
-
+if (false)
+for i=1:dim
+   gridTnew{i} = gridT{i}/2;
+end
+[newP, newGrid] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 5 );
+plot2DslicesAroundPoint( newP, expec(:,1), newGrid );
+end
 %% Tensor parameters
 if (~exist('bcon','var') )
     for i=1:dim
@@ -382,52 +388,22 @@ if (save_to_file && exist('saveResults','var') )
     set(gcf,'Renderer','OpenGL'); %to save to file
     pause(2)
 end
-if dim==1
-    hf = figure;
-    hold on
-    ht_pdf = pcolor(gridT{1},gridT{2},double(pk{1})');    
-    ht_kf = scatter(xkalman(1,1) ,xkalman(2,1) );
-    h = colorbar;
-    %set(h, 'ylim', [0 0.25])
-    %caxis([0 15])
-    set(ht_pdf, 'EdgeColor', 'none');
-    xlabel('x')
-    ylabel('y')
-    grid on
-    axis ([bdim(1,:),bdim(2,:)])
-    grid on
-
-    
-    for k = 2:10:kend
-         set ( ht_pdf, 'CData', double(pk{k})' );
-         set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
-         drawnow
-         pause(1.0/1000);
-         if (save_to_file )
-             M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
-             writeVideo(writerObj, M);
-         end
-    end
-
-else
-    hold on
-    handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
+hold on
+handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
 %     for i=1:dim
 %        ylim(handleSlices{i,i},[-40 250]);
 %     end
-    %ht_kf = scatter3(handleSlices{1,2}, xkalman(1,1) ,xkalman(2,1),5 );
-    for k = 2:5:length(t)
-        plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
-        %set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
-        
-        
-        pause(1.0/1000);
-        if (save_to_file  && exist('saveResults','var') )
-            M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
-            writeVideo(writerObj, M);
-        end        
-    end
+%ht_kf = scatter3(handleSlices{1,2}, xkalman(1,1) ,xkalman(2,1),5 );
+for k = 2:4:length(t)
+    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
+    %set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
+    pause(1.0/1000);
+    if (save_to_file  && exist('saveResults','var') )
+        M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
+        writeVideo(writerObj, M);
+    end        
 end
+
 
 if (save_to_file   && exist('saveResults','var') )
     close(writerObj);
