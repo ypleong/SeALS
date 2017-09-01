@@ -1,2 +1,8 @@
 .DS_Store
 .asv
+*.avi
+*.png
+*.fig
+*.eps
+*.mat
+*.asv
