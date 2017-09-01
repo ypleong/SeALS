@@ -116,6 +116,9 @@ for i=1:dim
         end         
     end
 end
+
+
+
 use_tensor = 1;
 %% Time Evolution 
 time1 = tic;
@@ -166,7 +169,7 @@ for k = 2:length(t)
             end
         end
     end
-    
+    diagT(:,k) = diag(cov(:,:,k));
     if ( mod(k,10)==0 )
         
         % assume measure wkth nokse R
@@ -193,7 +196,9 @@ for k = 2:length(t)
             % Direct PDF Bayesian Measurement
             pk{k} = HadTensProd(pk{k},zkcompressed);
             pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
+            
 
+            
             for i=1:dim
                 expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
             end
@@ -202,6 +207,17 @@ for k = 2:length(t)
                     cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
                 end
             end
+            
+            
+            [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 6 );
+            [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
+            %op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
+            [ weMean, weCov, weOnes ] = createWeights( gridT, n );
+            %figure
+            %plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
+            
+            
+            
         end
         
     end

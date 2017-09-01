@@ -1,6 +1,13 @@
 function [ tensOutput ] = interpTensor( tens, oldgridT, newgridT )
-% Change the grid of a tensor
-%  tens - the ktensor.
+%
+% Change the grid of a tensor and interpolate it to the new grid
+% Extrapolate using zeros.
+%
+% - tens - the ktensor.
+% -oldgridT, the old grid as a cell with size dim of vectors
+% -newgridT, the new grid as a cell with size dim of vectors, they might 
+% have different size than the oldgrid
+
     tensOutput = tens; % copy tensor
     kterms = length(tens.lambda);
     dim = ndims(tens);

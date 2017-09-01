@@ -97,11 +97,6 @@ function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x
     iTen = DiagKTensor(iTens{1}); 
     op_uncomp = iTen + SRMultM(dtTen, aop);
     
-    
-%     h_op = pcolor(reshape(double(aop),n,n))
-%     set(h_op,'edgecolor','none')
-%     colorbar
-    
     %% Compress Operator
     fprintf('Attempt to compress operator, rank(op)=%d\n', ncomponents(op_uncomp));
     rank_op_uncomp = ncomponents(op_uncomp);

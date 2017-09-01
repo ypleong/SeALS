@@ -4,22 +4,22 @@ clear all
 
 %% Initialization, User-defined variables
 
-caseStr = '3d_pos';
+caseStr = 'ND_forward';
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
      
-    dim = 5; % change it!
+    dim = 2; % change it!
     x = sym('x',[dim,1]); %do not change
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
    
     measure = 0;
     fFPE = zeros(dim,1);
     for i=1:dim
-        fFPE(i) = i/2;
+        fFPE(i) = i*3;
         n(i) = 101+10*i;
         x0(i) = i;
-        bdim(i,:) = [-2 8*i];
+        bdim(i,:) = [-2 4*i];
         bcon{i} = {'d',0,0};
         diagSigma(i) = 0.1*i;
         qdiag(i) = 0.1;
@@ -167,7 +167,7 @@ end
 
 
 % Simulation Parameters
-dt = 0.001;
+dt = 0.002;
 finalt = 5;
 t = 0:dt:finalt;
 
@@ -196,7 +196,7 @@ for i=1:dim
    gridTnew{i} = gridT{i}/2;
 end
 [newP, newGrid] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 5 );
-plot2DslicesAroundPoint( newP, expec(:,1), newGrid );
+plot2DslicesAroundPoint( newP, expec(:,k), newGrid );
 end
 %% Tensor parameters
 if (~exist('bcon','var') )
@@ -232,7 +232,8 @@ op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
 
 time1 = tic;
 for k = 2:length(t)
-    
+    % plot by:
+    % plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
     if ( explicit == 1 )
         pk{k} = SRMultV( op, pk{k-1});
         if length(pk{k}.lambda) > 1
@@ -242,6 +243,7 @@ for k = 2:length(t)
             [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
 
         end
+        
     else 
         [pk{k}, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...
         als_sys(op,pk{k-1},[],tol_err,als_options,debugging);
@@ -256,7 +258,15 @@ for k = 2:length(t)
             cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
         end
     end
-
+    if (mod(k,50)==0 )
+        [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 6 );
+        [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
+        op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
+        [ weMean, weCov, weOnes ] = createWeights( gridT, n );
+        figure
+        plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
+    end
+    
     % Integrate the GT
     xGT(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xGT(:,k-1)'),t(k));
     
@@ -264,8 +274,11 @@ for k = 2:length(t)
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
     stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
     covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
-    
 
+    
+    if (mod(k,500)==0 )
+        k
+    end
     %% Measure
     if (measure && mod(k,mesureFreq)==0 )
         Rmeas = diag(HK*diag(diagSigma)*HK');
@@ -394,7 +407,7 @@ handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
 %        ylim(handleSlices{i,i},[-40 250]);
 %     end
 %ht_kf = scatter3(handleSlices{1,2}, xkalman(1,1) ,xkalman(2,1),5 );
-for k = 2:4:length(t)
+for k = 2:10:length(t)
     plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
     %set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
     pause(1.0/1000);

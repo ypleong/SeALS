@@ -1,4 +1,4 @@
-function [ tensorOutput, gridTnew ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )
+function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )
 %
 %  Adjust the boundaries of the pdf to lambda sigmas around the mean
 %
