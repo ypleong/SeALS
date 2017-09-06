@@ -32,13 +32,14 @@ function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput
     end
     
     if nargin == 4
-        handleOutput = surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none');
-        view(0,90)
+        handleOutput = pcolor(grid{slices_dim(1)},grid{slices_dim(2)},kkksub');
+        set(handleOutput,'EdgeColor','none');
+        %view(0,90)
         %caxis([0 0.3])
 		xlabel(['x_{',num2str(slices_dim(1)),'}'])
 		ylabel(['x_{',num2str(slices_dim(2)),'}'])
     else 
-       set( handleInput, 'ZData', kkksub' )
+       set( handleInput, 'CData', kkksub' )
     end
         
 end
