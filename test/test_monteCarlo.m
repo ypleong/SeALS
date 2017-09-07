@@ -5,8 +5,8 @@ dim = 2;
 x = sym('x',[dim,1]); %do not change
 %t = sym('t');
 measure = 0;
-kpen = (2*pi/3)^2
-fFPE = [x(2);-kpen*sin(x(1))];
+kpen = (2*pi/3)^2;
+fFPE = [x(2);-kpen*(x(1))];
 n = [301 301];
     x0 = [0.7, 0.1];
     diagSigma = [0.6 0.5];
@@ -47,18 +47,28 @@ legend('x1','x2')
 % kalman
 
 particleKalman =  cell(length(t),1);
-particleKalman{1} = x0;
+particleKalman{1} = x0';
 time1 = tic;
 for k = 2:length(t)
      particleKalman{k} = dynUpdateParticles( particleKalman{k-1}, fDYN,[t(k-1) t(k)]);
 end
 toc(time1)
-
+xKmean = zeros(dim,length(t));
+for k = 1:length(t)
+    xKmean(:,k) = particleKalman{k};
+end
 
 figure
 plot(t,squeeze(covP(1,1,:)))
 xlabel('time(s)')
 ylabel('cov')
+
+afigure
+plot(t,xmean(1,:),t,xmean(2,:),'r',t,xKmean(1,:),'--black',t,xKmean(2,:),'--red')
+xlabel('time(s)')
+legend('x_1 PF','x_2 PF','x_1 KF','x_2 KF')
+
+
 %% Display particles animation
 hf = figure;
 save_to_file = 0;
@@ -76,7 +86,9 @@ if (save_to_file && exist('saveResults','var') )
     pause(2)
 end
 hold on
-ht_kf = scatter(particle{1}(1,:),particle{1}(2,:));
+ht_kf = scatter(particle{1}(1,:),particle{1}(2,:),1);
+xlabel('\theta')
+ylabel('\dot{theta}')
 axis([-pi pi -5 5])
 axis equal
 grid on
