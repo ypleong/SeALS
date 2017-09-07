@@ -44,7 +44,7 @@ end
 if op_len < 1
      e = 1e-4; 
 else
-    e = varargin{1};
+    e = abs(varargin{1});
 end
 
 curr_rank = 1;
@@ -88,7 +88,7 @@ else
     F = P;
 end
 
-if (iter == maxit && err > e)
+if (iter == maxit && err(iter) > e )
     disp('Max iterations reached without finding a good solution')
 end
 
