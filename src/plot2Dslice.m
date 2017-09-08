@@ -1,4 +1,4 @@
-function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput,lambda)
+function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,gridT, handleInput,lambda)
     
 % Inputs:
 % F - ktensor (n dims)
@@ -32,7 +32,7 @@ function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput
     end
     
     if nargin == 4
-        handleOutput = pcolor(grid{slices_dim(1)},grid{slices_dim(2)},kkksub');
+        handleOutput = pcolor(gridT{slices_dim(1)},gridT{slices_dim(2)},kkksub');
         set(handleOutput,'EdgeColor','none');
         %view(0,90)
         %caxis([0 0.3])
