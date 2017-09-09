@@ -43,7 +43,7 @@ HK = [1 0 0 0 0 0
 %% Tensor Estimation Preparation
 
 % Initial distribution
-n = [351 251 351 251 151 151];
+n = [81 51 81 51 81 51];
 bdim = [-1 3; -0.5 0.5;3 7; -0.6 0.6;-0.08 0.08; -0.06 0.06]; 
 diagSigma = diag(Phat(:,:,1));
 qdiag = diag(GQGp)+ones(dim,1)*0.01^2;
@@ -70,9 +70,9 @@ end
 pk{1} = ktensor(p0vector);
 plot2DslicesAroundPoint( pk{1}, xhat(:,1), gridT);
 expec = zeros(dim,length(t));
-cov = zeros(dim,dim,length(t));
+covT = zeros(dim,dim,length(t));
 
-cov(:,:,1) = sigma02Matrix;
+covT(:,:,1) = sigma02Matrix;
 expec(:,1) = xhat(:,1);
 
 bsca = []; %no manual scaling
@@ -95,19 +95,19 @@ end
 for i=1:dim
     for j = 1:dim
         if i == j
-            we{i,j} = gridT{j};
+            weMean{i,j} = gridT{j};
         else
-            we{i,j} = ones(n(j),1);
+            weMean{i,j} = ones(n(j),1);
         end         
     end
 end
 for i=1:dim
-    weones{i} = ones(n(i),1);
+    weOnes{i} = ones(n(i),1);
 end
 weCov = cell(dim,dim,dim);
 for i=1:dim
     for j = 1:dim
-        weCov(i,j,:) = weones;
+        weCov(i,j,:) = weOnes;
         if i == j
             weCov{i,j,i} = gridT{j}.*gridT{j};
         else
@@ -161,15 +161,15 @@ for k = 2:length(t)
 
         % Get Mean and Covariance values
         for i=1:dim
-            expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+            expec(i,k)  = intTens(pk{k}, [], gridT, weMean(i,:));
         end
         for i=1:dim
             for j = 1:dim
-                cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+                covT(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
             end
         end
     end
-    diagT(:,k) = diag(cov(:,:,k));
+    diagT(:,k) = diag(covT(:,:,k));
     if ( mod(k,10)==0 )
         
         % assume measure wkth nokse R
@@ -195,23 +195,23 @@ for k = 2:length(t)
             zkcompressed = ktensor(pz);
             % Direct PDF Bayesian Measurement
             pk{k} = HadTensProd(pk{k},zkcompressed);
-            pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weones));
+            pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weOnes));
             
 
+            [ expec(:,k), covT(:,:,k) ] = meanCovTensor( pk{k}, gridT, weMean, weCov, weOnes );
+%             for i=1:dim
+%                 expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
+%             end
+%             for i=1:dim
+%                 for j = 1:dim
+%                     covT(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+%                 end
+%             end
             
-            for i=1:dim
-                expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));
-            end
-            for i=1:dim
-                for j = 1:dim
-                    cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
-                end
-            end
             
-            
-            [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 6 );
+            [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), covT(:,:,k), n, 6 );
             [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
-            %op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
+            op = createOP_VTOL(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
             [ weMean, weCov, weOnes ] = createWeights( gridT, n );
             %figure
             %plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
@@ -228,11 +228,11 @@ toc(time1)
 
 %% Tensor plot
 
-handleSlices = plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT);
-for k = 2:10:length(t)
-    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
-    pause(1.0/1);      
-end
+% handleSlices = plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT);
+% for k = 2:10:length(t)
+%     plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
+%     pause(1.0/1);      
+% end
 %% Plot
 %afigure;
 
@@ -281,11 +281,15 @@ ylabel('\tau input')
 afigure
 hold on
 plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:) )
-scatter ( zmes(1,:), zmes(2,:))
+scatter ( zmes(1,:), zmes(2,:),2)
 legend('truth','kalman')
+xlabel('X')
+ylabel('Y')
 
 afigure
+hold on
 plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
+plot( t, sqrt( (xGT(1,:)-expec(1,:)).^2 + (xGT(3,:)- expec(3,:)).^2) )
 grid on
 xlabel('Time(s)')
 ylabel('Estimation Error(m)')
