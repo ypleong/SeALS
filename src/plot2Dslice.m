@@ -28,13 +28,13 @@ function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,grid, handleInput
     if vv
         kkksub = -log(abs(double(ktensor(factors, kkksubU)))*lambda);
     else
-        kkksub = abs(double(ktensor(factors, kkksubU)));
+        kkksub = (double(ktensor(factors, kkksubU)));
     end
     
     if nargin == 4
-        handleOutput = pcolor(grid{slices_dim(1)},grid{slices_dim(2)},kkksub');
-        set(handleOutput,'EdgeColor','none');
-        %view(0,90)
+        handleOutput = surf(grid{slices_dim(1)},grid{slices_dim(2)},kkksub','EdgeColor','none');
+%         set(handleOutput,'EdgeColor','none');
+        view(0,90)
         %caxis([0 0.3])
 		xlabel(['x_{',num2str(slices_dim(1)),'}'])
 		ylabel(['x_{',num2str(slices_dim(2)),'}'])
