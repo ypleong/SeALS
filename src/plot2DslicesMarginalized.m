@@ -1,4 +1,4 @@
-function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, point, gridT, handleInput )
+function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )
     % Plots a visualization of the Tensor. For each pair of dimensions it
     % plots a 2D slice around the selected point. The value of the
     % dimensions that are not sliced is kept constant the the vlue of the
@@ -27,11 +27,7 @@ function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, point, gridT, hand
     %
     
     dim = ndims(Ftensor);
-    indexT = zeros(dim,1);
-    for i=1:dim
-       [~, indexT(i)] = min( abs(point(i)-gridT{i}));
-    end
-    if nargin == 3
+    if nargin == 2
         handleOutput = {};
         
         for i=1:dim 
@@ -61,7 +57,7 @@ function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, point, gridT, hand
                 
             end
             for j=(i+1):dim
-                plot2DsliceM(Ftensor,[i,j],indexT,gridT,handleInput{i,j});
+                plot2DsliceM(Ftensor,[i,j],gridT,handleInput{i,j});
             end
         end 
         drawnow limitrate
