@@ -1,4 +1,4 @@
-function [Fint] = intTens(F, dim, grid, w)
+function [Fint] = intTens(F, dim, gridT, w)
 
 % F - ktensor
 % grid - grid in each dimension in cell
@@ -13,9 +13,9 @@ if nargin < 4 || isempty(w)
     end
 end
 
-if nargin < 3 || isempty(grid)
+if nargin < 3 || isempty(gridT)
     for ii = 1:nd
-        grid{ii} = (1:size(F.U{ii},1))';
+        gridT{ii} = (1:size(F.U{ii},1))';
     end
 end
 
@@ -35,7 +35,7 @@ int_all = 0;
 
 for ii = 1:nd
     if any(ii == dim)
-        Fintc{ii} = trapz(grid{ii},bsxfun(@times,F.U{ii},w{ii}));%w{ii}'*F.U{ii};
+        Fintc{ii} = trapz(gridT{ii},bsxfun(@times,F.U{ii},w{ii}));%w{ii}'*F.U{ii};
         Fint_lambda = Fint_lambda.*Fintc{ii};
     else
         Fintc{ii} = F.U{ii}; 

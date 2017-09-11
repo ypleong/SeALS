@@ -4,12 +4,12 @@ clear all
 
 %% Initialization, User-defined variables
 
-caseStr = 'ND_forward';
+caseStr = 'pendulum2D_NL';
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
      
-    dim = 2; % change it!
+    dim = 3; % change it!
     x = sym('x',[dim,1]); %do not change
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
    
@@ -51,13 +51,15 @@ elseif strcmp('pendulum2D_NL',caseStr)
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
    
     measure = 0;
-    fFPE = [x(2);-sin(x(1))];
-    n = [301 301];
-    x0 = [0.2, 0.01];
-    diagSigma = [0.03 0.001];
+    kpen = (2*pi/3)^2;
+    fFPE = [x(2);-kpen*sin(x(1))];
+    n = [101 101];
+    x0 = [0.7, 0.1];
+    diagSigma = [0.6 0.5];
     bdim = [-pi pi
-           -10 10];
+           -15 15];
     bcon = { {'p'}, {'d',0,0}};
+    qdiag = [0.001 0.01];
     
 elseif strcmp('2d_pos',caseStr) 
      % This case is the simple double integrator (constant speed)
@@ -167,8 +169,8 @@ end
 
 
 % Simulation Parameters
-dt = 0.002;
-finalt = 5;
+dt = 0.001;
+finalt = 12;
 t = 0:dt:finalt;
 
 pk = cell(length(t),1);
@@ -212,6 +214,7 @@ sca_ver = 1;
 
 tol_err_op = 1e-5;
 tol_err = 1e-6;
+maxIter = 200;
 als_options = [];
 als_variant = []; %{10,50};
 debugging = 0;
@@ -240,8 +243,23 @@ for k = 2:length(t)
             [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
 
             pk{k} = fixsigns(arrange(pk{k}));
-            [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op);
-
+%             Pinit = cell(dim,1);
+%             for i=1:length(pk{k-1}.lambda)
+%                 for j=1:dim
+%                     Pinit{j} = pk{k-1}.U{j}(:,i)*pk{k-1}.lambda(i);
+%                 end
+%             end
+            %pkTemporal = pk{k};
+            %timeWithoutInit = tic;
+            [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op,maxIter);
+            %timeWithout(k) = toc(timeWithoutInit);
+            %iterWithout(k) = iter_op;
+            %pk1 = pk{k};
+            %timeWithInit = tic;
+            %[pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pkTemporal,tol_err_op,maxIter,Pinit);
+            %timeWith(k) = toc(timeWithInit);
+            %iterWith(k) = iter_op;
+            %normCheck(k) = norm(pk1-pk{k});
         end
         
     else 
@@ -258,13 +276,13 @@ for k = 2:length(t)
             cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
         end
     end
-    if (mod(k,50)==0 )
+    if (mod(k,200000000)==0 )
         [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 6 );
         [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
         op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
         [ weMean, weCov, weOnes ] = createWeights( gridT, n );
-        figure
-        plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
+        %figure
+        %plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
     end
     
     % Integrate the GT
@@ -272,8 +290,8 @@ for k = 2:length(t)
     
     % Integrate KF
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
-    covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
+    %stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
+    %covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
 
     
     if (mod(k,500)==0 )
@@ -340,7 +358,7 @@ end
 %% Check Plots
 
 % State Vector
-figure
+afigure
 plot(t,xGT,t,expec,'.')
 xlabel('time(s)')
 zlabel('position')
@@ -388,7 +406,7 @@ end
 
 %% animated figure
 hf = figure;
-save_to_file = 1;
+save_to_file = 0;
 if (save_to_file && exist('saveResults','var') )
     FPS = 25;  
     pause(1)
@@ -403,16 +421,19 @@ if (save_to_file && exist('saveResults','var') )
 end
 hold on
 handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
+handleSlices_kalman = plot2DProjectionPoint( xkalman(:,1) );
+handleSlices_mean = plot2DProjectionPoint( expec(:,1) );
+legend('PDF','Kalman','Mean')
 %     for i=1:dim
 %        ylim(handleSlices{i,i},[-40 250]);
 %     end
-%ht_kf = scatter3(handleSlices{1,2}, xkalman(1,1) ,xkalman(2,1),5 );
 for k = 2:10:length(t)
-    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)
-    %set ( ht_kf, 'XData', xkalman(1,k),'YData', xkalman(2,k) );
-    pause(1.0/1000);
+    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices);
+    plot2DProjectionPoint(expec(:,k), handleSlices_mean );
+    plot2DProjectionPoint(xkalman(:,k), handleSlices_kalman );
+    pause(1.0/10);
     if (save_to_file  && exist('saveResults','var') )
-        M = getframe(gcf); %hardcopy(hf, '-dzbuffer', '-r0');
+        M = getframe(gcf);
         writeVideo(writerObj, M);
     end        
 end
@@ -450,14 +471,27 @@ title('Ration between the first two \lambda coefficients')
 xlabel('time(s)')
 ylabel('\lambda_1/\lambda_2')
 
+afigure
+plot(t, nLambda)
+title('Number of tensor coefficients')
+xlabel('time')
+ylabel('coefficients')
+
 
 afigure
 plotLambda = zeros(length(t),max(nLambda));
 for k = 1:kend
     plotLambda(k,1:nLambda(k)) = pk{k}.lambda;
 end
-plot(t,plotLambda,'d')
+semilogy(t,plotLambda,'d')
 title('\lambda Evolution with time')
 xlabel('time(s)')
 ylabel('\lambda')
 
+%
+afigure
+plot(1:k-1,timeWithout(1:k-1)*1000,1:k-1,timeWith*1000)
+xlabel('iteration')
+ylabel('time(ms)')
+legend('Random Init','Previous Iteration')
+title('als2 Tensor Initialization with previous iteration')
