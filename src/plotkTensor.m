@@ -14,7 +14,6 @@ ngrid = arrayfun(@(x) length(gridT{x}),1:dim);
 
 params = inputParser;
 
-%addRequired(params,'shape',@(x)validateattributes(x,charchk,nempty))
 addParameter(params,'takeLog',0,@isscalar);
 
 
@@ -52,7 +51,17 @@ handleInput = params.Results.handleInput;
 %% Plot ktensor
 switch plot2D
     case 'no'
-        
+        figure
+        title('Marginalized fibers for each dimension')
+        Uu = cell(dim,1);
+        for i=1:dim
+            subplot(dim,1,i)
+            Uu{i} = sum( repmat(F.lambda',size(F.U{i},1),1).*F.U{i},2);  
+            plot(gridT{i},Uu{i}) 
+            grid on
+            xlabel(['x_',num2str(i)])
+            ylabel(['U_',num2str(i)])   
+        end
     case 'slide'
         [ handleOutput ] = plot2DslicesAroundPoint(F, slidePoint, gridT, handleInput, plotType);
     case 'marginalized'
