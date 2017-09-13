@@ -27,7 +27,7 @@ function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput
     %
     
     dim = ndims(Ftensor);
-    if nargin == 2
+    if isempty(handleInput)
         handleOutput = {};
         
         for i=1:dim 

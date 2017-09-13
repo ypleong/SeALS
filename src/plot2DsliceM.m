@@ -12,7 +12,11 @@ function [handleOutput] = plot2DsliceM(itens,slices_dim,gridT, handleInput,lambd
     dim = ndims(itens);
     i = slices_dim(1);
     j = slices_dim(2);
-    tempT = intTens(itens, [1:i-1 i+1:j-1 j+1:dim], gridT, []);
+    if (dim>2)
+        tempT = intTens(itens, [1:i-1 i+1:j-1 j+1:dim], gridT, []);
+    else
+        tempT = itens;
+    end
     ktempT = ktensor(tempT.lambda,tempT.U{i},tempT.U{j});
     if nargin == 3
         handleOutput = pcolor(gridT{i},gridT{j},double(ktempT)');
