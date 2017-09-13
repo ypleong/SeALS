@@ -35,11 +35,8 @@ function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput
             grid on
             hold on
             xlabel(['x_',num2str(i)])
-            title('     Basis Function')
-            sizeU = size(Ftensor.U{i});
-            for k = 1:sizeU(2)
-                plot(gridT{i},Ftensor.lambda(k)*Ftensor.U{i}(:,k),'black');
-            end
+            title('     Basis Function Marginalized')
+            plot( gridT{i}, sum( repmat(Ftensor.lambda',size(Ftensor.U{i},1),1).*Ftensor.U{i},2));  
             for j=(i+1):dim
                 subplot(dim,dim,dim*(i-1)+j)
                 handleOutput{i,j} = plot2DsliceM(Ftensor,[i,j],gridT);

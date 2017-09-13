@@ -1,6 +1,7 @@
 function [ weMean, weCov, weOnes ] = createWeights( gridT, n )
     % Create weights for integration
     dim = length(gridT);
+    weMean = cell(dim,dim);
     for i=1:dim
         for j = 1:dim
             if i == j
@@ -10,6 +11,7 @@ function [ weMean, weCov, weOnes ] = createWeights( gridT, n )
             end         
         end
     end
+    weOnes = cell(dim,1);
     for i=1:dim
         weOnes{i} = ones(n(i),1);
     end
