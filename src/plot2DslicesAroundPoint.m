@@ -1,4 +1,4 @@
-function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput )
+function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)
     % Plots a visualization of the Tensor. For each pair of dimensions it
     % plots a 2D slice around the selected point. The value of the
     % dimensions that are not sliced is kept constant the the vlue of the
@@ -31,7 +31,7 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
     for i=1:dim
        [~, indexT(i)] = min( abs(point(i)-gridT{i}));
     end
-    if nargin == 3
+    if isempty(handleInput)
         handleOutput = {};
         
         for i=1:dim 
@@ -46,7 +46,7 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
             end
             for j=(i+1):dim
                 subplot(dim,dim,dim*(i-1)+j)
-                handleOutput{i,j} = plot2Dslice(Ftensor,[i,j],indexT,gridT);
+                handleOutput{i,j} = plot2Dslice(Ftensor,[i,j],indexT,gridT,[],[],plotType);
             end
         end    
     else
@@ -61,7 +61,7 @@ function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handl
                 
             end
             for j=(i+1):dim
-                plot2Dslice(Ftensor,[i,j],indexT,gridT,handleInput{i,j});
+                plot2Dslice(Ftensor,[i,j],indexT,gridT,handleInput{i,j},[],plotType);
             end
         end 
         drawnow limitrate

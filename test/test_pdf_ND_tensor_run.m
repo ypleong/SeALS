@@ -187,7 +187,7 @@ pz = cell(dim,1);
 cov(:,:,1) = sigma02Matrix;
 expec(:,1) = x0hat;
 % visualize, check boundaries
-plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT);
+plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT,[],'surf');
 
 xGT(:,1) = x0;
 xkalman(:,1) = x0hat;
