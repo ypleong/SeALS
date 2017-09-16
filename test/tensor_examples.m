@@ -2,7 +2,7 @@
 clear all
 % common variables
 dim = 3;
-n = [101 101 101];
+n = [101 121 131];
 bdim = [0 10
         0 10
         0 10];
@@ -10,7 +10,7 @@ for i=1:dim
     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
     gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
 end
-[ weMean, weCov, weOnes ] = createWeights( gridT, n )
+[ weMean, weCov, weOnes ] = createWeights( gridT, n );
 
 
 x0 = [2 2 2]';
@@ -70,3 +70,53 @@ for i=1:dim
     end
 end
 
+%% boundary test
+
+% Generate initial ktensor
+meanT = [1 1 5 ]';
+covT = diag([0.5 0.1 0.2]);
+pcheck = ktensorGaussian( meanT, diag(covT), gridT );
+plotkTensor(pcheck,gridT)
+
+% Check boundary
+lambdaMin = 4;
+lambdaInitial = 6;
+lambdaMax = 10;
+checkGridFit(gridT, meanT, covT,lambdaMin,lambdaMax)
+
+[ pcheckAfter, gridT_after, dx] = fitTensorBoundaries( pcheck, gridT, meanT, covT, n, lambdaInitial );
+plotkTensor(pcheckAfter,gridT_after)
+
+
+afigure
+gridT = -6:0.2:6;
+hold on
+plot(gridT,normpdf(gridT,0,1))
+plot(gridT,normpdf(gridT,0,6/4))
+plot(gridT,normpdf(gridT,0,6/12),'.-')
+legend('Original \lambda=6','Too Big \lambda=4','Too Small \lambda=12')
+
+
+%% plotfibers test
+clear all
+dim = 3;
+n = [101 121 131];
+bdim = [0 10
+        0 10
+        0 10];
+for i=1:dim
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
+    gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
+end
+
+meanT = [1 1 5 ]';
+covT = diag([0.5 0.1 0.2]);
+
+t = 0:0.01:1;
+pcheck = cell(length(t),1);
+for k=1:length(t)
+    pcheck{k} = ktensorGaussian( meanT+[t(k)*5,4*t(k)^2,sin(t(k)*2*pi)], diag(covT), gridT ) ... 
+         +      ktensorGaussian( meanT+[4,7,5]'-[t(k)*5,3*t(k)^2,sin(t(k)*2*pi)], diag(covT), gridT );
+end
+plotkTensorCell(pcheck,gridT,t,'plotSeq','marginalizedFiber')
+plotkTensorCell(pcheck,gridT,t,'plotSeq','slider')
