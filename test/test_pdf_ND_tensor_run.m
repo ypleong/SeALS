@@ -4,7 +4,7 @@ clear all
 
 %% Initialization, User-defined variables
 
-caseStr = 'pendulum2D_NL';
+caseStr = 'ND_forward';
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
@@ -16,7 +16,7 @@ if strcmp('ND_forward',caseStr)
     measure = 0;
     fFPE = zeros(dim,1);
     for i=1:dim
-        fFPE(i) = i*3;
+        fFPE(i) = 3; %i*3;
         n(i) = 101+10*i;
         x0(i) = i;
         bdim(i,:) = [-2 4*i];
@@ -25,6 +25,7 @@ if strcmp('ND_forward',caseStr)
         qdiag(i) = 0.1;
     end
     xhat = x0;
+    qdiag = zeros(dim,1);
 
 
 elseif strcmp('pendulum2D',caseStr) 
@@ -70,7 +71,7 @@ elseif strcmp('2d_pos',caseStr)
     x = sym('x',[dim,1]); %do not change
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)       
     measure = 1;
-    mesureFreq = 1000;
+    mesureFreq = 10;
     HK = [1 0];
     
     fFPE = [x(2);0];
@@ -90,19 +91,20 @@ elseif strcmp('3d_pos',caseStr)
     x = sym('x',[dim,1]); %do not change
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
     
-    measure = 1;
-    mesureFreq = 10;
+    measure = 0;
+    mesureFreq = 1000;
     HK = [1 0 0];
     fFPE = [x(2);x(3);0];
-    n = [201 201 301];
+    n = [101 101 121];
     x0 = [0.0, 0.0, 0.50]';
-    x0hat = [0.0, 0.0, 0.00]';
+    x0hat = x0; % [0.0, 0.0, 0.00]';
     diagSigma = [0.1 0.2 0.3];
     bdim = [-4 6
            -4 4
            -4 4];
     bcon = { {'d',0,0}, {'d',0,0},{'d',0,0}};
-    qdiag = [0.001 0.05 0.02];
+    qdiag = [0.001 0.001 0.002];
+    fitBoundary = 0;
     
 elseif strcmp('nd_hypersphere',caseStr) 
     dim = 3;
@@ -167,10 +169,16 @@ if (~exist('mesureFreq','var'))
    mesureFreq = 1; 
 end
 
+if (~exist('fitBoundary','var'))
+   fitBoundary = 0; 
+end
+lambdaMin = 4;
+lambdaInitial = 6;
+lambdaMax = 10;
 
 % Simulation Parameters
-dt = 0.001;
-finalt = 12;
+dt = 0.0005;
+finalt = 0.25;
 t = 0:dt:finalt;
 
 pk = cell(length(t),1);
@@ -193,13 +201,6 @@ xGT(:,1) = x0;
 xkalman(:,1) = x0hat;
 covKalman(:,:,1) = sigma02Matrix;
 
-if (false)
-for i=1:dim
-   gridTnew{i} = gridT{i}/2;
-end
-[newP, newGrid] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 5 );
-plot2DslicesAroundPoint( newP, expec(:,k), newGrid );
-end
 %% Tensor parameters
 if (~exist('bcon','var') )
     for i=1:dim
@@ -236,30 +237,14 @@ op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
 time1 = tic;
 for k = 2:length(t)
     % plot by:
-    % plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
+    % plotkTensor( pk{k}, gridT )
     if ( explicit == 1 )
         pk{k} = SRMultV( op, pk{k-1});
         if length(pk{k}.lambda) > 1
             [pk{k},~] = tenid(pk{k},tol_err_op,1,9,'frob',[],fnorm(pk{k}),0);
 
             pk{k} = fixsigns(arrange(pk{k}));
-%             Pinit = cell(dim,1);
-%             for i=1:length(pk{k-1}.lambda)
-%                 for j=1:dim
-%                     Pinit{j} = pk{k-1}.U{j}(:,i)*pk{k-1}.lambda(i);
-%                 end
-%             end
-            %pkTemporal = pk{k};
-            %timeWithoutInit = tic;
             [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pk{k},tol_err_op,maxIter);
-            %timeWithout(k) = toc(timeWithoutInit);
-            %iterWithout(k) = iter_op;
-            %pk1 = pk{k};
-            %timeWithInit = tic;
-            %[pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = als2(pkTemporal,tol_err_op,maxIter,Pinit);
-            %timeWith(k) = toc(timeWithInit);
-            %iterWith(k) = iter_op;
-            %normCheck(k) = norm(pk1-pk{k});
         end
         
     else 
@@ -268,21 +253,17 @@ for k = 2:length(t)
     end
     
     % Get Mean and Covariance values
-    for i=1:dim
-        expec(i,k)  = intTens(pk{k}, [], gridT, weMean(i,:));
-    end
-    for i=1:dim
-        for j = 1:dim
-            cov(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+    [ expec(:,k), cov(:,:,k) ] = meanCovTensor( pk{k}, gridT, weMean, weCov, weOnes );
+    
+    % Check conditions to fit boundaries
+    if ( fitBoundary )
+        checkBoundary =  checkGridFit( gridT, expec(:,k), cov(:,:,k), lambdaMin, lambdaMax );
+        if ( any(checkBoundary) )
+            [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, lambdaInitial );
+            [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
+            op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
+            [ weMean, weCov, weOnes ] = createWeights( gridT, n );
         end
-    end
-    if (mod(k,200000000)==0 )
-        [ pk{k}, gridT, dx] = fitTensorBoundaries( pk{k}, gridT, expec(:,k), cov(:,:,k), n, 6 );
-        [D,D2,~,~] = makediffop(gridT,n,dx,acc,bcon,region);
-        op = create_FP_op ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
-        [ weMean, weCov, weOnes ] = createWeights( gridT, n );
-        %figure
-        %plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )
     end
     
     % Integrate the GT
@@ -290,13 +271,10 @@ for k = 2:length(t)
     
     % Integrate KF
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    %stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
-    %covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
+    stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
+    covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
 
-    
-    if (mod(k,500)==0 )
-        k
-    end
+
     %% Measure
     if (measure && mod(k,mesureFreq)==0 )
         Rmeas = diag(HK*diag(diagSigma)*HK');
@@ -319,15 +297,8 @@ for k = 2:length(t)
         pk{k} = HadTensProd(pk{k},zkcompressed{k});
         pk{k} = pk{k} *(1/  intTens(pk{k}, [], gridT, weOnes));
         
-        for i=1:dim
-            expecAf(i,k)  = intTens(pk{k}, [], gridT, weMean(i,:));
-        end
-        for i=1:dim
-            for j = 1:dim
-                covAf(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expecAf(i,k)*expecAf(j,k);
-            end
-        end
-
+        [ expecAf(:,k), covAf(:,:,k) ] = meanCovTensor( pk{k}, gridT, weMean, weCov, weOnes );
+    
         % Kalman Measurement
         SG = HK*covKalman(:,:,k)*HK' + Rmeas;
         KG = covKalman(:,:,k)*HK'/(SG);
@@ -359,7 +330,7 @@ end
 
 % State Vector
 afigure
-plot(t,xGT,t,expec,'.')
+plot(t,xkalman,t,expec,'.')
 xlabel('time(s)')
 zlabel('position')
 for i=1:dim
@@ -383,7 +354,6 @@ legend('FPE','Kalman')
 if (exist('saveResults','var'))
    saveas(gcf,[folderName,'/covVsKalman.eps'])
    saveas(gcf,[folderName,'/covVsKalman.png'])
-   %saveas(gcf,[folderName,'covVsKalman.emf'])
    saveas(gcf,[folderName,'/covVsKalman.fig'])
 end
 
@@ -396,11 +366,6 @@ title('State Norm Error for the double integrator with measurements')
 legend('Tensor','Kalman')
 if (exist('saveResults','var'))
    saveas(gcf,[folderName,'/errorVsKalman.png'])
-   figure
-   plot2DslicesAroundPoint( pk{1}, x0hat, gridT)
-   saveas(gcf,[folderName,'/initialDistribution.png'])
-   saveas(gcf,[folderName,'/initialDistribution.eps'])
-   saveas(gcf,[folderName,'/initialDistribution.fig'])
 end
 
 
@@ -413,20 +378,17 @@ if (save_to_file && exist('saveResults','var') )
     str_title = ['Probability Density Function Evolution'];
     writerObj = VideoWriter([folderName,'/pdf_gaussian_.avi']);
     writerObj.FrameRate = FPS;
-    myVideo.Quality = 100;
+    writerObj.Quality = 100;
     set(hf,'Visible','on');
     open(writerObj);
     set(gcf,'Renderer','OpenGL'); %to save to file
     pause(2)
 end
 hold on
-handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT);
+handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT,[],[],'plot');
 handleSlices_kalman = plot2DProjectionPoint( xkalman(:,1) );
 handleSlices_mean = plot2DProjectionPoint( expec(:,1) );
 legend('PDF','Kalman','Mean')
-%     for i=1:dim
-%        ylim(handleSlices{i,i},[-40 250]);
-%     end
 for k = 2:10:length(t)
     plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices);
     plot2DProjectionPoint(expec(:,k), handleSlices_mean );
@@ -450,7 +412,7 @@ figure
 for k=1:kend
     
     if (~isempty(zkcompressed{k}))
-        plot2DslicesAroundPoint( zkcompressed{k}, x0, gridT);
+        plot2DslicesAroundPoint( zkcompressed{k}, x0, gridT,[]);
         ee
     end
 end
