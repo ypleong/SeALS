@@ -48,7 +48,7 @@ end
 pplus3 = ktensor(Uu);
 
 % 
-afigure
+figure
 for i=1:dim
     subplot(dim,1,i)
     tempT = intTens(pplus1, [1:i-1 i+1:dim], gridT, weOnes);
