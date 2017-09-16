@@ -11,7 +11,7 @@ function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )
     [ weMean, weCov, weOnes ] = createWeights( gridT, nT );
     meanT = zeros(dim,length(timeVector));
     for k=1:length(timeVector)
-        %pk{k} = pk{k}*(1/intTens(pk{k}, [], gridT, weOnes));
+        pk{k} = pk{k}*(1/intTens(pk{k}, [], gridT, weOnes));
         [ meanT(:,k), ~ ] = meanCovTensor( pk{k}, gridT, weMean, weCov, weOnes );
     end
     figure
