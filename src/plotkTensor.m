@@ -7,7 +7,7 @@ function [ handleoutput ] = plotkTensor( F, gridT, varargin )
 
 validateattributes(F,{'ktensor'},{'nonempty'})
 dim = ndims(F);
-validateattributes(gridT,{'cell'},{'size',[1,dim]})
+validateattributes(gridT,{'cell'},{'numel',dim})
 ngrid = arrayfun(@(x) length(gridT{x}),1:dim);
 [weMean,weCov,weOnes] = createWeights(gridT,ngrid);
 [ meanT, ~ ] = meanCovTensor( F, gridT, weMean, weCov, weOnes );

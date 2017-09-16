@@ -1,4 +1,4 @@
-function [ y ] = EvalTMat( TMat, x, grid )
+function [ y ] = EvalTMat( TMat, x, gridT )
 % EVALTMAT evaluates a matrix-valued ktensor function at a point x
 % Inputs:
 %   TMat - the matrix-valued ktensor function.
@@ -12,7 +12,7 @@ y = zeros(n,m);
 
 for i=1:n
     for j=1:m
-        y(i,j) = EvalT(TMat{i,j},x,grid);
+        y(i,j) = EvalT(TMat{i,j},x,gridT);
     end
 end
 

@@ -1,8 +1,6 @@
 function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )
-    % Plots a visualization of the Tensor. For each pair of dimensions it
-    % plots a 2D slice around the selected point. The value of the
-    % dimensions that are not sliced is kept constant the the vlue of the
-    % selected point
+    % Plots a visualization of the Tensor. Integrate over all dimensions
+    % but two.
     %
     % Inputs:
     % F - ktensor (n dims)

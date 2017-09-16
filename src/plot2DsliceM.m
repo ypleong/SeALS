@@ -20,6 +20,7 @@ function [handleOutput] = plot2DsliceM(itens,slices_dim,gridT, handleInput,lambd
     ktempT = ktensor(tempT.lambda,tempT.U{i},tempT.U{j});
     if nargin == 3
         handleOutput = pcolor(gridT{i},gridT{j},double(ktempT)');
+        colorbar
         set(handleOutput,'EdgeColor','none');
 		xlabel(['x_{',num2str(slices_dim(1)),'}'])
 		ylabel(['x_{',num2str(slices_dim(2)),'}'])

@@ -1,4 +1,4 @@
-function [ output_args ] = plot2DtimeMFibers( pk, timeVector, gridT )
+function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )
 % Plot the time evolution of the tensor marginalized for each dimension
 %
 % pk, 
@@ -24,6 +24,7 @@ function [ output_args ] = plot2DtimeMFibers( pk, timeVector, gridT )
             fiberTime(:,k) = sum( repmat(tempT.lambda',size(tempT.U{i},1),1).*tempT.U{i},2);
         end
         handleOutput = pcolor(timeVector',gridT{i},fiberTime);
+        shading interp 
         hold on
         plot(timeVector,meanT(i,:) )
         set(handleOutput,'EdgeColor','none');
