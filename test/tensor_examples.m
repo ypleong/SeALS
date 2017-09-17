@@ -120,3 +120,70 @@ for k=1:length(t)
 end
 plotkTensorCell(pcheck,gridT,t,'plotSeq','marginalizedFiber')
 plotkTensorCell(pcheck,gridT,t,'plotSeq','slider')
+%% Test als2 for diagonal gaussians
+clear all
+dim = 2;
+n = [101 101];
+bdim = [-6 6
+        -6 6];
+    
+for i=1:dim
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
+    gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
+end
+
+meanT = [0 0]';
+covT = diag([1 0.5^2]);
+%pcheck = ktensorGaussian( meanT , diag(covT), gridT );
+%plotkTensor(pcheck,gridT)
+[X1,X2] = meshgrid(gridT{1}',gridT{2}');
+theta = 0:0.01:pi/2;
+nLambda = zeros(length(theta),1);
+allLambda = cell(length(theta),1);
+for i=1:length(theta)
+    Rtheta = [cos(theta(i)) -sin(theta(i));sin(theta(i)) cos(theta(i))];
+    gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
+    gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
+    [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
+    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
+    %plotkTensor(pKxy2,gridT);
+    allLambda{i} = pKxy2.lambda;
+    nLambda(i) = length(pKxy2.lambda);
+end
+plot(theta*180/pi,nLambda,'d')
+xlabel('Rotation Angle')
+ylabel('Number of terms')
+grid on
+
+figure
+hold on
+for i=1:length(theta)
+   plot(allLambda{i},'Color',[i/length(theta) 0 1-i/length(theta)])
+end
+hold off
+
+
+%% Just for the 45deg case
+thetaI = pi/4;
+Rtheta = [cos(thetaI) -sin(thetaI);sin(thetaI) cos(thetaI)];
+gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
+gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
+[pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
+[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-7);
+plotkTensor(pKxy,gridT);
+
+%% Check accuracy graph
+epsV = logspace(-7,-1,200);
+nLambda = zeros(length(epsV),1);
+for i=1:length(epsV)
+    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,epsV(i));
+    nLambda(i) = length(pKxy2.lambda);
+end
+semilogx(epsV,nLambda)
+xlabel('Required Accuracy')
+ylabel('Number of terms')
+grid on
+fitOut = fit(log10(epsV'),nLambda,'poly1')
+hold on
+
+
