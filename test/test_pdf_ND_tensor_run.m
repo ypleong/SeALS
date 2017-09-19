@@ -9,7 +9,7 @@ caseStr = 'ND_forward';
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
      
-    dim = 3; % change it!
+    dim = 6; % change it!
     x = sym('x',[dim,1]); %do not change
     fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
    
@@ -17,7 +17,7 @@ if strcmp('ND_forward',caseStr)
     fFPE = zeros(dim,1);
     for i=1:dim
         fFPE(i) = 3; %i*3;
-        n(i) = 101+10*i;
+        n(i) = 61+10*i;
         x0(i) = i;
         bdim(i,:) = [-2 4*i];
         bcon{i} = {'d',0,0};
@@ -25,7 +25,26 @@ if strcmp('ND_forward',caseStr)
         qdiag(i) = 0.1;
     end
     xhat = x0;
-    qdiag = zeros(dim,1);
+    qdiag = 0.001*ones(dim,1);
+    fitBoundary = 1;
+
+elseif strcmp('yifei_2D_1',caseStr) 
+    
+    % Linear pendulum
+    
+    dim = 2;
+    x = sym('x',[dim,1]); %do not change
+    fprintf ('Running case  "%s"  with %d dimensions\n', caseStr, dim)
+    measure = 0;
+    a=0.125;
+    b=-0.5;
+    fFPE = [x(2);-b*x(2)-x(1)-a*x(2)*(x(1)^2+x(2)^2)];
+    n = [61 61];
+    x0 = [0.0, 1];
+    diagSigma = [0.03 0.001];
+    bdim = [-4 4
+           -4 4];
+    %bcon = { {'p'}, {'d',0,0}};
 
 
 elseif strcmp('pendulum2D',caseStr) 
@@ -178,7 +197,7 @@ lambdaMax = 10;
 
 % Simulation Parameters
 dt = 0.0005;
-finalt = 0.25;
+finalt = 20;
 t = 0:dt:finalt;
 
 pk = cell(length(t),1);
@@ -271,8 +290,8 @@ for k = 2:length(t)
     
     % Integrate KF
     xkalman(:,k)  = deval(ode45( @(t,x) tempCall(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
-    stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
-    covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
+    %stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);
+    %covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;
 
 
     %% Measure
@@ -385,12 +404,12 @@ if (save_to_file && exist('saveResults','var') )
     pause(2)
 end
 hold on
-handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT,[],[],'plot');
+handleSlices = plot2DslicesAroundPoint( pk{1}, x0, gridT,[],'pcolor');
 handleSlices_kalman = plot2DProjectionPoint( xkalman(:,1) );
 handleSlices_mean = plot2DProjectionPoint( expec(:,1) );
 legend('PDF','Kalman','Mean')
 for k = 2:10:length(t)
-    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices);
+    plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices,'pcolor');
     plot2DProjectionPoint(expec(:,k), handleSlices_mean );
     plot2DProjectionPoint(xkalman(:,k), handleSlices_kalman );
     pause(1.0/10);
