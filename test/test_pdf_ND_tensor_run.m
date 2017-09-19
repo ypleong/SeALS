@@ -4,7 +4,7 @@ clear all
 
 %% Initialization, User-defined variables
 
-caseStr = 'yifei_2D_1';
+caseStr = 'ND_forward';
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
