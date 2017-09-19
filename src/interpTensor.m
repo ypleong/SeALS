@@ -7,10 +7,15 @@ function [ tensOutput ] = interpTensor( tens, oldgridT, newgridT )
 % -oldgridT, the old grid as a cell with size dim of vectors
 % -newgridT, the new grid as a cell with size dim of vectors, they might 
 % have different size than the oldgrid
-
+    
+    validateattributes(tens,{'ktensor'},{'nonempty'})
+    dim = ndims(tens);
+    validateattributes(gridT,{'cell'},{'numel',dim})
+    validateattributes(newgridT,{'cell'},{'numel',dim})
+    
     tensOutput = tens; % copy tensor
     kterms = length(tens.lambda);
-    dim = ndims(tens);
+    
     for i=1:dim
         for j=1:kterms
             tensOutput.U{i}(:,j) = interp1(oldgridT{i},tens.U{i}(:,j),newgridT{i},'PCHIP',0);

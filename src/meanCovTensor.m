@@ -7,7 +7,7 @@ function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )
 % weCov, weights for the covariance, cell(dim,dim,dim);
 
     dim = ndims(itens);
-    itens = itens*(1/intTens(itens, [], gridT, weOnes));
+    itens = itens*(1/intTens(itens, [], gridT, weOnes)); %normalice
     meanT = zeros(dim,1);
     for i=1:dim
         meanT(i)  = intTens(itens, [], gridT, weMean(i,:));

@@ -13,7 +13,17 @@ function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, mean
 %  tensorOutput, 
 %  gridTnew 
 
+
+    % Check input
+    validateattributes(tens,{'ktensor'},{'nonempty'})
     dim = ndims(tens);
+    validateattributes(gridT,{'cell'},{'numel',dim})
+    validateattributes(meanT,{'double'},{'numel',dim})
+    validateattributes(ngridT,{'double'},{'numel',dim})
+    validateattributes(covT,{'double'},{'size',[dim,dim]})
+    validateattributes(lambda,{'double'},{'numel',1})
+    
+    
     gridTnew = cell(dim,1);
     bdim = zeros(dim,2);
     dx = zeros(dim,1);
