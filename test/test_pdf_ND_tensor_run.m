@@ -4,7 +4,10 @@ clear all
 
 %% Initialization, User-defined variables
 
+
 caseStr = 'ND_forward';
+caseStr = 'pendulum2D';
+
     
 if strcmp('ND_forward',caseStr) 
      % This is just a constant velocity dynamics in N dimensions
