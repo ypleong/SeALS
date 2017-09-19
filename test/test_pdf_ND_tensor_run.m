@@ -38,7 +38,7 @@ elseif strcmp('yifei_2D_1',caseStr)
     measure = 0;
     a=0.125;
     b=-0.5;
-    fFPE = [x(2);-b*x(2)-x(1)-a*x(2)*(x(1)^2+x(2)^2)];
+    fFPE = [x(2);-b*x(2)-x(1)-a*x(2)*x(1)^2 - a*x(2)^3];
     n = [61 61];
     x0 = [0.0, 1];
     diagSigma = [0.03 0.001];

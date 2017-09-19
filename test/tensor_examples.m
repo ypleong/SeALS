@@ -115,8 +115,9 @@ covT = diag([0.5 0.1 0.2]);
 t = 0:0.01:1;
 pcheck = cell(length(t),1);
 for k=1:length(t)
-    pcheck{k} = ktensorGaussian( meanT+[t(k)*5,4*t(k)^2,sin(t(k)*2*pi)], diag(covT), gridT ) ... 
+    pcheck{k} = (2+t(k))*ktensorGaussian( meanT+[t(k)*5,4*t(k)^2,sin(t(k)*2*pi)], (0.5+t(k))*diag(covT), gridT ) ... 
          +      ktensorGaussian( meanT+[4,7,5]'-[t(k)*5,3*t(k)^2,sin(t(k)*2*pi)], diag(covT), gridT );
+    pcheck{k} = arrange(pcheck{k});
 end
 plotkTensorCell(pcheck,gridT,t,'plotSeq','marginalizedFiber')
 plotkTensorCell(pcheck,gridT,t,'plotSeq','slider')
