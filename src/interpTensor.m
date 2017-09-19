@@ -10,7 +10,7 @@ function [ tensOutput ] = interpTensor( tens, oldgridT, newgridT )
     
     validateattributes(tens,{'ktensor'},{'nonempty'})
     dim = ndims(tens);
-    validateattributes(gridT,{'cell'},{'numel',dim})
+    validateattributes(oldgridT,{'cell'},{'numel',dim})
     validateattributes(newgridT,{'cell'},{'numel',dim})
     
     tensOutput = tens; % copy tensor

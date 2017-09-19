@@ -9,7 +9,7 @@ function [ outputCheck ] = checkGridFit( gridT, meanT, covT, lambdaMin, lambdaMa
 %   - the covariance cannot be smaller than the size of the grid divided by
 %   lambdaMax. That avoids resolution problems with peaked pdfs.
 
-    validateattributes(meanT,{'cell'},{'nonempty'})
+    validateattributes(gridT,{'cell'},{'nonempty'})
     dim = length(gridT);
     validateattributes(meanT,{'double'},{'numel',dim})
     validateattributes(covT,{'double'},{'size',[dim,dim]})
