@@ -120,24 +120,34 @@ for k=1:length(t)
 end
 plotkTensorCell(pcheck,gridT,t,'plotSeq','marginalizedFiber')
 plotkTensorCell(pcheck,gridT,t,'plotSeq','slider')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Test als2 for diagonal gaussians
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Common setup
 clear all
 dim = 2;
 n = [101 101];
-bdim = [-6 6
-        -6 6];
+bdim = [-4 4
+        -4 4];
     
 for i=1:dim
     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
     gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
 end
-
 meanT = [0 0]';
+
+%% Default Gaussian
 covT = diag([1 0.5^2]);
-%pcheck = ktensorGaussian( meanT , diag(covT), gridT );
-%plotkTensor(pcheck,gridT)
+pcheck = ktensorGaussian( meanT , diag(covT), gridT );
+plotkTensor(pcheck,gridT)
+%% Test Angle
+afigure
+for k=[2,4,6]
+covT = diag([1 (1/k)^2]);
 [X1,X2] = meshgrid(gridT{1}',gridT{2}');
-theta = 0:0.01:pi/2;
+theta = 0:0.03:pi/2;
 nLambda = zeros(length(theta),1);
 allLambda = cell(length(theta),1);
 for i=1:length(theta)
@@ -150,27 +160,29 @@ for i=1:length(theta)
     allLambda{i} = pKxy2.lambda;
     nLambda(i) = length(pKxy2.lambda);
 end
-plot(theta*180/pi,nLambda,'d')
+
+plot(theta*180/pi,nLambda)
 xlabel('Rotation Angle')
 ylabel('Number of terms')
 grid on
-
-figure
 hold on
-for i=1:length(theta)
-   plot(allLambda{i},'Color',[i/length(theta) 0 1-i/length(theta)])
 end
-hold off
+% figure
+% hold on
+% for i=1:length(theta)
+%    plot(allLambda{i},'Color',[i/length(theta) 0 1-i/length(theta)])
+% end
+% hold off
 
 
-%% Just for the 45deg case
+%% Just for the 45deg case, show one case
 thetaI = pi/4;
 Rtheta = [cos(thetaI) -sin(thetaI);sin(thetaI) cos(thetaI)];
 gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
 gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
 [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
-[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-7);
-plotkTensor(pKxy,gridT);
+[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-4);
+plotkTensor(pKxy2,gridT);
 
 %% Check accuracy graph
 epsV = logspace(-7,-1,200);
@@ -179,11 +191,57 @@ for i=1:length(epsV)
     [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,epsV(i));
     nLambda(i) = length(pKxy2.lambda);
 end
+%afigure
 semilogx(epsV,nLambda)
 xlabel('Required Accuracy')
 ylabel('Number of terms')
+hold on
 grid on
 fitOut = fit(log10(epsV'),nLambda,'poly1')
+
+
+%% Check covariance ratio
+thetaI = pi/4;
+Rtheta = [cos(thetaI) -sin(thetaI);sin(thetaI) cos(thetaI)];
+rV = 0.1:0.001:1;
+%rV = [2 4 8 16]; 
+%rV = 1./rV;
+nLambda = zeros(length(rV),1);
+for i = 1:length(rV)
+    covT = diag([1 rV(i)^2]);
+    gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
+    gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
+    [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
+    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
+    nLambda(i) = length(pKxy2.lambda);
+end
+afigure
+plot(rV,nLambda)
+xlabel('Covariance Ratio')
+ylabel('Number of terms')
+grid on
+
+
+%% Check locus test
+nLambda = zeros(100,1);
+figure
 hold on
+for i=1:length(nLambda)
+    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-8);
+    nLambda(i) = length(pKxy2.lambda);
+    plotkTensor(pKxy2,gridT);
+end
+xlabel('Number of terms')
+grid on
+
+nLambda = length(pKxy2.lambda);
+filterVector = zeros(nLambda,1);
+for i=1:nLambda
+    figure(i)
+    
+    filterVector(i) = 1;
+    plotkTensor(filterBasis(pKxy2,filterVector),gridT);
+    
+end
 
 
