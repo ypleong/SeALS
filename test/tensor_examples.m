@@ -98,6 +98,8 @@ legend('Original \lambda=6','Too Big \lambda=4','Too Small \lambda=12')
 
 
 %% plotfibers test
+
+% Show how the plotkTensorCell function works with 3 dimensions
 clear all
 dim = 3;
 n = [101 121 131];
@@ -144,30 +146,35 @@ covT = diag([1 0.5^2]);
 pcheck = ktensorGaussian( meanT , diag(covT), gridT );
 plotkTensor(pcheck,gridT)
 %% Test Angle
-afigure
-for k=[2,4,6]
-covT = diag([1 (1/k)^2]);
+covT = diag([1 (1/2)^2]);
 [X1,X2] = meshgrid(gridT{1}',gridT{2}');
-theta = 0:0.03:pi/2;
+theta = 0:0.02:pi/2;
 nLambda = zeros(length(theta),1);
 allLambda = cell(length(theta),1);
+pk = cell(length(theta),1);
 for i=1:length(theta)
     Rtheta = [cos(theta(i)) -sin(theta(i));sin(theta(i)) cos(theta(i))];
     gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
     gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
     [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
     [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
+    pk{i} = pKxy2;
     %plotkTensor(pKxy2,gridT);
     allLambda{i} = pKxy2.lambda;
     nLambda(i) = length(pKxy2.lambda);
 end
-
+afigure
 plot(theta*180/pi,nLambda)
 xlabel('Rotation Angle')
 ylabel('Number of terms')
 grid on
 hold on
-end
+
+figure
+plotkTensorCell(pk,gridT,theta)
+
+figure
+plotkTensorCell(pk,gridT,theta,'plotSeq','marginalizedFiber')
 % figure
 % hold on
 % for i=1:length(theta)
@@ -245,4 +252,50 @@ for i=1:nLambda
     
 end
 
+
+%% 3D gaussian
+
+% Common setup
+clear all
+dim = 3;
+n = [101 101 101];
+bdim = [-4 4 
+        -4 4
+        -4 4];
+    
+for i=1:dim
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
+    gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
+end
+meanT = [0 0 0]';
+
+%% Default Gaussian
+covT = diag([1 0.5^2 0.25^2]);
+pcheck = ktensorGaussian( meanT , diag(covT), gridT );
+plotkTensor(pcheck,gridT)
+%% Test Angle
+[X1,X2,X3] = meshgrid(gridT{1}',gridT{2}',gridT{3}');
+omega = 0:0.1:pi/2;
+phi = 0:0.1:pi/2;
+nLambda = zeros(length(omega),length(phi));
+for i=1:length(omega)
+    for j=1:length(phi)
+        Rtheta = euler2rot( omega(i), phi(j), 0 );
+        %Rtheta = [cos(theta(i)) -sin(theta(i));sin(theta(i)) cos(theta(i))];
+        gaussianXY = mvnpdf([X1(:) X2(:) X2(:)],meanT',Rtheta*covT*Rtheta');
+        gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}),length(gridT{3}));
+        [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
+        [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
+        %pk{i} = pKxy2;
+        %plotkTensor(pKxy2,gridT);
+        nLambda(i,j) = length(pKxy2.lambda);
+    end
+end
+figure
+surf(omega*180/pi,phi*180/pi,nLambda)
+xlabel('\Omega')
+ylabel('\phi')
+zlabel('Number of terms')
+grid on
+hold on
 

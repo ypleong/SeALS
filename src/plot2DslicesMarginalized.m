@@ -47,10 +47,7 @@ function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput
             %ylim([-1,1])
             hold on
             sizeU = size(Ftensor.U{i});
-            for k = 1:sizeU(2)
-                plot(gridT{i},Ftensor.lambda(k)*Ftensor.U{i}(:,k),'b');
-                
-            end
+            plot( gridT{i}, sum( repmat(Ftensor.lambda',size(Ftensor.U{i},1),1).*Ftensor.U{i},2));  
             for j=(i+1):dim
                 plot2DsliceM(Ftensor,[i,j],gridT,handleInput{i,j});
             end
