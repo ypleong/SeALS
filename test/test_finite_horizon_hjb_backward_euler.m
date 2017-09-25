@@ -70,18 +70,18 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 % lambda = 1;%noise_cov*R;
 
 % Linear system
-% AA = 0.1*randn(d,d);
-% BB = ones(d,2);
-% QQ = diag(ones(d,1));
-% RR = 1/2*diag(ones(1,2));
-% PP = care(AA,BB,QQ,RR);
-% B = BB;
-% G = B;
-% f = AA*x;
-% noise_cov = diag(ones(1,2));
-% q = x'*QQ*x;
-% R = RR;
-% lambda = 1;%noise_cov*R;
+AA = 0.1*randn(d,d);
+BB = ones(d,2);
+QQ = diag(ones(d,1));
+RR = 1/2*diag(ones(1,2));
+PP = care(AA,BB,QQ,RR);
+B = BB;
+G = B;
+f = AA*x;
+noise_cov = diag(ones(1,2));
+q = x'*QQ*x;
+R = RR;
+lambda = 1;%noise_cov*R;
 
 
 % Smooth 2D
@@ -94,14 +94,14 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 % lambda = 1;%noise_cov*R;
 
 % Simple Pendulum
-f1 = sin(x(1));
-f = [x(2) ; f1];
-G = [0.01 ; 1];
-B = G;
-noise_cov = 1;
-q = 0.1*x(1)^2+0.05*x(2)^2;
-R = 0.02;
-lambda = noise_cov*R;
+% f1 = sin(x(1));
+% f = [x(2) ; f1];
+% G = [0.01 ; 1];
+% B = G;
+% noise_cov = 1;
+% q = 0.1*x(1)^2+0.05*x(2)^2;
+% R = 0.02;
+% lambda = noise_cov*R;
 
 % Inverted Pendulum
 % m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
@@ -166,8 +166,8 @@ end_dynamics = toc(start_dynamics);
 fprintf('Creating PDE operator ...\n');
 start_PDEop = tic;
 [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
-op = DiagKTensor(oneTens(d, n)) + op*h;
-% op = DiagKTensor(oneTens(d, n)) - op*h;
+op = DiagKTensor(oneTens(d, n)) + op*h; % forward
+% op = DiagKTensor(oneTens(d, n)) - op*h; % backward
 toc(start_PDEop)
 end_PDEop = toc(start_PDEop);
 
@@ -350,7 +350,7 @@ if d == 2
     ylabel('y')
     title(['Time = ',num2str(tt(1))]);
     axis ([bdim(1,:),bdim(2,:)])
-    for k = 2:1:ind%length(tt)
+    for k = 2:10:ind%length(tt)
          set(ht_pdf, 'ZData', double(F_all{k})' );
          title(['Time = ',num2str(tt(k))]);
          drawnow
@@ -423,11 +423,11 @@ end
 
 saveplots = 0;
 savedata = 0;
-% ninputs = 2;
-% uref = zeros(ninputs,1);
+ninputs = 1;
+uref = zeros(ninputs,1);
 
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f1,G,B,noise_cov,q,R,x);
-sim_config = {h*(ind-1),h,repmat([1; 0; 0.8; -1.5; 0.1; 0;],1,1),[],[]};
+sim_config = {h*(ind-1),h,repmat([0.2; 0; ],1,1),[],[]};
 sim_data = {lambda,gridT,R,noise_cov,F_all,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 
 sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)

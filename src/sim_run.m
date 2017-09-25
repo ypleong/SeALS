@@ -51,7 +51,7 @@ function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 %% extract data
 [T,dt,x0_list,new_noise_cov,new_region] = deal(sim_config{:});
 
-[lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
+[lambda,grid,R,noise_cov,F,D,uref,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
 
 dirpath = [save_folder, 'saved_data/'];
 if 7~=exist(dirpath,'dir') 
@@ -111,15 +111,15 @@ for m = 1:n_trial
         c_f = fFunc(current);
         c_G = GFunc(current);
         c_B = BFunc(current);
-        c_F = EvalT(F,current,grid);
+        c_F = abs(EvalT(F,current,grid));
         c_dF = EvalTMat(dF,current,grid);
         c_q = qFunc(current);
         
         c_n = normrnd(0,sigma);
-        c_u = (1/c_F)*lambda*(R\c_G')*c_dF;
+        c_u = (1/c_F)*lambda*(R\c_G')*c_dF+uref;
         
         next = current + dt*(c_f+c_G*c_u+c_B*c_n);
-        cost = c_q + 0.5*c_u'*R*c_u;
+        cost = c_q + 0.5*(c_u-uref)'*R*(c_u-uref);
         current = next;
         
         traj_u(m,k,:) = c_u;
@@ -206,7 +206,7 @@ c_tot = dt*sum(c_traj,2);
 %% plot state trajectories
 
 pdim = ceil(sqrt(d));
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 
 % plot state trajectories for each dimension seperately
 fig = figure;
@@ -234,7 +234,7 @@ for i=1:d
     hold off
     xlabel('time(s)')
     axis([0 inf bdim(i,1) bdim(i,2)])
-    title(['state traj for x_',num2str(i)])
+    title(['state traj for x_{',num2str(i),'}'])
     
 end
 
@@ -243,13 +243,14 @@ if saveplots == 1
 end
 
 % plot trajectories at all dimensions
-
+if d > 1
 for i = 1:n_trial
     [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
     figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', 'EdgeColor', 'None');
     ylabel('Coordinates')
     xlabel('Time, s')
     title(['Trial ', i])
+end
 end
 
 if saveplots == 1
@@ -301,7 +302,7 @@ end
 %% plot control trajectories
 
 pdim = ceil(sqrt(ninputs));
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 
 % plot control trajectories for each control dimension seperately
 fig = figure;
@@ -324,7 +325,7 @@ end
 
 %% plot cost trajectory
 
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 fig = figure;
 
 hold on
@@ -332,8 +333,8 @@ for j = 1:n_trial
     plot( t(1:end_list(j)-1), c_traj(j,1:end_list(j)-1), 'color', ccc(j,:) );
 end
 hold off
-xlabel('time(s)')
-title('cost trajectories')
+xlabel('Time(s)')
+title(['Cost trajectories - average cost: ', num2str(trapz(t(1:end_list(j)-1),c_traj(j,1:end_list(j)-1))/T)])
 
 if saveplots == 1
     saveas(fig,[dirpath,'c_traj_plot_run',num2str(run)]);

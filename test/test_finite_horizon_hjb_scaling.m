@@ -5,7 +5,7 @@ addpath(genpath('../src'));
 clear all
 
 %%
-run = 1;
+run = 2;
 dirpath = ['./test_run/test_finite_horizon_hjb_scaling/run_',num2str(run),'/'];
 if 7~=exist(dirpath,'dir') 
     mkdir(dirpath); 
@@ -16,8 +16,10 @@ disp(datetime)
 
 start_whole = tic;
 
-dynamic_choice = 'Linear';
-time_stepping_choice = 'backward'; % forward
+dynamic_choice = 'VTOL';
+time_stepping_choice = 'forward'; % forward, backward
+discretization = 'spectral'; % 'uniform'; %
+rng(100);
 
 %% Define dynamics
 
@@ -29,13 +31,13 @@ if strcmp(dynamic_choice,'VTOL')
     ninputs = 2;
     x = sym('x',[d,1]); %do not change
     
-    n = [101; 103; 105; 107; 107; 101];
-    bdim = [-5 5; -5 5; -5 5; -5 5; -pi pi-(2*pi/(n(5)+1)); -5 5;];
+    n = [51; 53; 55; 57; 59; 61];%[101; 103; 105; 107; 107; 101]; %
+    bdim = [-8 8; -8 8; -8 8; -8 8; -pi pi-(2*pi/(n(5))); -8 8;];
     bcon = {{'d',0,0},{'d',0,0},{'d',0,0},{'d',0,0},{'p'},{'d',0,0}};
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
     als_variant = {10,20};
-    tol_err_op = 1e-6;
+    tol_err_op = 1e-4;
     c_err = 1e-7;
         
     g = 9.8; eps = 0.01;
@@ -151,7 +153,7 @@ elseif strcmp(dynamic_choice,'SimplePendulum')
     ninputs = 1;
     x = sym('x',[d,1]); %do not change
     n = [101; 103;];
-    bdim = [-pi pi-(2*pi/(n(5)+1)); -5 5;];
+    bdim = [-pi pi-(2*pi/(n(1)+1)); -5 5;];
     bcon = {{'p'},{'d',0,0}};
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
@@ -231,16 +233,18 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 fprintf('Creating differential operators ...\n');
 start_diff = tic;
 
-for i=1:d
-    gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
-    nd(i) = n(i);
-    dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
-    acc(:,i) = [2,2]';
+if strcmp(discretization,'uniform')
+    for i=1:d
+        gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+        nd(i) = n(i);
+        dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+        acc(:,i) = [2,2]';
+    end
+
+    [D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
+elseif strcmp(discretization,'spectral')
+    [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);
 end
-
-[D,D2,fd1,fd2] = makediffop(gridT,nd,dxd,acc,bcon,region);
-
-% [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);
 toc(start_diff)
 end_diff = toc(start_diff);
 
@@ -289,7 +293,7 @@ end
 % [op] = makebcop(op,bcon,bsca,n,fd1);
 % [op] = makebcopspectral(op,bcon,bsca,n,fd1);
 
-if strcmp(time_stepping_choice, 'forward')
+if strcmp(time_stepping_choice, 'forward') 
     [op] = makebcopforward(op,bcon,n); % forward
 elseif strcmp(time_stepping_choice, 'backward')
     [op] = makebcop(op,bcon,bsca,n,fd1); % backward
@@ -311,11 +315,17 @@ if strcmp(dynamic_choice,'Linear')
         initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
     end
 else
-    U = cell(d,1);
-    for i = 1:d
-        U{i} = exp(-gridT{i}.^2);
+    if d == 2
+        [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+        init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
+        initTens  = {cp_als(tensor(init'),10)};
+    else
+        U = cell(d,1);
+        for i = 1:d
+            U{i} = exp(-3*gridT{i}.^2);
+        end
+        initTens = {ktensor(U)};
     end
-    initTens = {ktensor(U)};
 end
     
 toc(start_PDEinit)
@@ -374,11 +384,11 @@ for ind = 2:nt+1
     end
     
     if ncomponents(F) > ncomponents(F_all{ind-1})
-        [F,~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
+        [F, ~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
         [F, ~] = als2(F,tol_err_op);
     end
     
-    F_norm = norm(F)/sqrt(ncomponents(F)*sum(n));
+    F_norm = EvalT(F,zeros(d,1), gridT); %norm(F)/sqrt(ncomponents(F)*sum(n));
     F_scale(ind) = F_scale(ind-1)*F_norm;
     F_all{ind} = F*(1/F_norm);
     iter_time(ind-1) = toc(start_iter);
@@ -402,6 +412,10 @@ save([dirpath,'run_',num2str(run),'data'])
 
 %% Visualize results
 
+for i=1:ind
+    F_all_2{i} = F_all{i}*F_scale(i);
+end
+
 %% Dimension = 1 
 
 if d == 1
@@ -409,7 +423,7 @@ if d == 1
 %% Plot result
 
     px = zeros(n,length(tt));
-    for k=1:ind-1;%length(tt)
+    for k=1:ind;%length(tt)
        px(:,k) = double(F_all{k}*F_scale(k)); 
     end
 
@@ -432,13 +446,14 @@ if d == 2
 %%    
     dim_plot = [1 2];
     coord = ceil(n/2);
-    for k = 1:10:ind-1
+    figure;
+    for k = 1:5:ind-1
          plot2Dslice(F_all{k}*F_scale(k),dim_plot,coord,gridT);
          colorbar;
 %          caxis([0 1])
          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
          title(['Time = ',num2str(tt(k))]);
-         zlim([0 100000])
+%          zlim([0 1])
          pause(1.0/1000);
     end
     
@@ -453,7 +468,7 @@ ninputs = 1;
 uref = zeros(ninputs,1);
 
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f1,G,B,noise_cov,q,R,x);
-sim_config = {h*(ind-1),h,repmat([0.2; 0; ],1,1),[],[]};
+sim_config = {h*(ind-1),h,repmat([1; 0; ],1,1),[],[]};
 sim_data = {lambda,gridT,R,noise_cov,F_all,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 
 sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)

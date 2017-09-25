@@ -51,7 +51,7 @@ function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)
 %% extract data
 [T,dt,x0_list,new_noise_cov,new_region] = deal(sim_config{:});
 
-[lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
+[lambda,grid,R,noise_cov,F,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
 
 dirpath = [save_folder, 'saved_data/'];
 if 7~=exist(dirpath,'dir') 
@@ -116,7 +116,11 @@ for m = 1:n_trial
         c_q = qFunc(current);
         
         c_n = normrnd(0,sigma);
-        c_u = (1/c_F)*lambda*(R\c_G')*c_dF;
+        if c_F < eps
+            c_u = zeros(ninputs,1);
+        else
+            c_u = (1/c_F)*lambda*(R\c_G')*c_dF + uref;
+        end
         
         next = current + dt*(c_f+c_G*c_u+c_B*c_n);
         cost = c_q + 0.5*c_u'*R*c_u;
@@ -206,7 +210,7 @@ c_tot = dt*sum(c_traj,2);
 %% plot state trajectories
 
 pdim = ceil(sqrt(d));
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 
 % plot state trajectories for each dimension seperately
 fig = figure;
@@ -302,7 +306,7 @@ end
 %% plot control trajectories
 
 pdim = ceil(sqrt(ninputs));
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 
 % plot control trajectories for each control dimension seperately
 fig = figure;
@@ -325,7 +329,7 @@ end
 
 %% plot cost trajectory
 
-ccc = jet(n_trial);
+ccc = lines(n_trial);
 fig = figure;
 
 hold on

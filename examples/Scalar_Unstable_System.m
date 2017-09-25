@@ -10,19 +10,19 @@
 % 1. domain 
 d = 1;
 n = 151;
-bdim = [-10 10];
-bcon = { {'d',0.0001,0.0001} };
-bsca = [0.1 0.1]; %no manual scaling
-region = [0 0];
+bdim = [-5 5];
+bcon = { {'d',1,0} };
+bsca = []; %no manual scaling
+region = [];
 regval = 1;
 regsca = 1;
 sca_ver = 1; %second scaling method
-ord_of_acc = 6;
+ord_of_acc = 4;
 
 % 2. dynamics
 lambda = 1;
 x = sym('x',[d,1]); %do not change
-f = x(1)^3+5*x(1)^2+x(1);
+f = x(1);%x(1)^3+5*x(1)^2+x(1);
 G = 1;
 B = 1;
 noise_cov = 1;

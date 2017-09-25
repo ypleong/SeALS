@@ -135,7 +135,7 @@ function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)
     if vb; fprintf('kk = %d, NTERMS = %d, TOL = %e, ERR = %e\n\n', kk(i), length(ix), tol, err(i)); end;
     
     % I don't think this is sufficient. Isn't there a requirement on dim?
-    if (err(i) < sqrt(2)*tol) && (length(Y.lambda) + 10 <= kk(i)) %added by MR
+    if (err(i) < sqrt(2)*tol) && (length(Y.lambda) + 10 <= kk(i)) && vb %added by MR
       err = err(1:i);
       fprintf('Tensor ID converged with %d terms, err = %e\n', length(Y.lambda), err(i));
       return

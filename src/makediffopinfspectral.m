@@ -65,9 +65,18 @@ for i=1:d
         else
             [grid{i}, sd] = chebdifn(ni, 2, bdim(i,1),bdim(i,2));
         end
+        
         grid{i} = grid{i}(2:end-1);
         fd1{i} = sd(2:end-1,2:end-1,1);
         fd2{i} = sd(2:end-1,2:end-1,2);
+%         
+%         grid{i} = linspace(bdim(i,1),bdim(i,2),ni)';
+%         grid{i} = grid{i}(2:end-1);
+%         hi = abs(grid{i}(2)-grid{i}(1));
+%         fd1{i} = fdmatrix(ni,1,2);
+%         fd1{i} = 1/hi*fd1{i}(2:end-1,2:end-1,1);
+%         fd2{i} = fdmatrix(ni,2,2);
+%         fd2{i} = 1/(hi^2)*fd2{i}(2:end-1,2:end-1,1);    
         
     end
     
