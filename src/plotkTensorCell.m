@@ -70,7 +70,7 @@ switch plotSeq
         end  
     case 'slider'
         h_figure = figure;
-        handleSlices = plot2DslicesMarginalized( Fcell{1}, gridT,[]);
+        handleSlices = plotkTensor( Fcell{1}, gridT );
         b_text = uicontrol('Parent',h_figure,'Style','text','Position',[51,50,30,23]);
         callbackSliderAA = @(source,event) callbackSlider(source,event,Fcell,gridT,handleSlices,b_text);
         
@@ -83,7 +83,7 @@ end
         sliderValue = round(source.Value);
         source.Value = sliderValue;
         set(b_text,'String',num2str(sliderValue));
-        plot2DslicesMarginalized( Fcell{sliderValue}, gridT, handleSlices);
+        plotkTensor( Fcell{sliderValue}, gridT, 'handleInput', handleSlices);
     end
     
 end

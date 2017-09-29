@@ -1,4 +1,4 @@
-function [ handleoutput ] = plotkTensor( F, gridT, varargin )
+function [ handleOutput ] = plotkTensor( F, gridT, varargin )
 % Plot a ktensor using different plotting styles
 %
 % F: ktensor with 'dim' dimensions
@@ -17,8 +17,8 @@ params = inputParser;
 addParameter(params,'takeLog',0,@isscalar);
 
 
-defaultPlot2D = 'slide';
-expectedPlot2D = {'no','marginalized','slide'};
+defaultPlot2D = 'slice';
+expectedPlot2D = {'no','marginalized','slice'};
 addParameter(params,'plot2D',defaultPlot2D,...
                  @(x) any(validatestring(x,expectedPlot2D)));
              
@@ -33,8 +33,8 @@ expectedplotType = {'surf','pcolor'};
 addParameter(params,'plotType',defaultplotType,...
                  @(x) any(validatestring(x,expectedplotType)));
              
-addParameter(params,'slidePoint',meanT,@(x) length(x)==dim)
-addParameter(params,'handleInput',[],@(x) iscell(x) && size(x)==[dim,dim])
+addParameter(params,'slicePoint',meanT,@(x) length(x)==dim)
+addParameter(params,'handleInput',[],@(x) iscell(x) )
 
 
 
@@ -45,7 +45,7 @@ plot2D = params.Results.plot2D;
 plot1D = params.Results.plot1D;
 plotType = params.Results.plotType;
 takeLog = params.Results.takeLog;
-slidePoint = params.Results.slidePoint;
+slicePoint = params.Results.slicePoint;
 handleInput = params.Results.handleInput;
 
 %% Plot ktensor
@@ -62,10 +62,19 @@ switch plot2D
             xlabel(['x_',num2str(i)])
             ylabel(['U_',num2str(i)])   
         end
-    case 'slide'
-        [ handleOutput ] = plot2DslicesAroundPoint(F, slidePoint, gridT, handleInput, plotType);
+    case 'slice'
+        if (isempty(handleInput))
+            [ handleOutput ] = plot2DslicesAroundPoint(F, slicePoint, gridT, handleInput, plotType);
+        else
+            plot2DslicesAroundPoint(F, slicePoint, gridT, handleInput, plotType);
+        end
+        
     case 'marginalized'
-        [ handleOutput ] = plot2DslicesMarginalized(F, gridT, handleInput);
+        if (isempty(handleInput))
+            [ handleOutput ] = plot2DslicesMarginalized(F, gridT, handleInput);
+        else
+            plot2DslicesMarginalized(F, gridT, handleInput)
+        end
 end
 
 end
