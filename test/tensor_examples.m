@@ -158,7 +158,9 @@ for i=1:length(theta)
     gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
     [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
     [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
+
     pk{i} = pKxy2;
+    pk{i} = fixMarginalSign( pk{i} );
     %plotkTensor(pKxy2,gridT);
     allLambda{i} = pKxy2.lambda;
     nLambda(i) = length(pKxy2.lambda);
@@ -181,6 +183,28 @@ plotkTensorCell(pk,gridT,theta,'plotSeq','marginalizedFiber')
 %    plot(allLambda{i},'Color',[i/length(theta) 0 1-i/length(theta)])
 % end
 % hold off
+
+sumI = cell(length(t),1);
+sumIndex = cell(length(t),1);
+for i=1:length(t)
+    [pk{i},sumI{i},sumIndex{i}] = fixMarginalSign( pk{i}, gridT );
+end
+afigure
+hold on
+for i=1:length(t)
+    plot(abs(sumIndex{i}))
+end
+
+for i=1:length(t)
+    nLambda(i) = ncomponents(pk{i});
+end
+[pk2,flipSign] = keepSign(pk);
+
+afigure
+plot(t,flipSign/2,t,nLambda)
+xlabel('Time')
+legend('Number of flip pairs','Number of basis functions')
+
 
 
 %% Just for the 45deg case, show one case
