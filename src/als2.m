@@ -26,13 +26,32 @@ R = ncomponents(op);
 op_len = length(varargin);
 illcond = 0;
 
-if op_len < 3
+
+if op_len < 5
+    fullBasis = 1;
+else
+    fullBasis = varargin{5};
+end
+
+if op_len < 4
+    curr_rank = 1;
+else
+    curr_rank = varargin{4};
+end
+
+if op_len < 3 
     Pinit = cell(1,dim);
     for ii = 1:dim
         Pinit{ii} = matrandnorm(size(op.U{ii},1),1);
     end
 else
     Pinit = varargin{3};
+    if isempty(Pinit)
+        Pinit = cell(1,dim);
+        for ii = 1:dim
+            Pinit{ii} = matrandnorm(size(op.U{ii},1),1);
+        end
+    end
 end
 
 if op_len < 2
@@ -47,7 +66,7 @@ else
     e = abs(varargin{1});
 end
 
-curr_rank = 1;
+%curr_rank = 1;
 iter = 0;
 err = zeros(maxit,1);
 t_step = zeros(maxit,1);
@@ -58,7 +77,12 @@ e_list = 1;
 
 while (iter < maxit) && (tol > e) && (curr_rank < R) && ~(illcond)
     
-    [P,~,out]= cp_als(op,curr_rank,'init',Pinit,'printitn',0);
+    if (fullBasis)
+        [P,~,out]= cp_als(op,curr_rank,'init',Pinit,'printitn',0);
+    else
+        curr_rank = min(curr_rank,4);
+        [P,~,out]= cp_nmu(op,curr_rank);
+    end
     iter = iter + out.iters;
     e_list = [e_list out.iters+1];
     tol = out.err(out.iters);

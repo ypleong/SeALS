@@ -1,4 +1,8 @@
-%% Create a ktensor with M terms in n dimensions
+%Tensor examples playground
+% Each %%% section is independent
+
+
+%% %%% Create a ktensor with M terms in n dimensions
 clear all
 % common variables
 dim = 3;
@@ -131,7 +135,7 @@ plotkTensorCell(pcheck,gridT,t,'plotSeq','slider')
 % Common setup
 clear all
 dim = 2;
-n = [101 101];
+n = [101 111];
 bdim = [-4 4
         -4 4];
     
@@ -148,19 +152,22 @@ plotkTensor(pcheck,gridT)
 %% Test Angle
 covT = diag([1 (1/2)^2]);
 [X1,X2] = meshgrid(gridT{1}',gridT{2}');
-theta = 0:0.02:pi/2;
+theta = 0.1:0.02:pi/2*0.9;
 nLambda = zeros(length(theta),1);
 allLambda = cell(length(theta),1);
 pk = cell(length(theta),1);
 for i=1:length(theta)
     Rtheta = [cos(theta(i)) -sin(theta(i));sin(theta(i)) cos(theta(i))];
-    gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
-    gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
+    Ptheta = Rtheta*covT*Rtheta';
+    pxy(i) = Ptheta(1,2);
+    gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Ptheta);
+    gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}))';
     [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
-    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy);
-
+    [pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-11,2000,[],1,0);
+    fittemp = fit((1:length(pKxy2.lambda))',log(pKxy2.lambda),'poly1');
+    fitp(i,1:2) = [fittemp.p1,fittemp.p2];
     pk{i} = pKxy2;
-    pk{i} = fixMarginalSign( pk{i} );
+    %pk{i} = fixMarginalSign( pk{i} );
     %plotkTensor(pKxy2,gridT);
     allLambda{i} = pKxy2.lambda;
     nLambda(i) = length(pKxy2.lambda);
@@ -174,6 +181,40 @@ hold on
 
 figure
 plotkTensorCell(pk,gridT,theta)
+
+fitOut = fit((1:length(pKxy2.lambda))',log(pKxy2.lambda),'poly1')
+
+
+figure
+for i=1:length(theta)
+    hold on
+    plot(1:length(allLambda{i}),log(allLambda{i}))
+end
+
+
+[pk2,flipSign] = keepSign(pk);
+% adjust
+pk3 = pk2;
+for i=1:(length(theta))
+    gridTn = gridT;
+    gridTn{1} = gridT{1}*(1-0.5*sin(theta(i)));
+    pk3{i} = arrange(pk2{i});
+    pk3{i} = interpTensor(pk3{i},gridT,gridTn);
+    pk3{i} = arrange(pk3{i});
+end
+
+figure
+plotkTensorCell(pk3,gridT,theta)
+
+figure
+hold on
+for i=1:(length(theta)-1)
+    for j=1:min([length(pk3{i}.lambda)-6,5])
+        subplot(5,1,j)
+        hold on
+        plot(gridT{1},pk3{i}.U{1}(:,j))
+    end
+end
 
 figure
 plotkTensorCell(pk,gridT,theta,'plotSeq','marginalizedFiber')
@@ -205,16 +246,56 @@ plot(t,flipSign/2,t,nLambda)
 xlabel('Time')
 legend('Number of flip pairs','Number of basis functions')
 
+%%
+clear all
+% decompose exp(-k*x*y)
+clear all
+dim = 3;
+n = [101 121];
+bdim = [0 10
+        0 10];
+for i=1:dim
+    dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); % grid space
+    gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; % grid vector
+end
+
+k = 0.1;
+gaussianXY = zeros(n(1),n(2));
+for i =1:n(1)
+    for j=1:n(2)
+        gaussianXY(i,j) = exp(-k*gridT{1}(i)*gridT{2}(j));
+    end
+end
+surf(gridT{1},gridT{2},gaussianXY')
+pKxy = [];
+[pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
+[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-11,2000,[],1,1);
+fittemp = fit((1:length(pKxy2.lambda))',log(pKxy2.lambda),'poly1');
 
 
 %% Just for the 45deg case, show one case
 thetaI = pi/4;
 Rtheta = [cos(thetaI) -sin(thetaI);sin(thetaI) cos(thetaI)];
 gaussianXY = mvnpdf([X1(:) X2(:)],meanT',Rtheta*covT*Rtheta');
-gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}));
+gaussianXY = reshape(gaussianXY,length(gridT{2}),length(gridT{1}))';
 [pKxy,Uo,out(i)] = cp_als(tensor(gaussianXY),101,'init','nvecs');
-[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-4);
+[pKxy2, err, iter, e_list, t_step, illcond, noreduce] = als2(pKxy,1e-8,5000,[],1,0);
 plotkTensor(pKxy2,gridT);
+
+rankV = 1:20;
+for i=rankV
+   [Pals,~,out]= cp_als(pKxy,i);%,'init','nvecs'); 
+   errals(i) = out.err(out.iters);
+   [Pout,~,out]= cp_nmu(pKxy,i); 
+   errnmu(i) = out.err(out.iters);
+   %figure(i)
+   %plotkTensor(Pout,gridT);
+end
+afigure
+semilogy(rankV,errals,rankV,errnmu)
+xlabel('Rank')
+ylabel('Relative Error')
+legend('Non-negative','ALS')
 
 %% Check accuracy graph
 epsV = logspace(-7,-1,200);
@@ -267,10 +348,10 @@ xlabel('Number of terms')
 grid on
 
 nLambda = length(pKxy2.lambda);
-filterVector = zeros(nLambda,1);
+
 for i=1:nLambda
     figure(i)
-    
+    filterVector = zeros(nLambda,1);
     filterVector(i) = 1;
     plotkTensor(filterBasis(pKxy2,filterVector),gridT);
     
