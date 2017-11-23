@@ -1,19 +1,21 @@
 %% Example - Scalar Unstable System
-% Elis Stefansson, Aug 2015
 
 % The following example is taken from the paper:
 % Linearly Solvable Stochastic Control Lyapunov Functions 
 % by Yoke Peng Leong et. al.
+
+clear all
+addpath(genpath('/home/yleong/tensor_toolbox'));
 
 %% setup
 
 % 1. domain 
 d = 1;
 n = 151;
-bdim = [-5 5];
-bcon = { {'d',1,0} };
+bdim = [-1 1];
+bcon = { {'d',0,0} };
 bsca = []; %no manual scaling
-region = [];
+region = [0 0];
 regval = 1;
 regsca = 1;
 sca_ver = 1; %second scaling method
@@ -22,7 +24,7 @@ ord_of_acc = 4;
 % 2. dynamics
 lambda = 1;
 x = sym('x',[d,1]); %do not change
-f = x(1);%x(1)^3+5*x(1)^2+x(1);
+f = x(1)^3+5*x(1)^2+x(1);
 G = 1;
 B = 1;
 noise_cov = 1;
@@ -41,7 +43,7 @@ debugging = 0;
 % 4. visualize result and run simulation
 plotdata = 1;
 saveplots = 0;
-savedata = 1;
+savedata = 0;
 sim_config = {5,0.005,[-0.5 0.5],[],[]};
 
 % 5. run index
@@ -53,7 +55,5 @@ input2 = {x,f,G,B,noise_cov,q,R,lambda};
 input3 = {artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging};
 input4 = {saveplots,savedata,plotdata,sim_config};
 
-save(['./test_run/scalar_',num2str(run),'_setup'])
-
 % Solve for F
-[F, grid] = main_run_spectral(input1,input2,input3,input4,run,'./test_run/scalar_');
+[F, gridT] = main_run(input1,input2,input3,input4,run);

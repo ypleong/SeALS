@@ -1,4 +1,4 @@
-function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)
+function [F, gridT] = main_run(input1,input2,input3,input4,run,save_folder)
 % MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,
 % visualizes the result and runs simulations with the obtained controller.
 % Inputs:
@@ -32,12 +32,12 @@ fprintf(['Starting run ',num2str(run),' with main_run \n'])
 checklambda(G,B,noise_cov,R,lambda);
 
 % assign basics
-[n,grid,h,region,ord_of_acc,noise_cov,R] = makebasic(bdim,n,region,ord_of_acc,noise_cov,R,G,B);
+[n,gridT,h,region,ord_of_acc,noise_cov,R] = makebasic(bdim,n,region,ord_of_acc,noise_cov,R,G,B);
 
 %% Step 3: calculate differentiation operators and finite difference matrices
 fprintf('Creating differential operators ...\n');
 start_diff = tic;
-[D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region);
+[D,D2,fd1,fd2] = makediffop(gridT,n,h,ord_of_acc,bcon,region);
 toc(start_diff)
 end_diff = toc(start_diff);
 
@@ -45,7 +45,7 @@ end_diff = toc(start_diff);
 fprintf('Creating dynamics operator ...\n');
 %create ktensors
 start_dynamics = tic;
-[fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid);
+[fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,gridT);
 toc(start_dynamics)
 end_dynamics = toc(start_dynamics);
 
@@ -72,9 +72,9 @@ end
 if isempty(bsca) == 1 || isempty(regsca) == 1
     
     if sca_ver == 1
-        [bscat, regscat] = make_bc_sca_var(op,grid,region,bcon);    
+        [bscat, regscat] = make_bc_sca_var(op,gridT,region,bcon);    
     elseif sca_ver == 2
-        [bscat, regscat] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n);
+        [bscat, regscat] = make_bc_sca(op,bcon,region,regval,als_options,fd1,gridT,x,n);
     elseif sca_ver == 3
         % temporarily option made for comparing with old results
         op = (h(1)^2*h(2)^2)*op;
@@ -95,7 +95,7 @@ if isempty(regsca)
 end
 
 % make bc
-[bc] = makebc(bcon,bsca,grid,x,n);
+[bc] = makebc(bcon,bsca,gridT,x,n);
 
 %% Step 8: set up boundary conditions for operator
 [op] = makebcop(op,bcon,bsca,n,fd1);
@@ -103,7 +103,7 @@ end
 %% Step 9: incooporate region in boundary conditions and operator
 
 if isempty(region) == 0
-    [op,bc] = incorpregion(op,bc,region,grid,regval,regsca);
+    [op,bc] = incorpregion(op,bc,region,gridT,regval,regsca);
 end
 
 %% Step 10: compress operator
@@ -154,25 +154,28 @@ disp('Solution complete');
 
 if plotdata
 % arrange input data
-    F = arrange(F);
-    plotsolve = {F,err,enrich,t_step,Fcond,grid};
-    plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
-    plotdebug = {F_cell,b_cell,B_cell};
-
-% plot results from run als and compress operator
-    try
-        fprintf('Plotting results \n')
-        visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
-        fprintf('Plotting complete \n')
-    catch
-        fprintf('Could not visualize results \n')
-    end
+%     F = arrange(F);
+%     plotsolve = {F,err,enrich,t_step,Fcond,gridT};
+%     plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
+%     plotdebug = {F_cell,b_cell,B_cell};
+% 
+% % plot results from run als and compress operator
+%     try
+%         fprintf('Plotting results \n')
+%         visres(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+%         fprintf('Plotting complete \n')
+%     catch
+%         fprintf('Could not visualize results \n')
+%     end
+    figure
+    coord = zeros(d,1);
+    plot2DslicesAroundPoint(F, coord, gridT,[],'surf');
 end
 
 %% Step 13. run simulations
 
 % % arrange input data
-% sim_data = {lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+% sim_data = {lambda,gridT,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 % 
 % % run simulation
 % if isempty(sim_config) == 0

@@ -135,11 +135,13 @@
 % Elis Stefansson, Aug 4 2015
 
 % Add the scripts to path - run this once before running any setup
-% addpath('./src/');
+addpath(genpath('./src'));
 
 %% setup
 
+clear all
 % run('./examples/Inverted_Pendulum.m')
+run('./examples/Scalar_Unstable_System.m')
 % run('./examples/Smooth_2D_Example.m')
 % run('./examples/Quadcopter.m')
 
@@ -147,7 +149,7 @@
 input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};
 input2 = {x,f,G,B,noise_cov,q,R,lambda};
 input3 = {artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging};
-input4 = {saveplots,savedata,sim_config};
+input4 = {saveplots,savedata,plotdata,sim_config};
 
 %% run
 [F] = main_run(input1,input2,input3,input4,run);

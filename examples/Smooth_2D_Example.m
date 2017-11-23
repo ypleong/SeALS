@@ -1,9 +1,11 @@
 %% Example - Smooth 2D Example
-% Elis Stefansson, Aug 2015
 
 % The following example is taken from the paper:
 % Linearly Solvable Stochastic Control Lyapunov Functions 
 % by Yoke Peng Leong et. al.
+
+clear all
+addpath(genpath('../src'));
 
 %% setup
 
@@ -35,13 +37,23 @@ tol_err_op = 1e-6;
 comp_options = [];
 tol_err = 1e-9;
 als_options = [];
-als_variant = []; %{10,50};
+als_variant = []; % {10,50}; -- not ill condition,  []; -- ill-condition
 debugging = 0;
 
 % 4. visualize result and run simulation
 saveplots = 0;
 savedata = 0;
+plotdata = 1;
 sim_config = {5,0.005,[-0.5 0.5 0.2 -0.7 -0.2 0.3;0.5 0 0.6 -0.2 -0.4 -0.6],[],[]};
 
 % 5. run index
 run = 1;
+
+% Setup run
+input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};
+input2 = {x,f,G,B,noise_cov,q,R,lambda};
+input3 = {artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging};
+input4 = {saveplots,savedata,plotdata,sim_config};
+
+% Solve for F
+[F, gridT] = main_run(input1,input2,input3,input4,run);
