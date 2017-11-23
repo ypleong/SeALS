@@ -111,7 +111,7 @@ for m = 1:n_trial
         c_q = qFunc(current);
         
         c_n = normrnd(0,sigma);
-        c_u = -RR\BB'*2*PP*current+uref;
+        c_u = -(RR)\BB'*2*PP*current+uref;
         
         next = current + dt*(c_f+c_G*c_u+c_B*c_n);
         cost = c_q + 0.5*(c_u-uref)'*R*(c_u-uref);
@@ -200,14 +200,15 @@ c_tot = dt*sum(c_traj,2);
 
 %% plot state trajectories
 
-pdim = ceil(sqrt(d));
+pdim2 = floor(sqrt(d));
+pdim1 = ceil(sqrt(d));
 ccc = lines(n_trial);
 
 % plot state trajectories for each dimension seperately
 fig = figure;
 for i=1:d
     
-    subplot(pdim,pdim,i);
+    subplot(pdim1,pdim2,i);
     hold on
     for j = 1:n_trial
         
@@ -216,7 +217,7 @@ for i=1:d
         for k = 1:length(c_per_list)-1
             
             cc_per_list = c_per_list(k)+1:c_per_list(k+1);
-            plot( t(cc_per_list), squeeze( traj(j,cc_per_list,i) ), 'color', ccc(j,:) );
+            plot( t(cc_per_list), squeeze( traj(j,cc_per_list,i) ), 'color', ccc(j,:) ,'linewidth',1.5);
             
         end
         
@@ -227,72 +228,75 @@ for i=1:d
         plot([t(1) t(end_list(j))],[region(i,2) region(i,2)], '--', 'Color',[.3 .3 .3], 'LineWidth',1);
     end
     hold off
-    xlabel('time(s)')
+    xlabel('Time(s)')
+    ylabel(['x_{',num2str(i),'}'])
     axis([0 inf bdim(i,1) bdim(i,2)])
-    title(['state traj for x_{',num2str(i),'}'])
+    set(gca,'fontsize',18)
+    box on
+%     title(['state traj for x_{',num2str(i),'}'])
     
 end
 
 if saveplots == 1
     saveas(fig,[dirpath,'traj_plot_run',num2str(run)]);
 end
-
-% plot trajectories at all dimensions
-if d > 1
-for i = 1:n_trial
-    [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
-    figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', 'EdgeColor', 'None');
-    ylabel('Coordinates')
-    xlabel('Time, s')
-    title(['Trial ', i])
-end
-end
-
-if saveplots == 1
-    saveas(fig,[dirpath,'traj_plot_all_run',num2str(run)]);
-end
-
-% special case when d = 2, trajectories in one plot.
-if d == 2
-    
-    % combine peridic_list for dimension 1 and 2
-    per_list_d2 = cell(1,n_trial);
-    for j = 1:n_trial
-        per_list_d2{j} = unique([periodic_list{j,1} periodic_list{j,2}]);
-    end
-    
-    fig = figure;
-    hold on
-    for j = 1:n_trial
-        
-        c_per_list = per_list_d2{j};
-        
-        for k = 1:length(c_per_list)-1
-            
-            cc_per_list = c_per_list(k)+1:c_per_list(k+1);
-            plot(squeeze((traj(j,cc_per_list,1))),squeeze((traj(j,cc_per_list,2))),'color',ccc(j,:))
-            
-        end
-        
-    end
-    
-    if isempty(region) == 0
-        rectangle('Position',[region(1,1),region(2,1),region(1,2)-region(1,1),region(2,2)-region(2,1)],...
-            'Curvature',[0,0],'FaceColor','r')
-    end
-    xlabel('x_1')
-    ylabel('x_2')
-    title('state trajectories')
-    axis([bdim(1,1) bdim(1,2) bdim(2,1) bdim(2,2)])
-    set(gca,'fontsize', 16)
-    box on
-    hold off;
-    
-    if saveplots == 1
-        saveas(fig,[dirpath,'traj_2Dplot_run',num2str(run)]);
-    end
-    
-end
+%%
+% % plot trajectories at all dimensions
+% if d > 1
+% for i = 1:n_trial
+%     [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
+%     figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', 'EdgeColor', 'None');
+%     ylabel('Coordinates')
+%     xlabel('Time, s')
+%     title(['Trial ', i])
+% end
+% end
+% 
+% if saveplots == 1
+%     saveas(fig,[dirpath,'traj_plot_all_run',num2str(run)]);
+% end
+% 
+% % special case when d = 2, trajectories in one plot.
+% if d == 2
+%     
+%     % combine peridic_list for dimension 1 and 2
+%     per_list_d2 = cell(1,n_trial);
+%     for j = 1:n_trial
+%         per_list_d2{j} = unique([periodic_list{j,1} periodic_list{j,2}]);
+%     end
+%     
+%     fig = figure;
+%     hold on
+%     for j = 1:n_trial
+%         
+%         c_per_list = per_list_d2{j};
+%         
+%         for k = 1:length(c_per_list)-1
+%             
+%             cc_per_list = c_per_list(k)+1:c_per_list(k+1);
+%             plot(squeeze((traj(j,cc_per_list,1))),squeeze((traj(j,cc_per_list,2))),'color',ccc(j,:))
+%             
+%         end
+%         
+%     end
+%     
+%     if isempty(region) == 0
+%         rectangle('Position',[region(1,1),region(2,1),region(1,2)-region(1,1),region(2,2)-region(2,1)],...
+%             'Curvature',[0,0],'FaceColor','r')
+%     end
+%     xlabel('x_1')
+%     ylabel('x_2')
+%     title('state trajectories')
+%     axis([bdim(1,1) bdim(1,2) bdim(2,1) bdim(2,2)])
+%     set(gca,'fontsize', 16)
+%     box on
+%     hold off;
+%     
+%     if saveplots == 1
+%         saveas(fig,[dirpath,'traj_2Dplot_run',num2str(run)]);
+%     end
+%     
+% end
 
 %% plot control trajectories
 
@@ -305,14 +309,21 @@ for i=1:ninputs
     
     subplot(pdim,pdim,i);
     hold on
-    for j = 1:n_trial
-        plot( t(1:end_list(j)-1), squeeze( traj_u(j,1:end_list(j)-1,i) ), 'color', ccc(j,:) );
-    end
+%     for j = 1:n_trial
+%         plot( t(1:end_list(j)-1), squeeze( traj_u(j,1:end_list(j)-1,i) ), 'color', ccc(j,:) );
+%     end
+    plot( t(1:end-1), squeeze( traj_u(:,1:end_list(j)-1,i) ),'linewidth',1.5);
     hold off
-    xlabel('time(s)')
-    title(['control traj:s for u_',num2str(i)])
+    xlabel('Time(s)')
+    ylabel(['u_',num2str(i)])
+    box on
+%     title(['control traj:s for u_',num2str(i)])
+    set(gca,'fontsize',18)
     
 end
+
+set(findall(gcf, 'Type', 'Text'),'FontWeight', 'Normal')
+
 
 if saveplots == 1
     saveas(fig,[dirpath,'traj_u_plot_run',num2str(run)]);
@@ -325,11 +336,20 @@ fig = figure;
 
 hold on
 for j = 1:n_trial
-    plot( t(1:end_list(j)-1), c_traj(j,1:end_list(j)-1), 'color', ccc(j,:) );
+    plot( t(1:end_list(j)-1), c_traj(j,1:end_list(j)-1), 'color', ccc(j,:),'linewidth',1.5);
 end
 hold off
 xlabel('Time(s)')
-title(['Cost trajectories - average cost: ', num2str(trapz(t(1:end_list(j)-1),c_traj(j,1:end_list(j)-1))/T)])
+ylabel('Cost')
+% title(['Cost trajectories - average cost: ', num2str(trapz(t(1:end_list(j)-1),c_traj(j,1:end_list(j)-1))/T)])
+set(gca,'fontsize',18)
+box on
+
+c_ave = zeros(n_trial,1);
+for j = 1:n_trial
+    c_ave(j) = trapz(t(1:end_list(j)-1),c_traj(j,1:end_list(j)-1))/T;
+end
+
 
 if saveplots == 1
     saveas(fig,[dirpath,'c_traj_plot_run',num2str(run)]);
@@ -339,7 +359,7 @@ end
 
 if savedata == 1
     clear fig;
-    save([save_folder,'simdata_run_',num2str(run)]);
+    save([save_folder,'simdata_lqg_run_',num2str(run)]);
 end
 
 

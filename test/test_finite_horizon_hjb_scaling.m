@@ -17,9 +17,12 @@ disp(datetime)
 start_whole = tic;
 
 dynamic_choice = 'VTOL';
-time_stepping_choice = 'forward'; % forward, backward
-discretization = 'spectral'; % 'uniform'; %
-rng(100);
+time_stepping_choice = 'backward'; % forward, backward
+discretization = 'uniform'; % 'uniform'; %
+inittype = 'manual';
+initfilename = './test_run/test_infinite_horizon_hjb/run_1/run_VTOL_thesis.mat';
+initvar = 'F_last';
+writedisk = 0;
 
 %% Define dynamics
 
@@ -31,14 +34,14 @@ if strcmp(dynamic_choice,'VTOL')
     ninputs = 2;
     x = sym('x',[d,1]); %do not change
     
-    n = [51; 53; 55; 57; 59; 61];%[101; 103; 105; 107; 107; 101]; %
-    bdim = [-8 8; -8 8; -8 8; -8 8; -pi pi-(2*pi/(n(5))); -8 8;];
+    n = [101; 103; 105; 107; 107; 101]; %[51; 53; 55; 57; 59; 61];%
+    bdim = [-5 5; -5 5; -5 5; -5 5; -pi pi-(2*pi/(n(5)+1)); -5 5;];%[-8 8;-8 8;-8 8;-8 8; -pi pi-(2*pi/(n(5)+1)); -8 8;]; %
     bcon = {{'d',0,0},{'d',0,0},{'d',0,0},{'d',0,0},{'p'},{'d',0,0}};
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
     als_variant = {10,20};
     tol_err_op = 1e-4;
-    c_err = 1e-7;
+    c_err = 1e-4;
         
     g = 9.8; eps = 0.01;
     G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
@@ -132,6 +135,7 @@ elseif strcmp(dynamic_choice,'Linear')
     als_variant = {10,20};
     tol_err_op = 1e-5;
     c_err = 1e-7;
+    uref = zeros(ninputs,1);
 
     AA = randn(d,d);
     BB = eye(d,ninputs);
@@ -158,7 +162,7 @@ elseif strcmp(dynamic_choice,'SimplePendulum')
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
     tol_err_op = 1e-6;
-    c_err = 1e-7;
+    c_err = 1e-6;
 
     % Simple Pendulum
     f = [x(2) ; sin(x(1))];
@@ -169,11 +173,12 @@ elseif strcmp(dynamic_choice,'SimplePendulum')
     q = 0.1*x(1)^2+0.05*x(2)^2;
     R = 0.02;
     lambda = noise_cov*R;
+    uref = zeros(ninputs,1);
     
     AA = [0 1; 
           1 0]; 
     BB = B;
-    QQ = diag(ones(d,1));
+    QQ = diag([0.1 0.05]);
     RR = 1/2*R;
     PP = care(AA,BB,QQ,RR);
 
@@ -201,6 +206,7 @@ elseif strcmp(dynamic_choice,'InvertedPendulum')
     q = 0.1*x(1)^2+0.05*x(2)^2;
     R = 0.02;
     lambda = noise_cov*R;
+    uref = zeros(ninputs,1);
 
     % linearized dynamics
     AA = [0 1; (g/l)/(4/3-mr) 0];%randn(d,d);% 
@@ -305,26 +311,31 @@ end
 fprintf('Creating initial conditions ...\n');
 start_PDEinit = tic;
 
-if strcmp(dynamic_choice,'Linear')
-    if d == 2
-        [gridx, gridy] = meshgrid(gridT{1},gridT{2});
-        init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
-        initTens  = {cp_als(tensor(init'),10)};
-    else
-        init = exp(-x(1)'*PP*x(1)/lambda);
-        initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
-    end
-else
-    if d == 2
-        [gridx, gridy] = meshgrid(gridT{1},gridT{2});
-        init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
-        initTens  = {cp_als(tensor(init'),10)};
-    else
-        U = cell(d,1);
-        for i = 1:d
-            U{i} = exp(-3*gridT{i}.^2);
+if strcmp(inittype,'manual')
+    load(initfilename,initvar);
+    initTens = {eval(initvar)};
+else 
+    if strcmp(dynamic_choice,'Linear')
+        if d == 2
+            [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+            init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
+            initTens  = {cp_als(tensor(init'),10)};
+        else
+            init = exp(-x(1)'*PP*x(1)/lambda);
+            initTens  = fcell2ftens( fsym2fcell(sym(init) ,x), gridT);
         end
-        initTens = {ktensor(U)};
+    else
+        if d == 2
+            [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+            init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
+            initTens  = {cp_als(tensor(init'),10)};
+        else
+            U = cell(d,1);
+            for i = 1:d
+                U{i} = exp(-3*gridT{i}.^2);
+            end
+            initTens = {ktensor(U)};
+        end
     end
 end
     
@@ -363,38 +374,57 @@ start_solve = tic;
 
 nt = length(tt);
 
-F_all = cell(1,nt+1);
-F_all{1} = initTens{1};
 F_scale = ones(1,nt+1);
+F_last = initTens{1};
 
 t = 0;
 
 iter_time = zeros(nt,1);
+
+filename = [dirpath,'run_',num2str(run),'data'];
+
+if writedisk
+    save(filename,'-v7.3')
+    mfile = matfile(filename,'Writable',true);
+    mfile.F_all = cell(1,nt+1);
+    mfile.F_all(1,1) = {F_last};
+else 
+    save(filename)
+    F_all = cell(1,nt+1);
+    F_all(1,1) = {F_last};
+end
+
 %%
 for ind = 2:nt+1
     start_iter = tic;
     if strcmp(time_stepping_choice, 'forward')
         [bc] = makebcforward(bcon,n);
-        F = SRMultV(op,F_all{ind-1}) + bc;
+        F = SRMultV(op,F_last) + bc;
     elseif strcmp(time_stepping_choice, 'backward')
-        [bc] = makebcbackward(F_all{ind-1},bcon,n);
+        [bc] = makebcbackward(F_last,bcon,n);
         [F, ~] = als_sys(op,bc,bc,tol_err_op,als_options,debugging, 0);
     else
         error([time_stepping_choice, ' time stepping scheme does not exist.'])
     end
     
-    if ncomponents(F) > ncomponents(F_all{ind-1})
-        [F, ~] = tenid(F,tol_err_op,1,9,'frob',[],fnorm(F),0);
-        [F, ~] = als2(F,tol_err_op);
+    if ncomponents(F) > ncomponents(F_last)
+        [F, ~] = tenid(F,c_err,1,9,'frob',[],fnorm(F),0);
+        [F, ~] = als2(F,c_err);
     end
     
     F_norm = EvalT(F,zeros(d,1), gridT); %norm(F)/sqrt(ncomponents(F)*sum(n));
     F_scale(ind) = F_scale(ind-1)*F_norm;
-    F_all{ind} = F*(1/F_norm);
+    F_last = F*(1/F_norm);
+    if writedisk
+        mfile.F_all(1,ind) = {F_last};   
+    else
+        F_all(1,ind) = {F_last};
+    end
     iter_time(ind-1) = toc(start_iter);
     
-    if mod(ind,20) == 0
-        fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_all{ind}))
+    if mod(ind,500) == 0
+        fprintf('Time: %.4fs  Current tensor rank: %d \n', tt(ind), ncomponents(F_last))
+        save(filename,'-append','F_scale')
     end
 end
 
@@ -408,13 +438,29 @@ fprintf(['Run ',num2str(run),' with main_run is complete \n'])
 
 diary off
 
-save([dirpath,'run_',num2str(run),'data'])
+save(filename,'-append')
 
 %% Visualize results
 
-for i=1:ind
-    F_all_2{i} = F_all{i}*F_scale(i);
+rank_F_list = zeros(length(tt),1);
+for i = 1:length(tt)
+    rank_F_list(length(tt)-i+1) = ncomponents(F_all{i});
 end
+
+figure;
+plot(tt,rank_F_list,'linewidth',1.5)
+xlabel('Time, s')
+ylabel('Seperation Rank')
+set(gca,'fontsize',18)
+box on
+
+%%
+figure;
+plot(tt,F_scale(end-1:-1:1),'linewidth',1.5)
+xlabel('Time, s')
+ylabel('Scaling constant')
+set(gca,'fontsize',18)
+box on
 
 %% Dimension = 1 
 
@@ -424,7 +470,8 @@ if d == 1
 
     px = zeros(n,length(tt));
     for k=1:ind;%length(tt)
-       px(:,k) = double(F_all{k}*F_scale(k)); 
+       FF = mfile.F_all(1,k);
+       px(:,k) = double(FF{1}*F_scale(k)); 
     end
 
     plottend = length(tt)-length(tt)+ind-1;
@@ -444,18 +491,27 @@ end
 if d == 2
     
 %%    
-    dim_plot = [1 2];
+    dim_plot = [5 6];
     coord = ceil(n/2);
     figure;
     for k = 1:5:ind-1
-         plot2Dslice(F_all{k}*F_scale(k),dim_plot,coord,gridT);
+        FF = mfile.F_all(1,k);% F_all(1,k);%
+         plot2Dslice(FF{1}*F_scale(k),dim_plot,coord,gridT,[],[],'surf');
          colorbar;
 %          caxis([0 1])
          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
          title(['Time = ',num2str(tt(k))]);
 %          zlim([0 1])
-         pause(1.0/1000);
+%          pause(1.0/1000);
     end
+    
+%%
+
+coord = zeros(d,1);
+k = 1;%ceil(length(tt)/2);
+FF = {F_all{k}};%mfile.F_all(1,k);
+figure;
+plot2DslicesAroundPoint(FF{1}*F_scale(k), coord, gridT,[],'surf');
     
 end
 
@@ -463,14 +519,16 @@ end
 %% Simulations
 
 saveplots = 0;
-savedata = 0;
-ninputs = 1;
-uref = zeros(ninputs,1);
+savedata = 1;
+% ninputs = 1;
+% uref = zeros(ninputs,1);
 
+rng(50)
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f1,G,B,noise_cov,q,R,x);
-sim_config = {h*(ind-1),h,repmat([1; 0; ],1,1),[],[]};
+sim_config = {h*(ind-1),h,randi([-100, 100],d,10)/100,[],[]}; %randi([-100, 100],d,10)/400 repmat([1; 0; ],1,1)
 sim_data = {lambda,gridT,R,noise_cov,F_all,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
-
+%% 
+rng(101)
 sim_finite_run(sim_config,sim_data,saveplots,savedata,run,dirpath)
 
 %% LQR

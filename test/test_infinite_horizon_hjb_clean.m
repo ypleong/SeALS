@@ -19,9 +19,10 @@ disp(datetime)
 
 start_whole = tic;
 
-dynamic_choice = 'VTOL';
+dynamic_choice = 'SimplePendulum';
 discretization = 'spectral'; % 'uniform'; %
 initialization = 'linear'; % 'simple', 'random'
+saveF = 0;
 
 %% Define dynamics
 
@@ -42,8 +43,8 @@ if strcmp(dynamic_choice,'VTOL')
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
     als_variant = {10,20};
-    tol_err_op = 1e-5;
-    c_err = 1e-7;
+    tol_err_op = 1e-6;
+    c_err = 1e-8;
         
     g = 9.8; eps = 0.01;
     G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
@@ -61,7 +62,7 @@ if strcmp(dynamic_choice,'VTOL')
     AA = [0 1 0 0 0 0; 
           0 0 0 0 -g 0; 
           0 0 0 1 0 0; 
-          zeros(1,d); 
+          0 0 0 0 0 0; 
           0 0 0 0 0 1; 
           zeros(1,6);]; 
     BB = [0 0; 0 eps; 0 0; 1 0; 0 0; 0 1]; 
@@ -75,7 +76,7 @@ elseif strcmp(dynamic_choice,'Quadcopter')
     d = 12;
     ninputs = 4;
     x = sym('x',[d,1]); %do not change
-    n = 51*ones(d,1);
+    n = 151*ones(d,1);
     bdim = [-5 5 ; -5 5; -5 5; -pi pi; -pi pi; -pi pi;...
         -5 5; -5 5; -5 5; -pi pi-(2*pi/n(10)); -pi pi-(2*pi/n(11)); -pi pi-(2*pi/n(12))];
     bcon = { {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , {'d',0,0} , ...
@@ -83,8 +84,8 @@ elseif strcmp(dynamic_choice,'Quadcopter')
     bsca = ones(d,2);
     als_options = {100,20,'average',1e-7,1e-12,0.01,15};
     als_variant = {10,20};
-    tol_err_op = 1e-4;
-    c_err = 1e-4;
+    tol_err_op = 1e-5;
+    c_err = 1e-25;
 
     g = 9.8;
     hf1 = sin(x(12))*sin(x(10))+cos(x(12))*cos(x(10))*sin(x(11));
@@ -119,11 +120,12 @@ elseif strcmp(dynamic_choice,'Quadcopter')
     QQ = diag(ones(d,1));
     RR = 1/2*R;
     PP = care(AA,BB,QQ,RR);
+    trace(PP*BB*noise_cov*BB')
 
 elseif strcmp(dynamic_choice,'Linear')
 
-    d = 2;
-    ninputs = 1;
+    d = 4;
+    ninputs = 3;
     x = sym('x',[d,1]); %do not change
     n = 51;
     bdim = [-5,5];
@@ -140,19 +142,21 @@ elseif strcmp(dynamic_choice,'Linear')
     c_err = 1e-7;
 
     AA = randn(d,d);
+    load([dirpath,'run_linear4D.mat'],'AA');
     BB = eye(d,ninputs);
     QQ = diag(ones(d,1));
     RR = 1/2*diag(ones(ninputs,1));
     PP = care(AA,BB,QQ,RR);
+    noise_cov = diag(ones(ninputs,1));
     trace(PP*BB*noise_cov*BB')
     
     B = BB;
     G = B;
     f = AA*x;
     f1 = f;
-    noise_cov = diag(ones(ninputs,1));
+    uref = [0 0 0]';
     q = x'*QQ*x;
-    R = RR;
+    R = 2*RR;
     lambda = 1;%noise_cov*R;
     
 elseif strcmp(dynamic_choice,'SimplePendulum')
@@ -165,12 +169,14 @@ elseif strcmp(dynamic_choice,'SimplePendulum')
     bcon = {{'p'},{'d',0,0}};
     bsca = ones(d,2);
     als_options = {100,25,'average',1e-7,1e-12,0.01,15};
+    als_variant = {10,20};
     tol_err_op = 1e-6;
     c_err = 1e-7;
 
     % Simple Pendulum
     f = [x(2) ; sin(x(1))];
     f1 = f;
+    uref = 0;
     G = [0.01 ; 1];
     B = G;
     noise_cov = 1;
@@ -181,7 +187,7 @@ elseif strcmp(dynamic_choice,'SimplePendulum')
     AA = [0 1; 
           1 0]; 
     BB = B;
-    QQ = diag(ones(d,1));
+    QQ = diag([0.1,0.05]);
     RR = 1/2*R;
     PP = care(AA,BB,QQ,RR);
 
@@ -229,7 +235,6 @@ regsca = [];
 sca_ver = 1;
 
 debugging = 0;
-saveF = 1;
 
 fprintf(['Starting run ',num2str(run),' with main_run \n'])
 
@@ -382,7 +387,10 @@ for ind = 2:tend
     
     iter_time(ind-1) = toc(start_iter);
     
-    errF(ind-1) = norm(F - F_last)/(nndata*(ncomponents(F)+ncomponents(F_last)));
+    F_diff = F - F_last;
+    [F_diff,~] = tenid(F_diff,tol_err_op,1,9,'frob',[],fnorm(F_diff),0);
+    
+    errF(ind-1) = norm(F_diff)/(nndata*(ncomponents(F_diff)));
     
     F_last = F;
     
@@ -396,6 +404,8 @@ for ind = 2:tend
             ind, ncomponents(F),eigc(ind),errF(ind-1))
         break
     end
+    
+    save([dirpath,'run_',num2str(run),'data'])
 end
 
 time_solve = toc(start_solve);
@@ -416,28 +426,31 @@ dim_plot = [1 2];
 
 %% Eigenvalues
 figure;
-plot(eigc(1:ind))
+plot(eigc(1:ind),'linewidth',1.5)
 xlabel('Iteration')
 ylabel('Eigenvalue')
-title(['Final value: ', num2str(eigc(ind)),' Correct linear value: ', ...
+title(['Final Value: ', num2str(eigc(ind)),' Linear Value: ', ...
     num2str(trace(PP*BB*noise_cov*BB'))])
+set(gca,'fontsize',18)
 
 %% Errors
 figure;
-plot(errF(1:ind))
+plot(errF(1:ind),'linewidth',1.5)
 xlabel('Iteration')
 ylabel('Error')
-title(['Final error: ', num2str(errF(ind))])
+set(gca,'fontsize',18)
+% title(['Final error: ', num2str(errF(ind))])
 
 %% Slices
 figure
 coord = zeros(d,1);
-plot2DslicesAroundPoint(F_all{ind}, coord, gridT,[],'surf');
+plot2DslicesAroundPoint(F_last, coord, gridT,[],'surf');
 
 %%
 figure;
 coord = ceil(n/2);
-plot2Dslice(F_all{ind},dim_plot,coord,gridT);
+dim_plot = [5 6];
+plot2Dslice(F_last*(1/F_last(coord)),dim_plot,coord,gridT,[],[],'surf');
 
 %% LQR 
 [gridx, gridy] = meshgrid(gridT{dim_plot(1)},gridT{dim_plot(2)});
@@ -452,12 +465,13 @@ axis([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
 %% Simulations
 
 saveplots = 0;
-savedata = 0;
+savedata = 1;
 
 h = 0.0005;
 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f1,G,B,noise_cov,q,R,x);
-sim_config = {20,h,repmat([0;0;1;0;1;0;],1,1),[],[]};
-sim_data = {lambda,gridT,R,noise_cov,F_all{ind},D,uref,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+% sim_config = {10,h,repmat([0;0;1;0],1,10),[],[]};
+sim_config = {10,h,randi([-100, 100],d,10)/100,[],[]};
+sim_data = {lambda,gridT,R,noise_cov,F_last,D,uref,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
 sim_data2 = {AA,BB,RR,QQ};
 
 %%
@@ -465,6 +479,6 @@ rng(100);
 sim_run(sim_config,sim_data,saveplots,savedata,run,dirpath);
 
 %%
-rng(100);
+rng(100); 
 sim_run_lqg(sim_config,sim_data,sim_data2,saveplots,savedata,run,dirpath);
 
