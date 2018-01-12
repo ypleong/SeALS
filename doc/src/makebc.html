@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makebc</title>
+  <meta name="keywords" content="makebc">
+  <meta name="description" content="MAKEBC creates the boundary conditions with scaling.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makebc
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEBC creates the boundary conditions with scaling.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [bc] = makebc(bcon,bsca,grid,x,n) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKEBC creates the boundary conditions with scaling.
+ Input:
+   bcon - the boundary conditions. bcon{i} is boundary conditions in
+   dimension i:
+      bcon{i} = {'p'}. Periodic
+      bcon{i} = {'d',val_lo,val_up}. Dirichlet with val_lo and val_up 
+      for lower and upper boundary in dimension i.
+      bcon{i} = {'n',val_lo,val_up}. Neumann with val_lo and val_up for
+      lower and upper boundary in dimension i.
+      where all the values are for the desirability function.
+   bsca - boundary scaling. bsca(i,1) and bsca(i,2) is how much lower and
+   upper boundary in dimension i should be scaled.
+   grid - the discreatization grid.
+   x - the symbolic state space vector.
+   n - the number of grid points in each dimension.
+ Output:
+   bc - the boundary conditions as a ktensor
+
+ Remark: The boundary points common for more than one dimension will 
+ attain the lowest dimension boundary value.
+
+ See also <a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">MAKE_BC_SCA</a>, <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [bc] = makebc(bcon,bsca,grid,x,n)</a>
+0002 <span class="comment">% MAKEBC creates the boundary conditions with scaling.</span>
+0003 <span class="comment">% Input:</span>
+0004 <span class="comment">%   bcon - the boundary conditions. bcon{i} is boundary conditions in</span>
+0005 <span class="comment">%   dimension i:</span>
+0006 <span class="comment">%      bcon{i} = {'p'}. Periodic</span>
+0007 <span class="comment">%      bcon{i} = {'d',val_lo,val_up}. Dirichlet with val_lo and val_up</span>
+0008 <span class="comment">%      for lower and upper boundary in dimension i.</span>
+0009 <span class="comment">%      bcon{i} = {'n',val_lo,val_up}. Neumann with val_lo and val_up for</span>
+0010 <span class="comment">%      lower and upper boundary in dimension i.</span>
+0011 <span class="comment">%      where all the values are for the desirability function.</span>
+0012 <span class="comment">%   bsca - boundary scaling. bsca(i,1) and bsca(i,2) is how much lower and</span>
+0013 <span class="comment">%   upper boundary in dimension i should be scaled.</span>
+0014 <span class="comment">%   grid - the discreatization grid.</span>
+0015 <span class="comment">%   x - the symbolic state space vector.</span>
+0016 <span class="comment">%   n - the number of grid points in each dimension.</span>
+0017 <span class="comment">% Output:</span>
+0018 <span class="comment">%   bc - the boundary conditions as a ktensor</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Remark: The boundary points common for more than one dimension will</span>
+0021 <span class="comment">% attain the lowest dimension boundary value.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% See also MAKE_BC_SCA, MAIN_RUN.</span>
+0024 
+0025 <span class="comment">% Elis Stefansson, Aug 6 2015</span>
+0026 
+0027 d = length(n);
+0028 bc = [];
+0029 
+0030 <span class="keyword">for</span> i = 1:d <span class="comment">%add boundary conditions to each dimension</span>
+0031     
+0032     bconi = bcon{i};
+0033     
+0034     <span class="keyword">if</span> strcmp(bconi{1},<span class="string">'n'</span>) || strcmp(bconi{1},<span class="string">'d'</span>) <span class="comment">%not periodic</span>
+0035         
+0036         
+0037         <span class="comment">% 1. create lower boundary tensor</span>
+0038         bcl = bconi{2};
+0039         <span class="keyword">if</span> isa(bcl,<span class="string">'sym'</span>) == 0 <span class="comment">%not sym (constant)</span>
+0040             bcl = sym(bcl);
+0041         <span class="keyword">end</span>
+0042         bcl_cell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(bcl,x);
+0043         bcl_tens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(bcl_cell,grid);
+0044         bcl_tens = bcl_tens{1}; <span class="comment">%from cell to tensor</span>
+0045         
+0046         <span class="comment">% do not intefer with bc for lower dimensions</span>
+0047         <span class="keyword">for</span> k = 1:(i-1)
+0048             bcl_tens.U{k}(1,:) = 0;
+0049             bcl_tens.U{k}(<span class="keyword">end</span>,:) = 0;
+0050         <span class="keyword">end</span>
+0051         
+0052         <span class="comment">% just the lower boundary points</span>
+0053         Ui = bcl_tens.U{i};
+0054         si = size(Ui);
+0055         newUi = zeros(si);
+0056         newUi(1,:) = Ui(1,:);
+0057         bcl_tens.U{i} = newUi;
+0058         
+0059         <span class="comment">% scale the boundary</span>
+0060         bcl_tens = bsca(i,1)*bcl_tens;
+0061         
+0062         
+0063         <span class="comment">% 2. create upper boundary tensor</span>
+0064         bcu = bconi{3};
+0065         <span class="keyword">if</span> isa(bcu,<span class="string">'sym'</span>) == 0 <span class="comment">%not sym (constant)</span>
+0066             bcu = sym(bcu);
+0067         <span class="keyword">end</span>
+0068         bcu_cell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(bcu,x);
+0069         bcu_tens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(bcu_cell,grid);
+0070         bcu_tens = bcu_tens{1};
+0071         
+0072         <span class="comment">% do not intefer with bc for lower dimensions</span>
+0073         <span class="keyword">for</span> k = 1:(i-1)
+0074             bcu_tens.U{k}(1,:) = 0;
+0075             bcu_tens.U{k}(<span class="keyword">end</span>,:) = 0;
+0076         <span class="keyword">end</span>
+0077         
+0078         <span class="comment">% just the upper boundary points</span>
+0079         Ui = bcu_tens.U{i};
+0080         si = size(Ui);
+0081         newUi = zeros(si);
+0082         newUi(<span class="keyword">end</span>,:) = Ui(<span class="keyword">end</span>,:);
+0083         bcu_tens.U{i} = newUi;
+0084         
+0085         <span class="comment">% scale the boundary</span>
+0086         bcu_tens = bsca(i,1)*bcu_tens;
+0087         
+0088         <span class="comment">% 3. combine</span>
+0089         bci = bcl_tens+bcu_tens;
+0090         
+0091         <span class="keyword">if</span> isempty(bc) == 1
+0092             bc = bci;
+0093         <span class="keyword">else</span>
+0094             bc = bc+bci;
+0095         <span class="keyword">end</span>
+0096         
+0097     <span class="keyword">end</span>
+0098     
+0099 <span class="keyword">end</span>
+0100 
+0101 <span class="keyword">if</span> isempty(bc) == 1 <span class="comment">%all periodic or vanishing</span>
+0102     
+0103     bcU = cell(1,d);
+0104     <span class="keyword">for</span> i=1:d
+0105         bcU{i} = zeros(n(i),1);
+0106     <span class="keyword">end</span>
+0107     
+0108     bc = ktensor(bcU);
+0109     
+0110 <span class="keyword">end</span>
+0111 
+0112 bc = fixsigns(arrange(bc));
+0113</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

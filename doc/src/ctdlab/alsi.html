@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of alsi</title>
+  <meta name="keywords" content="alsi">
+  <meta name="description" content="Main ALS iteration.  See als.m for arguments">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>alsi
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Main ALS iteration.  See als.m for arguments</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Main ALS iteration.  See als.m for arguments</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="knnz.html" class="code" title="function n=knnz(A)">knnz</a>	Count the non-zero elements of a spktensor</li><li><a href="knumel.html" class="code" title="function n = knumel(A)">knumel</a>	Number of elements in a ktensor</li><li><a href="trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>	Absolute truncation of factor matrices.  All entries less than delta in</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="als.html" class="code" title="function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)">als</a>	Rank reduction by standard ALS.</li><li><a href="../../src/ctdlab/tests/test_als.html" class="code" title="">test_als</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)</a>
+0002 <span class="comment">% Main ALS iteration.  See als.m for arguments</span>
+0003 
+0004     D=ndims(A);
+0005     
+0006     <span class="comment">% parse optional inputs and/or set defaults</span>
+0007     params=inputParser;
+0008     params.addParamValue(<span class="string">'B'</span>,[],@(x) (isequal(class(x),<span class="string">'ktensor'</span>) || <span class="keyword">...</span>
+0009         isempty(x)))
+0010     params.addParamValue(<span class="string">'density'</span>,<a href="knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A)/<a href="knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A),<span class="keyword">...</span>
+0011         @(x) isscalar(x) &amp;&amp; x&gt;0);
+0012     params.addParamValue(<span class="string">'maxit'</span>,500,@(x) isscalar(x) &amp;&amp; x&gt;0);
+0013     params.addParamValue(<span class="string">'verbose'</span>,0,@isscalar);
+0014     params.addParamValue(<span class="string">'dimorder'</span>,1:D, @(x) isequal(sort(x),1:D));
+0015     params.addParamValue(<span class="string">'Anorm'</span>,[],@(x) (isscalar(x) &amp;&amp; x&gt;=0) || isempty(x));
+0016     params.addParamValue(<span class="string">'errtype'</span>,<span class="string">'rel'</span>,@(x) (ischar(x) &amp;&amp; (isequal(x,<span class="string">'rel'</span>) <span class="keyword">...</span>
+0017         || isequal(x,<span class="string">'abs'</span>))));
+0018     params.parse(varargin{:});
+0019 
+0020     <span class="comment">% copy params</span>
+0021     B=params.Results.B;
+0022     density=params.Results.density;
+0023     maxit=params.Results.maxit;
+0024     verbose=params.Results.verbose;
+0025     dimorder=params.Results.dimorder;
+0026     Anorm=params.Results.Anorm;
+0027     errtype=params.Results.errtype;
+0028     
+0029     <span class="comment">% print parameters</span>
+0030     <span class="keyword">if</span> verbose
+0031         fprintf(<span class="string">'***alsr.m: required parameters\n'</span>)
+0032         fprintf(<span class="string">'      tol = %g, stucktol = %g, delta = %g, rnk = %d\n\n'</span>,<span class="keyword">...</span>
+0033             tol,stucktol,delta,rnk)
+0034         fprintf(<span class="string">'***                     optional parameters:\n'</span>)
+0035         disp(params.Results)
+0036         fprintf(<span class="string">'\n'</span>)        
+0037     <span class="keyword">end</span>
+0038     
+0039     <span class="comment">% if using relative error and norm of A not supplied, compute it</span>
+0040     <span class="keyword">if</span> isempty(Anorm) &amp;&amp; isequal(errtype,<span class="string">'rel'</span>)
+0041         Anorm = <a href="fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0042     <span class="keyword">end</span>
+0043 
+0044     <span class="comment">% initial guess</span>
+0045     <span class="keyword">if</span> isempty(B)
+0046         
+0047         <span class="comment">% if no initial guess provided, use a random sparse one</span>
+0048         B=cell(1,D);
+0049         <span class="keyword">for</span> d=1:D
+0050             B{d} = sprandn(size(A,d),rnk,density);
+0051         <span class="keyword">end</span>
+0052         
+0053         <span class="comment">% normalize the initial guess</span>
+0054         B = ktensor(1,B);
+0055         B = normalize(B);
+0056         B = B.U;
+0057     <span class="keyword">else</span>
+0058         Bk = B;
+0059         B = B.U;
+0060         rnk = length(Bk.lambda);
+0061     <span class="keyword">end</span>
+0062         
+0063     <span class="comment">% residual error vector</span>
+0064     err = zeros(1,maxit);
+0065     
+0066     <span class="comment">% Main ALS iteration.</span>
+0067     <span class="comment">% This implementation uses matlab vectorized operations as much as</span>
+0068     <span class="comment">% possible.  See Kolda &amp; Bader (2009) for vectorized formulation.</span>
+0069     <span class="keyword">for</span> iter = 1:maxit
+0070         
+0071         <span class="keyword">for</span> k = dimorder
+0072          
+0073             <span class="comment">% list of &quot;active&quot; dimensions</span>
+0074             ia = dimorder;
+0075             ia(find(ia==k))=[];
+0076             
+0077             <span class="comment">% coefficient matrix to be inverted</span>
+0078             Y = ones(rnk,rnk);
+0079             <span class="keyword">for</span> d = ia
+0080                 Y = Y .* (B{d}'*B{d});
+0081             <span class="keyword">end</span>
+0082             
+0083             <span class="comment">% regularize, alpha just larger than eps...</span>
+0084             Y = full(Y) + 1e-10 * eye(rnk);
+0085             
+0086             <span class="comment">% compute pseudo-inverse</span>
+0087             [UY,DY,VY] = svd(full(Y));
+0088             irng = find((diag(DY))&gt;(DY(1,1)*1e-10)); <span class="comment">% I'm not sure this is needed</span>
+0089             VY = VY(:,irng);
+0090             UY = UY(:,irng);
+0091             DY = DY(irng,irng);
+0092             Ypinv = VY * diag(1./diag(DY)) * UY';
+0093             
+0094             <span class="comment">% khatri-rao product.  This function is in the sandia tensor toolbox.</span>
+0095             Z = mttkrp(A,B,k);
+0096             
+0097             <span class="comment">% multiply by right pseudoinverse</span>
+0098             Z = Z * Ypinv;
+0099 
+0100             <span class="comment">% normalize</span>
+0101             lambda = sqrt(abs(sum(Z.^2,1)))';
+0102             Z = Z * spdiags(1./lambda,0,rnk,rnk);
+0103 
+0104             <span class="comment">% update</span>
+0105             B{k} = Z;
+0106             Bk = ktensor(lambda,B);
+0107             
+0108             <span class="comment">% extra info for analysis</span>
+0109             <span class="keyword">if</span> ~isempty(ext)
+0110               ext.ls_cond = [ext.ls_cond, max(abs(diag(DY))) / min(abs(diag(DY)))];
+0111               ext.nsig_svals = [ext.nsig_svals, length(irng)];
+0112               ext.lambda_l1 = [ext.lambda_l1, norm(lambda,1)];
+0113               ext.rank_iter = [ext.rank_iter; [rnk iter k]];
+0114               ext.Bnorm = [ext.Bnorm, full(norm(Bk))];
+0115             <span class="keyword">end</span>
+0116             
+0117         <span class="keyword">end</span>
+0118         
+0119 
+0120         
+0121         <span class="comment">% truncate small elements by sparsity factor</span>
+0122         Bk = <a href="trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>(Bk,delta);
+0123         
+0124         <span class="comment">% check for convergence, print some info</span>
+0125         err(iter) = norm(A-Bk);
+0126         <span class="keyword">if</span> isequal(errtype,<span class="string">'rel'</span>)
+0127             err(iter) = err(iter) / Anorm;
+0128         <span class="keyword">end</span>
+0129         
+0130         <span class="comment">% error &quot;velocity&quot;, used to check if stuck</span>
+0131         <span class="keyword">if</span> iter&gt;1
+0132             derr = abs(err(iter)-err(iter-1));
+0133         <span class="keyword">else</span>
+0134             derr = [];
+0135         <span class="keyword">end</span>
+0136         
+0137         <span class="keyword">if</span> verbose
+0138           fprintf(<span class="string">'rnk = %d, iter = %d, err = %g, derr = %g\n'</span>, <span class="keyword">...</span>
+0139             rnk,iter,full(err(iter)),full(derr))
+0140           <span class="keyword">if</span> ~isempty(ext)
+0141           fprintf(<span class="string">'\nCond ............... = %e\n'</span>,ext.ls_cond(end))
+0142           fprintf(<span class="string">'Significant svals .... = %d\n'</span>, ext.nsig_svals(end));
+0143           fprintf(<span class="string">'L1 norm of sval vector = %e\n'</span>, ext.lambda_l1(end));
+0144           fprintf(<span class="string">'||B||_F = ............ = %e\n\n'</span>, ext.Bnorm(end));
+0145           <span class="keyword">end</span>
+0146         <span class="keyword">end</span>
+0147         
+0148         <span class="comment">% if converged, exit</span>
+0149         <span class="keyword">if</span> err(iter)&lt;tol
+0150             <span class="keyword">if</span> verbose
+0151                 fprintf(<span class="string">'Converged to rank %d\n'</span>, rnk)
+0152             <span class="keyword">end</span>
+0153             err = err(1:iter);
+0154             <span class="keyword">return</span>
+0155         <span class="keyword">end</span>
+0156         
+0157         <span class="comment">% if stuck, exit</span>
+0158         <span class="keyword">if</span> iter&gt;1
+0159             <span class="keyword">if</span> derr &lt; stucktol
+0160                 <span class="keyword">if</span> verbose
+0161                     fprintf(<span class="string">'Stuck!\n'</span>)
+0162                 <span class="keyword">end</span>
+0163                 err = err(1:iter);
+0164                 <span class="keyword">return</span>
+0165             <span class="keyword">end</span>
+0166         <span class="keyword">end</span>
+0167     <span class="keyword">end</span>
+0168     
+0169     <span class="keyword">if</span> verbose
+0170         fprintf(<span class="string">'Reached maximum iterations.\n\n'</span>)
+0171     <span class="keyword">end</span>
+0172     
+0173     <span class="keyword">return</span>
+0174 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_vvpwm</title>
+  <meta name="keywords" content="test_vvpwm">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_vvpwm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>	Generate a (dense) ones tensor.</li><li><a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>	Create random sparse ctd with uniformly distributed elements.</li><li><a href="../../../src/ctdlab/vvpwm.html" class="code" title="function c = vvpwm(a,b)">vvpwm</a>	"Vector-vector pointwise multiplication"</li><li><a href="../../../src/ctdlab/vvpwmatt.html" class="code" title="function c = vvpwmatt(a,b)">vvpwmatt</a>	function c = vvpwmatt(a,b)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;
+0002 
+0003 fprintf(<span class="string">'\n***test_vvpwm***\n'</span>)
+0004 
+0005 fprintf(<span class="string">'which -all vvpwm\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/vvpwm.html" class="code" title="function c = vvpwm(a,b)">vvpwm</a>
+0007 
+0008 fprintf(<span class="string">'which -all vvpwmatt\n'</span>)
+0009 which -all <a href="../../../src/ctdlab/vvpwmatt.html" class="code" title="function c = vvpwmatt(a,b)">vvpwmatt</a>
+0010 
+0011 ok = 1;
+0012 
+0013 d = 10;
+0014 n = 1024;
+0015 r = 10;
+0016 
+0017 A = <a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>(d,n);
+0018 B = <a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>(d,n,r,1);
+0019 
+0020 tic;
+0021 C = <a href="../../../src/ctdlab/vvpwm.html" class="code" title="function c = vvpwm(a,b)">vvpwm</a>(A,B);
+0022 tC = toc;
+0023 
+0024 <span class="comment">% Added by Mr</span>
+0025 tic;
+0026 D = <a href="../../../src/ctdlab/vvpwmatt.html" class="code" title="function c = vvpwmatt(a,b)">vvpwmatt</a>(A,B);
+0027 tD = toc;
+0028 
+0029 err = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B-C)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B);
+0030 errD = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B-D)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B);
+0031 fprintf(<span class="string">'err vvpwm = %e\n'</span>, err)
+0032 fprintf(<span class="string">'err vvpwmatt = %e\n'</span>, errD)
+0033 
+0034 fprintf(<span class="string">'Time taken by vvpwm = %e\n'</span>,tC)
+0035 fprintf(<span class="string">'Time taken by vvpwmatt = %e\n'</span>,tD)
+0036 
+0037 
+0038 <span class="keyword">if</span> err &gt; 1e-7 || errD &gt; 1e-7
+0039   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0040 <span class="keyword">else</span>
+0041   fprintf(<span class="string">'PASSED\n'</span>)
+0042 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

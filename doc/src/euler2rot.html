@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of euler2rot</title>
+  <meta name="keywords" content="euler2rot">
+  <meta name="description" content="change from Euler321 to a rotation matrix (check)!!!">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>euler2rot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>change from Euler321 to a rotation matrix (check)!!!</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ R ] = euler2rot( rx, ry, rz ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> change from Euler321 to a rotation matrix (check)!!!
+
+ The rotation is in order rx, ry, rz</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ R ] = euler2rot( rx, ry, rz )</a>
+0002 <span class="comment">% change from Euler321 to a rotation matrix (check)!!!</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% The rotation is in order rx, ry, rz</span>
+0005 <span class="comment">%</span>
+0006 
+0007 Rx = [1 0 0;
+0008       0 cos(rx) -sin(rx);
+0009       0 sin(rx) cos(rx)];
+0010   
+0011 Ry = [cos(ry) 0 sin(ry);
+0012       0 1 0;
+0013       -sin(ry) 0 cos(ry)];
+0014   
+0015 Rz = [cos(rz) -sin(rz) 0;
+0016       sin(rz) cos(rz) 0;
+0017       0 0 1];
+0018   
+0019 R = Rx*Ry*Rz;
+0020 <span class="keyword">end</span>
+0021</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

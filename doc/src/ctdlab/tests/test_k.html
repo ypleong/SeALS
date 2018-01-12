@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_k</title>
+  <meta name="keywords" content="test_k">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_k
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>	Count the non-zero elements of a spktensor</li><li><a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>	Number of elements in a ktensor</li><li><a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>	Generate a (dense) ones tensor.</li><li><a href="../../../src/ctdlab/kzeros.html" class="code" title="function z = kzeros(D,N)">kzeros</a>	Generate a zero sparse ktensor.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;
+0002 
+0003 fprintf(<span class="string">'\n***test_k***\n'</span>)
+0004 
+0005 fprintf(<span class="string">'which -all kzeros\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/kzeros.html" class="code" title="function z = kzeros(D,N)">kzeros</a>
+0007 fprintf(<span class="string">'which -all kones\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>
+0009 fprintf(<span class="string">'which -all knnz\n'</span>)
+0010 which -all <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>
+0011 fprintf(<span class="string">'which -all knumel\n'</span>)
+0012 which -all <a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>
+0013 
+0014 ok = 1;
+0015 
+0016 d = 3;
+0017 n = 5;
+0018 r = 10;
+0019 
+0020 A = full(<a href="../../../src/ctdlab/kzeros.html" class="code" title="function z = kzeros(D,N)">kzeros</a>(d,n));
+0021 Af = zeros([n,n,n]);
+0022 res1 = A-Af;
+0023 err1 = sqrt(sum(res1(:).^2));
+0024 fprintf(<span class="string">'err1 = %e\n'</span>, err1)
+0025 
+0026 B = full(<a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>(d,n));
+0027 Bf = ones([n,n,n]);
+0028 res2 = B-Bf;
+0029 err2 = sqrt(sum(res2(:).^2)) / sqrt(sum(Bf(:).^2));
+0030 fprintf(<span class="string">'err2 = %e\n'</span>, err2)
+0031 
+0032 C = <a href="../../../src/ctdlab/kones.html" class="code" title="function one = kones(D,N)">kones</a>(d,n);
+0033 nnz1 = <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(C);
+0034 nnz2 = <a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(C);
+0035 err3 = abs(nnz1-nnz2);
+0036 fprintf(<span class="string">'err3 = %e\n'</span>, err3)
+0037 
+0038 <span class="keyword">if</span> max(err1,err2) &gt; 1e-15   ||   err3 ~= 0
+0039   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0040 <span class="keyword">else</span>
+0041   fprintf(<span class="string">'PASSED\n'</span>)
+0042 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of EvalT</title>
+  <meta name="keywords" content="EvalT">
+  <meta name="description" content="EVALT evaluates a ktensor (function) at an individual point">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>EvalT
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>EVALT evaluates a ktensor (function) at an individual point</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [y] = EvalT(tens,x,grid) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> EVALT evaluates a ktensor (function) at an individual point
+ Inputs:
+   tens - the ktensor.
+   x - the point where the ktensor value should be evaluated.
+   grid - the discretization grid.
+ Outputs:
+   y - the value at x.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="EvalTMat.html" class="code" title="function [ y ] = EvalTMat( TMat, x, gridT )">EvalTMat</a>	EVALTMAT evaluates a matrix-valued ktensor function at a point x</li><li><a href="sim_finite_run.html" class="code" title="function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_finite_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li><li><a href="sim_run.html" class="code" title="function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [y] = EvalT(tens,x,grid)</a>
+0002 <span class="comment">% EVALT evaluates a ktensor (function) at an individual point</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   tens - the ktensor.</span>
+0005 <span class="comment">%   x - the point where the ktensor value should be evaluated.</span>
+0006 <span class="comment">%   grid - the discretization grid.</span>
+0007 <span class="comment">% Outputs:</span>
+0008 <span class="comment">%   y - the value at x.</span>
+0009 
+0010 y = tens.lambda';
+0011 <span class="keyword">for</span> i=1:length(x);
+0012     y = y.*interp1( grid{i}, tens.U{i}, x(i) );
+0013 <span class="keyword">end</span>
+0014 
+0015 y = sum(y);
+0016 <span class="keyword">end</span>
+0017</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

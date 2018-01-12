@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bc_dirichlet</title>
+  <meta name="keywords" content="bc_dirichlet">
+  <meta name="description" content="BC_DIRICHLET sets up Dirichlet boundary conditions on operator. More">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>bc_dirichlet
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>BC_DIRICHLET sets up Dirichlet boundary conditions on operator. More</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [op] = bc_dirichlet(op, dim, bsca, n) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BC_DIRICHLET sets up Dirichlet boundary conditions on operator. More
+ precisely:
+   Modifies an operator so that it doesn't affect the boundaries of its
+   domain. The operator acts as the identity on the boundaries times the
+   boundary scaling. Common boundary points will have the scaling of the
+   lowest dimension, see also <a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">MAKEBC</a>.
+ Input:
+   op - the operator as ktensor.
+   dim - the dimension along which to modify the operator.
+   n - the number of grid points in each dimension.
+ Output:
+   op - the adjusted operator.
+
+ See also <a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">MAKEBCOP</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [op] = bc_dirichlet(op, dim, bsca, n)</a>
+0002 <span class="comment">% BC_DIRICHLET sets up Dirichlet boundary conditions on operator. More</span>
+0003 <span class="comment">% precisely:</span>
+0004 <span class="comment">%   Modifies an operator so that it doesn't affect the boundaries of its</span>
+0005 <span class="comment">%   domain. The operator acts as the identity on the boundaries times the</span>
+0006 <span class="comment">%   boundary scaling. Common boundary points will have the scaling of the</span>
+0007 <span class="comment">%   lowest dimension, see also MAKEBC.</span>
+0008 <span class="comment">% Input:</span>
+0009 <span class="comment">%   op - the operator as ktensor.</span>
+0010 <span class="comment">%   dim - the dimension along which to modify the operator.</span>
+0011 <span class="comment">%   n - the number of grid points in each dimension.</span>
+0012 <span class="comment">% Output:</span>
+0013 <span class="comment">%   op - the adjusted operator.</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% See also MAKEBCOP.</span>
+0016 
+0017 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0018 
+0019 d = length(n);
+0020 
+0021 <span class="comment">%% Construct identity on the boundary without interfering lower dimensions</span>
+0022 
+0023 U = cell(1,d);
+0024 <span class="comment">% don't interfer with boundary for lower dimensions</span>
+0025 <span class="keyword">for</span> i = 1:(dim-1)
+0026     ni = n(i);
+0027     idcut = eye(ni);
+0028     idcut(1,:) = zeros(1,ni);
+0029     idcut(<span class="keyword">end</span>,:) = zeros(1,ni);
+0030     U{i} = idcut(:);
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="comment">% the boundary for dim</span>
+0034 ndim = n(dim);
+0035 dim_matrix = zeros(ndim,ndim);
+0036 dim_matrix(1,1) = bsca(1); <span class="comment">% obs: scaled</span>
+0037 dim_matrix(ndim,ndim) = bsca(2);
+0038 U{dim} = dim_matrix(:);
+0039 
+0040 <span class="keyword">for</span> i = (dim+1):d
+0041     ni = n(i);
+0042     id = eye(ni);
+0043     U{i} = id(:);
+0044 <span class="keyword">end</span>
+0045 
+0046 ident = ktensor(U);
+0047 
+0048 <span class="comment">%% Eliminate whatever is happening on the boundary currently</span>
+0049 sr = ncomponents(op);
+0050 dimU = op.U{dim};
+0051 <span class="keyword">for</span> i=1:sr
+0052     el = reshape(dimU(:,i),ndim,ndim);
+0053     el(1,:) = zeros(1,ndim);
+0054     el(ndim,:) = zeros(1,ndim);
+0055     dimU(:,i) = el(:);
+0056 <span class="keyword">end</span>
+0057 op.U{dim} = dimU;
+0058 
+0059 <span class="comment">%% Combine above</span>
+0060 op = op + ident;
+0061 op = fixsigns(arrange(op));
+0062 
+0063 <span class="keyword">end</span>
+0064</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

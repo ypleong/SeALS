@@ -1,0 +1,357 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als_sys</title>
+  <meta name="keywords" content="als_sys">
+  <meta name="description" content="ALS_SYS code to perform the ALS algorithm as described in Beylkin">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als_sys
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS_SYS code to perform the ALS algorithm as described in Beylkin</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS_SYS code to perform the ALS algorithm as described in Beylkin
+ and Mohlenkamp 2005. Tries to solve AF = G.
+ Inputs:
+   F - inital guess. If it is empty a random guess will be used. If
+   it's a scalar ALS_SYS will start with a random tensor of that
+   rank.
+   e - desired error
+   debugging - if 1 all F, B and b are saved in cell arrays.
+   tol_it - maximum number of tolerated iterations. Default if 1000.
+   tol_rank - maximum tolerated rank for F. Default is 20.
+   e_type - type of error ('average' or 'total'). Default is (point)
+   average. 
+   r_tol - minimum decrease in error between iterations. Default is 1e-3.
+   alpha - regularization factor. Default is 1e-12.
+   newcond_r_tol - tolerated decrease for preconditon. Default is 1e-2.
+   newcond_it_tol - maximum number of tolerated iterations for
+   preconditon. Default is 15.
+ Outputs:
+   F - achieved solution.
+   err - achieved error.
+   iter - number of iterations.
+   Fcond - condition number for F during the run.
+   e_list - indices when new tensor term was added
+   t_step - computing time for als onestep during the run
+   illcond - 1 if an als matrix were illcond.
+   maxit - 1 if maximum number of tolerated iterations was exceeded.
+   F_cell - all F during a run
+   B_cell - all B (ALS matrices) during a run
+   b_cell - all b (RHS vectors) during a run
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="als_onestep_sys.html" class="code" title="function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging)">als_onestep_sys</a>	ALS_ONSTEP_SYS performs one step of the ALS algorithm for solving AF=G.</li><li><a href="prepareAG_4_als_sys.html" class="code" title="function [AtA, AtG] = prepareAG_4_als_sys(A, G)">prepareAG_4_als_sys</a>	</li><li><a href="stoploop.html" class="code" title="function F = stoploop(str)">stoploop</a>	STOPLOOP - creates stop button to have a user interrupt a loop</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)</a>
+0002 <span class="comment">% ALS_SYS code to perform the ALS algorithm as described in Beylkin</span>
+0003 <span class="comment">% and Mohlenkamp 2005. Tries to solve AF = G.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   F - inital guess. If it is empty a random guess will be used. If</span>
+0006 <span class="comment">%   it's a scalar ALS_SYS will start with a random tensor of that</span>
+0007 <span class="comment">%   rank.</span>
+0008 <span class="comment">%   e - desired error</span>
+0009 <span class="comment">%   debugging - if 1 all F, B and b are saved in cell arrays.</span>
+0010 <span class="comment">%   tol_it - maximum number of tolerated iterations. Default if 1000.</span>
+0011 <span class="comment">%   tol_rank - maximum tolerated rank for F. Default is 20.</span>
+0012 <span class="comment">%   e_type - type of error ('average' or 'total'). Default is (point)</span>
+0013 <span class="comment">%   average.</span>
+0014 <span class="comment">%   r_tol - minimum decrease in error between iterations. Default is 1e-3.</span>
+0015 <span class="comment">%   alpha - regularization factor. Default is 1e-12.</span>
+0016 <span class="comment">%   newcond_r_tol - tolerated decrease for preconditon. Default is 1e-2.</span>
+0017 <span class="comment">%   newcond_it_tol - maximum number of tolerated iterations for</span>
+0018 <span class="comment">%   preconditon. Default is 15.</span>
+0019 <span class="comment">% Outputs:</span>
+0020 <span class="comment">%   F - achieved solution.</span>
+0021 <span class="comment">%   err - achieved error.</span>
+0022 <span class="comment">%   iter - number of iterations.</span>
+0023 <span class="comment">%   Fcond - condition number for F during the run.</span>
+0024 <span class="comment">%   e_list - indices when new tensor term was added</span>
+0025 <span class="comment">%   t_step - computing time for als onestep during the run</span>
+0026 <span class="comment">%   illcond - 1 if an als matrix were illcond.</span>
+0027 <span class="comment">%   maxit - 1 if maximum number of tolerated iterations was exceeded.</span>
+0028 <span class="comment">%   F_cell - all F during a run</span>
+0029 <span class="comment">%   B_cell - all B (ALS matrices) during a run</span>
+0030 <span class="comment">%   b_cell - all b (RHS vectors) during a run</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% See also MAIN_RUN.</span>
+0033 
+0034 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0035 
+0036 <span class="comment">%% assign</span>
+0037 <span class="keyword">if</span> isempty(als_options)
+0038     tol_it = 2000;
+0039     tol_rank = 30;
+0040     e_type = <span class="string">'average'</span>;
+0041     r_tol = 1e-3;
+0042     alpha = 1e-12;
+0043     newcond_r_tol = 0.01;
+0044     newcond_it_tol = 15;
+0045 <span class="keyword">else</span>
+0046     [tol_it,tol_rank,e_type,r_tol,alpha,newcond_r_tol,newcond_it_tol] = <span class="keyword">...</span>
+0047         deal(als_options{:});
+0048 <span class="keyword">end</span>
+0049 
+0050 <span class="keyword">if</span> strcmp(e_type,<span class="string">'average'</span>)
+0051     norA = sqrt(prod(size(G)));
+0052 <span class="keyword">elseif</span> strcmp(e_type,<span class="string">'total'</span>)
+0053     norA = 1;
+0054 <span class="keyword">else</span>
+0055     error(<span class="string">'wrong type of error specified'</span>);
+0056 <span class="keyword">end</span>
+0057 
+0058 <span class="keyword">if</span> nargin &lt; 7
+0059     verbose = 1;
+0060 <span class="keyword">end</span>
+0061 
+0062 <span class="comment">%% documentation</span>
+0063 <span class="keyword">if</span> debugging == 1
+0064     maxit = 0; <span class="comment">%1 if max iter exceeded</span>
+0065     maxrank = 0; <span class="comment">%1 if max rank exceeded</span>
+0066     illcond = 0; <span class="comment">%1 if ill-conditioned matrix</span>
+0067     B_cell{1,2} = {}; <span class="comment">%just to make sure it has correct dims</span>
+0068     b_cell{1,2} = {};
+0069 <span class="keyword">else</span>
+0070     maxit = 0;
+0071     maxrank = 0;
+0072     illcond = 0;
+0073     F_cell = {};
+0074     B_cell = {};
+0075     b_cell = {};
+0076 <span class="keyword">end</span>
+0077 
+0078 <span class="comment">%% main script</span>
+0079 nd = ndims(G);
+0080 sizeG = size(G);
+0081 
+0082 U = cell(nd,1);
+0083 
+0084 <span class="keyword">if</span> isempty(F)
+0085     <span class="keyword">for</span> n = 1:nd
+0086         U{n} = matrandnorm(sizeG(n),1);
+0087     <span class="keyword">end</span>
+0088     F = ktensor(U);
+0089     
+0090 <span class="keyword">elseif</span> isfloat(F)
+0091     <span class="keyword">for</span> n = 1:nd
+0092         U{n} = matrandnorm(sizeG(n),F);
+0093     <span class="keyword">end</span>
+0094     F = ktensor(U);
+0095 <span class="keyword">else</span>
+0096     F = arrange(F);
+0097     F = fixsigns(F);
+0098 <span class="keyword">end</span>
+0099 
+0100 rF = ncomponents(F);
+0101 
+0102 <span class="comment">%%% documentation %%%</span>
+0103 <span class="keyword">if</span> debugging == 1
+0104     F_cell{1,4} = {F};
+0105 <span class="keyword">end</span>
+0106 <span class="comment">%%% documentation %%%</span>
+0107 
+0108 old_err = norm(<a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(A,F)-G)/norA;
+0109 
+0110 reverseStr = <span class="string">''</span>;
+0111 msg = <span class="string">''</span>;
+0112 
+0113 useStop = 1;
+0114 e_count = 2;
+0115 e_list(1) = 1;
+0116 
+0117 <span class="keyword">if</span> useStop &amp;&amp; verbose
+0118     FS = <a href="stoploop.html" class="code" title="function F = stoploop(str)">stoploop</a>({<span class="string">'Exit execution at current iteration?'</span>, <span class="string">'Stop'</span>}) ;
+0119 <span class="keyword">end</span>
+0120 
+0121 [AtA, AtG] = <a href="prepareAG_4_als_sys.html" class="code" title="function [AtA, AtG] = prepareAG_4_als_sys(A, G)">prepareAG_4_als_sys</a>(A, G);
+0122 
+0123 <span class="keyword">for</span> iter = 1:tol_it
+0124     
+0125     <span class="comment">%%%%%% Debugging %%%%%%</span>
+0126     <span class="keyword">if</span> length(size(F)) == 0 <span class="comment">%set to 2 for 2D-solution plots while solving</span>
+0127         sol = double(F)';
+0128         <span class="comment">%[xx,yy] = meshgrid(x1,x2);</span>
+0129         <span class="comment">%surf(xx,yy,sol,'EdgeColor','none');</span>
+0130         figure(6)
+0131         <span class="comment">%surf(sol,'EdgeColor','none');</span>
+0132         imagesc(sol);
+0133         xlabel(<span class="string">'x'</span>);ylabel(<span class="string">'y'</span>);zlabel(<span class="string">'u'</span>);
+0134         <span class="keyword">if</span> iter ~= 1
+0135             title([<span class="string">'Solution, time step:'</span>, num2str(time_step(iter-1))]);
+0136         <span class="keyword">end</span>
+0137         pause(0.0001)
+0138     <span class="keyword">end</span>
+0139     <span class="comment">%%%%%% Debugging %%%%%%</span>
+0140     
+0141     <span class="comment">% Display progress</span>
+0142     <span class="keyword">if</span> verbose
+0143         msg = sprintf(<span class="string">'Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n'</span>, iter, tol_it, old_err, e, ncomponents(F));
+0144         fprintf([reverseStr, msg]);
+0145         reverseStr = repmat(sprintf(<span class="string">'\b'</span>), 1, length(msg));
+0146     <span class="keyword">end</span>
+0147     
+0148     step_time = tic;
+0149     [Fn, status, F_cell_onestep, B_cell_onestep, b_cell_onestep] = <a href="als_onestep_sys.html" class="code" title="function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging)">als_onestep_sys</a>(AtA,AtG,F,alpha,debugging);
+0150     time_step(iter) = toc(step_time);
+0151     
+0152     <span class="comment">%%% documentation %%%</span>
+0153     <span class="keyword">if</span> debugging == 1
+0154         F_cell{iter,1} = F_cell_onestep;
+0155         B_cell{iter,1} = B_cell_onestep;
+0156         b_cell{iter,1} = b_cell_onestep;
+0157     <span class="keyword">end</span>
+0158     <span class="comment">%%% documentation %%%</span>
+0159     
+0160     <span class="keyword">if</span> status == 0
+0161         fprintf(<span class="string">'ALS matrix inversion ill-conditioned, returning after iteration %d\n'</span>, iter);
+0162         illcond = 1;
+0163         Fcond(iter) = norm(F.lambda)/norm(F);
+0164         err(iter) = norm(<a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(A,F)-G)/norA;
+0165         <span class="keyword">break</span>;
+0166     <span class="keyword">else</span>
+0167         F = Fn;
+0168     <span class="keyword">end</span>
+0169     
+0170     Fcond(iter) = norm(F.lambda)/norm(F);
+0171     err(iter) = full(norm(<a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(A,F)-G)/norA);
+0172     <span class="comment">%err(iter) = norm(SRMultV(A,F)-G);</span>
+0173     
+0174     <span class="keyword">if</span> err(iter) &lt;= e
+0175         <span class="keyword">break</span>;
+0176     <span class="keyword">end</span>
+0177     
+0178     <span class="keyword">if</span> abs(err(iter) - old_err)/old_err &lt; r_tol
+0179         
+0180         rF = rF + 1;
+0181         
+0182         <span class="keyword">if</span>( rF &gt; tol_rank )
+0183             disp(<span class="string">'Maximum rank reached. Quitting...'</span>);
+0184             maxrank = 1;
+0185             <span class="keyword">break</span>;
+0186         <span class="keyword">end</span>
+0187         
+0188         e_list(e_count) = iter;
+0189         e_count = e_count + 1;
+0190         
+0191         <span class="comment">% debugging:</span>
+0192         <span class="comment">%fprintf('increased rank on iteration %i\n',iter);</span>
+0193         addStr = repmat(sprintf(<span class="string">' '</span>), 1, length(msg));
+0194         fprintf(addStr);
+0195         
+0196         <span class="keyword">for</span> n = 1:nd
+0197             U{n} = matrandnorm(sizeG(n),1);
+0198         <span class="keyword">end</span>
+0199         nF = ktensor(U);
+0200         
+0201         <span class="comment">% Precondition the new rank 1 tensor</span>
+0202         count = 1;
+0203         err_newF = 1;
+0204         err_oldF = 2;
+0205         
+0206         <span class="comment">% debugging:</span>
+0207         <span class="comment">%fprintf('Conditioning new term. Error: %f\n', norm(G-SRMultV(A,F)));</span>
+0208         
+0209         [AtA2, AtG2] = <a href="prepareAG_4_als_sys.html" class="code" title="function [AtA, AtG] = prepareAG_4_als_sys(A, G)">prepareAG_4_als_sys</a>(A, G-<a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(A,F));
+0210         
+0211         <span class="keyword">while</span> count &lt; newcond_it_tol &amp;&amp; (abs(err_newF - err_oldF)/err_oldF) &gt; newcond_r_tol
+0212             
+0213             [nF, ~, F_cell_onestep, B_cell_onestep, b_cell_onestep] = <a href="als_onestep_sys.html" class="code" title="function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging)">als_onestep_sys</a>(AtA2,AtG2,nF,alpha,debugging);
+0214 
+0215             err_oldF = err_newF;
+0216             err_newF = nF.lambda;
+0217             
+0218             <span class="comment">%%% documentation %%%</span>
+0219             <span class="keyword">if</span> debugging == 1
+0220                 <span class="keyword">if</span> count == 1
+0221                     F_cell_precond = F_cell_onestep;
+0222                     B_cell_precond = B_cell_onestep;
+0223                     b_cell_precond = b_cell_onestep;
+0224                 <span class="keyword">else</span>
+0225                     F_cell_precond = [F_cell_precond, F_cell_onestep];
+0226                     B_cell_precond = [B_cell_precond, B_cell_onestep];
+0227                     b_cell_precond = [b_cell_precond, b_cell_onestep];
+0228                 <span class="keyword">end</span>
+0229             <span class="keyword">end</span>
+0230             <span class="comment">%%% documentation %%%</span>
+0231             
+0232             count = count + 1;
+0233             
+0234         <span class="keyword">end</span>
+0235         
+0236         <span class="comment">%%% documenation %%%</span>
+0237         <span class="keyword">if</span> debugging == 1
+0238             F_cell{iter,2} = F_cell_precond;
+0239             B_cell{iter,2} = B_cell_precond;
+0240             b_cell{iter,2} = b_cell_precond;
+0241         <span class="keyword">end</span>
+0242         <span class="comment">%%% documentation %%%</span>
+0243         
+0244         F = arrange(F + nF);
+0245         F = fixsigns(F);
+0246         
+0247         <span class="comment">%%% documentation %%%</span>
+0248         <span class="keyword">if</span> debugging == 1
+0249             F_cell{iter,3} = {F};
+0250         <span class="keyword">end</span>
+0251         <span class="comment">%%% documentation %%%</span>
+0252         
+0253         <span class="comment">% debugging %</span>
+0254         <span class="comment">%fprintf('Conditioning complete. Error: %f, count:%d\n', norm(G-SRMultV(A,F)), count);</span>
+0255         
+0256     <span class="keyword">end</span>
+0257     old_err = err(iter);
+0258     
+0259     <span class="comment">%Check quit option</span>
+0260     <span class="keyword">if</span> useStop &amp;&amp; verbose
+0261         <span class="keyword">if</span> FS.Stop()
+0262             <span class="keyword">break</span>;
+0263         <span class="keyword">end</span>
+0264     <span class="keyword">end</span>
+0265 <span class="keyword">end</span>
+0266 
+0267 <span class="keyword">if</span> iter == tol_it
+0268     maxit = 1;
+0269 <span class="keyword">end</span>
+0270 
+0271 <span class="keyword">if</span> useStop &amp;&amp; verbose
+0272     FS.Clear() ;  <span class="comment">% Clear up the box</span>
+0273     clear FS ;    <span class="comment">% this structure has no use anymore</span>
+0274 <span class="keyword">end</span>
+0275 
+0276 <span class="keyword">if</span> ~illcond &amp;&amp; verbose
+0277     msg = sprintf(<span class="string">'Iteration: %d (%d), error=%2.9f (%2.9f), rank(F)=%d\n'</span>, iter, tol_it, err(iter), e, ncomponents(F));
+0278     fprintf([reverseStr, msg]);
+0279 <span class="keyword">end</span>
+0280 
+0281 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of VTOL</title>
+  <meta name="keywords" content="VTOL">
+  <meta name="description" content="% Example - VTOL Aircraft">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html examples -->
+<h1>VTOL
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Example - VTOL Aircraft</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Example - VTOL Aircraft
+ Elis Stefansson, Aug 2015</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Example - VTOL Aircraft</span>
+0002 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0003 
+0004 <span class="comment">% The following example is taken from the paper:</span>
+0005 <span class="comment">% Linear Hamilton-Jacobi-Bellan Equations in High Dimensions</span>
+0006 <span class="comment">% by Matanya B. Horowitz et al.</span>
+0007 
+0008 <span class="comment">% The states are:</span>
+0009 <span class="comment">% [x, dx, y, dy, th, dth]</span>
+0010 <span class="comment">%  1  2   3  4   5   6</span>
+0011 
+0012 <span class="comment">%% setup</span>
+0013 
+0014 <span class="comment">% 1. domain</span>
+0015 d = 6;
+0016 x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0017 n = 100;
+0018 bdim = [-4 4 ; -8 8 ; 0 2; -1 1; -pi pi; -5 5];
+0019 
+0020 <span class="comment">% help function for boundary y = 0</span>
+0021 bcon_y = (1-x(1)^2/4^2)*(1-x(2)^2/8^2)*(1-x(4)^2)*(1-x(5)^2/pi^2)*(1-x(6)^2/5^2);
+0022 
+0023 bcon = { {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0}, {<span class="string">'d'</span>,bcon_y,0}, {<span class="string">'d'</span>,0,0}, {<span class="string">'p'</span>}, {<span class="string">'d'</span>,0,0} };
+0024 
+0025 bsca = [];
+0026 region = []; <span class="comment">%no goal region</span>
+0027 regval = [];
+0028 regsca = [];
+0029 sca_ver = 1;
+0030 ord_of_acc = 2; <span class="comment">%since als error is probably dominant</span>
+0031 
+0032 <span class="comment">% 2. dynamics</span>
+0033 lambda = 6;
+0034 g = 9.8; eps = 0.01;
+0035 f = [x(2); 0; x(4); -g; x(6); 0];
+0036 G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
+0037 B = G;
+0038 noise_cov = 3;
+0039 q = 1;
+0040 R = 2;
+0041 
+0042 <span class="comment">% 3. artificial diffusion, compress operator and solve als</span>
+0043 artdiff_option = {1,<span class="string">'needed'</span>,0.03};
+0044 tol_err_op = 1e-5;
+0045 comp_options = [];
+0046 tol_err = 1e-9;
+0047 als_options = [];
+0048 als_variant = {10,50};
+0049 debugging = 0;
+0050 
+0051 <span class="comment">% 4. visualize result, run simulation and run index.</span>
+0052 saveplots = 1;
+0053 savedata = 1;
+0054 sim_config = {5,0.005,[2; 0; 1; 0; 0.1; 0],[],[]};
+0055 
+0056 <span class="comment">%5. run index</span>
+0057 run = 1;</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

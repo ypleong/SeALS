@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_run_spectral_periodic</title>
+  <meta name="keywords" content="test_run_spectral_periodic">
+  <meta name="description" content="Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_run_spectral_periodic
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function test_run_spectral_periodic(run) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen
+ Drr u + 1/r Dr u +1/r^2 Dthth u = f(r, th)   -1 &lt; r &lt; 1, 0 &lt; th &lt; 2pi
+ u = 0 at r = 1
+ f(r,th) = -r^2sin(th/2)^4 + sin(6th)cos(th/2)^2</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>	SRMULTM multiplies two ktensor operators A and B. The result is a new</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>	ALS_SYS_VAR is a modified version of the original ALS algorithm found</li><li><a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>	MAKE_BC_SCA_VAR creates scalings for the boundary condition and goal</li><li><a href="../src/makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>	MAKEBC creates the boundary conditions with scaling.</li><li><a href="../src/makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="../src/makediffopspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region)">makediffopspectral</a>	MAKEDIFFOP creates discretization grids and differentiation operators</li><li><a href="../src/visres.html" class="code" title="function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)">visres</a>	VISRES plots results from a run by MAIN_RUN.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function test_run_spectral_periodic(run)</a>
+0002 
+0003 <span class="comment">% Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</span>
+0004 <span class="comment">% Drr u + 1/r Dr u +1/r^2 Dthth u = f(r, th)   -1 &lt; r &lt; 1, 0 &lt; th &lt; 2pi</span>
+0005 <span class="comment">% u = 0 at r = 1</span>
+0006 <span class="comment">% f(r,th) = -r^2sin(th/2)^4 + sin(6th)cos(th/2)^2</span>
+0007 
+0008 start_whole = tic;
+0009 
+0010 <span class="comment">%% Initialization</span>
+0011 
+0012 d = 2;
+0013 x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0014 n = 100; <span class="comment">% n has to be even to avoid r = 0</span>
+0015 
+0016 bdim = [-1 1 ; 0 2*pi];
+0017 bcon = { {<span class="string">'d'</span>,0,0} , {<span class="string">'p'</span>} };
+0018 bsca = []; <span class="comment">%no manual scaling</span>
+0019 region = [];
+0020 regval = 1;
+0021 regsca = [];
+0022 sca_ver = 1;
+0023 
+0024 tol_err_op = 1e-6;
+0025 tol_err = 1e-9;
+0026 als_options = [];
+0027 als_variant = []; <span class="comment">%{10,50};</span>
+0028 debugging = 0;
+0029 
+0030 run = 1;
+0031 
+0032 fprintf([<span class="string">'Starting run '</span>,num2str(run),<span class="string">' with main_run \n'</span>])
+0033 
+0034 <span class="comment">%% Calculate differentiation operators and finite difference matrices</span>
+0035 
+0036 [n,grid,region,D,D2,fd1,fd2] = <a href="../src/makediffopspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region)">makediffopspectral</a>(bdim,n,bcon,region);
+0037 
+0038 
+0039 <span class="comment">%% Calculate dynamics</span>
+0040 
+0041 <span class="comment">%   x = sym('x',[2,1]) %two dimensions</span>
+0042 <span class="comment">%   f = x(1)*x(2)+x(2)</span>
+0043 <span class="comment">%   becomes in cell array represenation</span>
+0044 <span class="comment">%   fcell = { { @(x2)x2, [2] }, { @(x1)x1, [1] ; @(x2)x2, [2]} }</span>
+0045 <span class="comment">% -r^2sin(th/2)^4 + sin(6th)cos(th/2)^2</span>
+0046 
+0047 fcell = {{{@(x1)-x1.^2, 1; @(x2)sin(x2/2).^4, 2}, {@(x2)sin(6*x2).*cos(x2/2).^2, 2}}};
+0048 fTens = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(fcell,grid);
+0049 rcell = {{{@(x1)1./x1, 1}}};
+0050 rTens = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(rcell,grid);
+0051 rTen = <a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(rTens{1});
+0052 
+0053 op = D2{1} + <a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(rTen, D{1}) + <a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(rTen, <a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(rTen, D2{2}));
+0054 
+0055 <span class="comment">%% Create boundary conditions</span>
+0056 
+0057 <span class="comment">% create scaling for bc</span>
+0058 <span class="keyword">if</span> isempty(bsca) == 1 || isempty(regsca) == 1
+0059     
+0060     <span class="keyword">if</span> sca_ver == 1
+0061         [bscat, ~] = <a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>(op,grid,region,bcon);    
+0062     <span class="keyword">elseif</span> sca_ver == 2
+0063         [bscat, ~] = <a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>(op,bcon,region,regval,als_options,fd1,grid,x,n);
+0064     <span class="keyword">else</span>
+0065         error(<span class="string">'wrong specification on boundary scaling'</span>);
+0066     <span class="keyword">end</span>
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="keyword">if</span> isempty(bsca)
+0070     bsca = bscat;
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">% make bc</span>
+0074 [bc] = <a href="../src/makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>(bcon,bsca,grid,x,n)+fTens{1};
+0075 [op] = <a href="../src/makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>(op,bcon,bsca,n,fd1);
+0076 
+0077 <span class="comment">%% Compress operator</span>
+0078 
+0079 op_uncomp = op; <span class="comment">%save uncompressed op</span>
+0080 
+0081 fprintf(<span class="string">'Attempt to compress operator, rank(op)=%d\n'</span>, ncomponents(op));
+0082 rank_op_uncomp = ncomponents(op);
+0083 tic;
+0084 start_compress = tic;
+0085 
+0086 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(op,tol_err_op);
+0087 
+0088 compress_time = toc(start_compress);
+0089 toc;
+0090 rank_op_comp = ncomponents(op);
+0091 fprintf(<span class="string">'Number of components after compression, %d\n'</span>, ncomponents(op));
+0092 
+0093 <span class="comment">%% Step 11: solve system</span>
+0094 
+0095 disp(<span class="string">'Beginning Solving'</span>);
+0096 tic;
+0097 start_solve = tic;
+0098 
+0099 <span class="keyword">if</span> isempty(als_variant) <span class="comment">%original</span>
+0100     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = <span class="keyword">...</span>
+0101         <a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>(op,bc,[],tol_err,als_options,debugging);
+0102     restart = []; <span class="comment">%no restarts for original</span>
+0103 <span class="keyword">else</span> <span class="comment">%variant</span>
+0104     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell, restart] = <span class="keyword">...</span>
+0105         <a href="../src/als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>(op,bc,[],tol_err,als_options,als_variant,debugging);
+0106 <span class="keyword">end</span>
+0107 
+0108 time_solve = toc(start_solve);
+0109 toc;
+0110 disp(<span class="string">'Solution complete'</span>);
+0111 
+0112 <span class="comment">%% Visualize results</span>
+0113 
+0114 <span class="comment">% arrange input data</span>
+0115 F = arrange(F);
+0116 plotsolve = {F,err,enrich,t_step,Fcond,grid};
+0117 plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
+0118 plotdebug = {F_cell,b_cell,B_cell};
+0119 
+0120 <span class="comment">% plot results from run als and compress operator</span>
+0121 <span class="keyword">try</span>
+0122     fprintf(<span class="string">'Plotting results \n'</span>)
+0123     <a href="../src/visres.html" class="code" title="function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)">visres</a>(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+0124     [rr,tt] = meshgrid(grid{1}(1:n(1)/2), grid{2}([n(2) 1:n(2)]));
+0125     [xx,yy] = pol2cart(tt,rr);
+0126     ftemp = reshape(double(F)',n(1),n(2));
+0127     figure; mesh(xx,yy,ftemp([n(2) 1:n(2)],1:n(1)/2))
+0128     fprintf(<span class="string">'Plotting complete \n'</span>)
+0129 <span class="keyword">catch</span>
+0130     fprintf(<span class="string">'Could not visualize results \n'</span>)
+0131 <span class="keyword">end</span>
+0132 
+0133 time_whole = toc(start_whole);
+0134 
+0135 fprintf([<span class="string">'Run '</span>,num2str(run),<span class="string">' with main_run is complete \n'</span>])</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

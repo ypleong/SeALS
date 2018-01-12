@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of checklambda</title>
+  <meta name="keywords" content="checklambda">
+  <meta name="description" content="CHECKLAMBDA checks that lambda is correctly specified for the special">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>checklambda
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CHECKLAMBDA checks that lambda is correctly specified for the special</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function checklambda(G,B,noise_cov,R,lambda) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> CHECKLAMBDA checks that lambda is correctly specified for the special 
+ case B=G and scalar noise_cov, R. Gives error if not.
+ Inputs:
+   G
+   B
+   noise_cov
+   R
+   lambda
+   See MAIN_PROGRAM for specification.
+
+   See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function checklambda(G,B,noise_cov,R,lambda)</a>
+0002 <span class="comment">% CHECKLAMBDA checks that lambda is correctly specified for the special</span>
+0003 <span class="comment">% case B=G and scalar noise_cov, R. Gives error if not.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   G</span>
+0006 <span class="comment">%   B</span>
+0007 <span class="comment">%   noise_cov</span>
+0008 <span class="comment">%   R</span>
+0009 <span class="comment">%   lambda</span>
+0010 <span class="comment">%   See MAIN_PROGRAM for specification.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%   See also MAIN_RUN.</span>
+0013 
+0014 <span class="comment">% Elis Stefansson, Aug 6 2015</span>
+0015 
+0016 <span class="keyword">if</span> isequaln(B,G) &amp;&amp; length(noise_cov) == 1 &amp;&amp; length(R) == 1
+0017     
+0018     <span class="comment">% then lambda can be checked</span>
+0019     lambda_check = noise_cov*R;
+0020     <span class="keyword">if</span> lambda ~= lambda_check
+0021         error(<span class="string">'lambda is not correct'</span>)
+0022     <span class="keyword">end</span>
+0023     
+0024 <span class="keyword">end</span>
+0025         
+0026 <span class="keyword">end</span>
+0027</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

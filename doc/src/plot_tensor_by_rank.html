@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot_tensor_by_rank</title>
+  <meta name="keywords" content="plot_tensor_by_rank">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>plot_tensor_by_rank
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function plot_tensor_by_rank(F) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function plot_tensor_by_rank(F)</a>
+0002 
+0003 d = ndims(F);
+0004 r = ncomponents(F);
+0005 
+0006 xlabel_list = {<span class="string">'Trial'</span>,<span class="string">'x'</span>,<span class="string">'y'</span>,<span class="string">'z'</span>,<span class="string">'Features'</span>};
+0007 
+0008 figure;
+0009 <span class="keyword">for</span> i = 1:d
+0010     F_U = F.U{i};
+0011     n = size(F_U,1);
+0012     
+0013     ylimrange = [min(min(F_U)) max(max(F_U))];
+0014     
+0015     <span class="keyword">for</span> j = 1:r
+0016         subplot(r,d,i+(j-1)*d)
+0017         scatter(1:size(F_U,1), F_U(:,j), <span class="string">'.'</span>)
+0018         hold on
+0019         plot([1, size(F_U,1)],[0 0],<span class="string">'k'</span>,<span class="string">'linewidth'</span>,0.5)
+0020         hold off
+0021         xlim([1 n]);
+0022         ylim(ylimrange);
+0023         
+0024         <span class="keyword">if</span> j == r
+0025             xlabel(xlabel_list(i))
+0026         <span class="keyword">else</span>
+0027             <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'xticklabel'</span>,[])
+0028         <span class="keyword">end</span>
+0029         
+0030         <span class="keyword">if</span> i == 1
+0031             text(-40, 0, num2str(F.lambda(j),<span class="string">'%.0f'</span>));
+0032         <span class="keyword">end</span>
+0033     <span class="keyword">end</span>   
+0034 <span class="keyword">end</span>
+0035 
+0036 lambda = F.lambda;
+0037 
+0038 figure;
+0039 
+0040 <span class="keyword">for</span> i = 1:d
+0041     F_U = F.U{i};
+0042     n = size(F_U,1);
+0043     
+0044 <span class="comment">%     ylimrange = [min(min(F_U)) max(max(F_U))];</span>
+0045     
+0046     subplot(d,1,i)
+0047     plot(bsxfun(@mtimes,F_U,lambda'))
+0048     xlim([1 n]);
+0049     xlabel(xlabel_list(i))
+0050 <span class="comment">%     ylim(ylimrange);</span>
+0051       
+0052 <span class="keyword">end</span>
+0053 
+0054 
+0055 <span class="comment">% title(F.lambda)</span>
+0056 
+0057 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

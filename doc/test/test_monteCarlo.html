@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_monteCarlo</title>
+  <meta name="keywords" content="test_monteCarlo">
+  <meta name="description" content="Monte Carlo Particle Filter">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_monteCarlo
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Monte Carlo Particle Filter</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Monte Carlo Particle Filter</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/dynUpdateParticles.html" class="code" title="function [ particleOutput ] = dynUpdateParticles( particle, fDYN, timeVector)">dynUpdateParticles</a>	Non-Linear MonteCarlo propagation</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Monte Carlo Particle Filter</span>
+0002 clear all
+0003 <span class="comment">%% Set parameters</span>
+0004 dim = 2;
+0005 x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0006 <span class="comment">%t = sym('t');</span>
+0007 measure = 0;
+0008 kpen = (2*pi/3)^2;
+0009 fFPE = [x(2);-kpen*(x(1))];
+0010 n = [301 301];
+0011     x0 = [0.7, 0.1];
+0012     diagSigma = [0.6 0.5];
+0013 dt = 0.04;
+0014 finalt = 12;
+0015 t = 0:dt:finalt;
+0016 nparticles = 2e3;
+0017 fDYN = matlabFunction(fFPE,<span class="string">'Vars'</span>,x);
+0018 
+0019 <span class="comment">% init variables</span>
+0020 particle = cell(length(t),1);
+0021 <span class="comment">%% Generate Initial distribution</span>
+0022 particle{1} = mvnrnd(x0,diag(diagSigma),nparticles )';
+0023 scatter(particle{1}(1,:),particle{1}(2,:),1)
+0024 axis equal
+0025 axis([-pi pi -5 5])
+0026 
+0027 <span class="comment">%% Propagate particles</span>
+0028 time1 = tic;
+0029 <span class="keyword">for</span> k = 2:length(t)
+0030      particle{k} = <a href="../src/dynUpdateParticles.html" class="code" title="function [ particleOutput ] = dynUpdateParticles( particle, fDYN, timeVector)">dynUpdateParticles</a>( particle{k-1}, fDYN,[t(k-1) t(k)]);
+0031 <span class="keyword">end</span>
+0032 toc(time1)
+0033 
+0034 <span class="comment">%% Compute mean and covariance</span>
+0035 xmean = zeros(dim,length(t));
+0036 covP  = zeros(dim,dim,length(t));
+0037 <span class="keyword">for</span> k = 1:length(t)
+0038     xmean(:,k) = mean(particle{k}');
+0039     covP(:,:,k) = cov(particle{k}');
+0040 <span class="keyword">end</span>
+0041 <span class="comment">%% Plot variables</span>
+0042 figure
+0043 plot(t,xmean)
+0044 xlabel(<span class="string">'time(s)'</span>)
+0045 legend(<span class="string">'x1'</span>,<span class="string">'x2'</span>)
+0046 
+0047 <span class="comment">% kalman</span>
+0048 
+0049 particleKalman =  cell(length(t),1);
+0050 particleKalman{1} = x0';
+0051 time1 = tic;
+0052 <span class="keyword">for</span> k = 2:length(t)
+0053      particleKalman{k} = <a href="../src/dynUpdateParticles.html" class="code" title="function [ particleOutput ] = dynUpdateParticles( particle, fDYN, timeVector)">dynUpdateParticles</a>( particleKalman{k-1}, fDYN,[t(k-1) t(k)]);
+0054 <span class="keyword">end</span>
+0055 toc(time1)
+0056 xKmean = zeros(dim,length(t));
+0057 <span class="keyword">for</span> k = 1:length(t)
+0058     xKmean(:,k) = particleKalman{k};
+0059 <span class="keyword">end</span>
+0060 
+0061 figure
+0062 plot(t,squeeze(covP(1,1,:)))
+0063 xlabel(<span class="string">'time(s)'</span>)
+0064 ylabel(<span class="string">'cov'</span>)
+0065 
+0066 afigure
+0067 plot(t,xmean(1,:),t,xmean(2,:),<span class="string">'r'</span>,t,xKmean(1,:),<span class="string">'--black'</span>,t,xKmean(2,:),<span class="string">'--red'</span>)
+0068 xlabel(<span class="string">'time(s)'</span>)
+0069 legend(<span class="string">'x_1 PF'</span>,<span class="string">'x_2 PF'</span>,<span class="string">'x_1 KF'</span>,<span class="string">'x_2 KF'</span>)
+0070 
+0071 
+0072 <span class="comment">%% Display particles animation</span>
+0073 hf = figure;
+0074 save_to_file = 0;
+0075 saveResults = 1;
+0076 <span class="keyword">if</span> (save_to_file &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0077     FPS = 25;  
+0078     pause(1)
+0079     str_title = [<span class="string">'Probability Density Function Evolution'</span>];
+0080     writerObj = VideoWriter(<span class="string">'pdf_gaussian_.avi'</span>);
+0081     writerObj.FrameRate = FPS;
+0082     myVideo.Quality = 100;
+0083     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hf,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0084     open(writerObj);
+0085     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0086     pause(2)
+0087 <span class="keyword">end</span>
+0088 hold on
+0089 ht_kf = scatter(particle{1}(1,:),particle{1}(2,:),1);
+0090 xlabel(<span class="string">'\theta'</span>)
+0091 ylabel(<span class="string">'\dot{theta}'</span>)
+0092 axis([-pi pi -5 5])
+0093 axis equal
+0094 grid on
+0095 <span class="keyword">for</span> k = 2:1:length(t)
+0096     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_kf, <span class="string">'XData'</span>,particle{k}(1,:),<span class="string">'YData'</span>,particle{k}(2,:) );
+0097     pause(1.0/10);
+0098     axis([-pi pi -5 5])
+0099     drawnow
+0100     <span class="keyword">if</span> (save_to_file  &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0101         M = getframe(gcf);
+0102         writeVideo(writerObj, M);
+0103     <span class="keyword">end</span>        
+0104 <span class="keyword">end</span>
+0105 <span class="keyword">if</span> (save_to_file   &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0106     close(writerObj);
+0107 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

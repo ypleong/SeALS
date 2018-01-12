@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of chebdifn</title>
+  <meta name="keywords" content="chebdifn">
+  <meta name="description" content="Without (a) and (b)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html dmsuite -->
+<h1>chebdifn
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Without (a) and (b)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Without (a) and (b)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/makediffopinfspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopinfspectral(bdim,n,bcon,region)">makediffopinfspectral</a>	MAKEDIFFOP creates discretization grids and differentiation operators</li><li><a href="../../src/makediffopspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region)">makediffopspectral</a>	MAKEDIFFOP creates discretization grids and differentiation operators</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [DM] = computeD(x, k, N, M)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)</a>
+0002 
+0003 <span class="comment">% Without (a) and (b)</span>
+0004 
+0005 <span class="comment">%  The function [x, DM] =  chebdif(N,M) computes the differentiation</span>
+0006 <span class="comment">%  matrices D1, D2, ..., DM on Chebyshev nodes.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">%  Input:</span>
+0009 <span class="comment">%  N:        Size of differentiation matrix.</span>
+0010 <span class="comment">%  M:        Number of derivatives required (integer).</span>
+0011 <span class="comment">%  xmin:     lower bound of the domain</span>
+0012 <span class="comment">%  xmax:     upper bound of the domain</span>
+0013 <span class="comment">%  imin:     lower bound of the interior domain</span>
+0014 <span class="comment">%  imax:     upper bound of the interior domain</span>
+0015 <span class="comment">%  Note:     0 &lt; M &lt;= N-1.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%  Output:</span>
+0018 <span class="comment">%  DM:       DM(1:N,1:N,ell) contains ell-th derivative matrix, ell=1..M.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%  The code implements two strategies for enhanced</span>
+0021 <span class="comment">%  accuracy suggested by W. Don and S. Solomonoff in</span>
+0022 <span class="comment">%  SIAM J. Sci. Comp. Vol. 6, pp. 1253--1268 (1994).</span>
+0023 <span class="comment">%  The two strategies are (a) the use of trigonometric</span>
+0024 <span class="comment">%  identities to avoid the computation of differences</span>
+0025 <span class="comment">%  x(k)-x(j) and (b) the use of the &quot;flipping trick&quot;</span>
+0026 <span class="comment">%  which is necessary since sin t can be computed to high</span>
+0027 <span class="comment">%  relative precision when t is small whereas sin (pi-t) cannot.</span>
+0028 <span class="comment">%  Note added May 2003:  It may, in fact, be slightly better not to</span>
+0029 <span class="comment">%  implement the strategies (a) and (b).   Please consult the following</span>
+0030 <span class="comment">%  paper for details:   &quot;Spectral Differencing with a Twist&quot;, by</span>
+0031 <span class="comment">%  R. Baltensperger and M.R. Trummer, to appear in SIAM J. Sci. Comp.</span>
+0032 
+0033 <span class="comment">%  J.A.C. Weideman, S.C. Reddy 1998.  Help notes modified by</span>
+0034 <span class="comment">%  JACW, May 2003.</span>
+0035 
+0036 <span class="keyword">if</span> nargin &lt; 3
+0037     xmin = -1;
+0038     xmax = 1;
+0039     imin = [];
+0040     imax = [];
+0041 <span class="keyword">elseif</span> nargin &lt; 5
+0042     imin = [];
+0043     imax = [];
+0044 <span class="keyword">elseif</span> nargin == 6
+0045     <span class="keyword">if</span> N &lt; 5
+0046         error(<span class="string">'N must be greater than 4'</span>)
+0047     <span class="keyword">end</span>
+0048 <span class="keyword">end</span>
+0049     
+0050      <span class="keyword">if</span> isempty(imin) &amp;&amp; isempty(imax)
+0051          k = (0:N-1)';                        <span class="comment">% Compute theta vector.</span>
+0052         th = k*pi/(N-1);
+0053         
+0054         x = cos(th); <span class="comment">% Compute Chebyshev points.</span>
+0055         x = ((xmax-xmin)*x+xmax+xmin)/2;
+0056         
+0057         DM = <a href="#_sub1" class="code" title="subfunction [DM] = computeD(x, k, N, M)">computeD</a>(x, (0:N-1)', N, M);
+0058        
+0059      <span class="keyword">else</span>
+0060          imid = (imax+imin)/2;
+0061          Nb = floor((imid-xmin)*N/(xmax-xmin));
+0062          
+0063          k1 = (0:Nb)';
+0064          k2 = (0:N-Nb-1)';
+0065          th1 = k1*pi/(Nb);
+0066          th2 = k2*pi/(N-Nb-1);
+0067          
+0068          x1 = cos(th1); <span class="comment">% Compute Chebyshev points.</span>
+0069          x2 = cos(th2); <span class="comment">% Compute Chebyshev points.</span>
+0070                
+0071          x = [((xmax-imid)*x2+imid+xmax)/2; ((imid-xmin)*x1(2:end)+imid+xmin)/2;];
+0072          
+0073          DM = <a href="#_sub1" class="code" title="subfunction [DM] = computeD(x, k, N, M)">computeD</a>(x, (0:N-1)', N, M);
+0074          
+0075      <span class="keyword">end</span>
+0076      
+0077      
+0078 <span class="keyword">end</span>
+0079 
+0080 <a name="_sub1" href="#_subfunctions" class="code">function [DM] = computeD(x, k, N, M)</a>
+0081 
+0082      I = eye(N);                          <span class="comment">% Identity matrix.</span>
+0083      L = logical(I);                      <span class="comment">% Logical identity matrix.</span>
+0084 
+0085      T = repmat(x,1,N);                
+0086     DX = T-T';           
+0087  DX(L) = ones(N,1);                       <span class="comment">% Put 1's on the main diagonal of DX.</span>
+0088 
+0089      C = toeplitz((-1).^k);               <span class="comment">% C is the matrix with</span>
+0090 C(1,:) = C(1,:)*2; C(N,:) = C(N,:)*2;     <span class="comment">% entries c(k)/c(j)</span>
+0091 C(:,1) = C(:,1)/2; C(:,N) = C(:,N)/2;
+0092 
+0093      Z = 1./DX;                           <span class="comment">% Z contains entries 1/(x(k)-x(j))</span>
+0094   Z(L) = zeros(N,1);                      <span class="comment">% with zeros on the diagonal.</span>
+0095 
+0096      D = eye(N);                          <span class="comment">% D contains diff. matrices.</span>
+0097 
+0098 DM = zeros(N,N,M);
+0099 
+0100 <span class="keyword">for</span> ell = 1:M
+0101     D = ell*Z.*(C.*repmat(diag(D),1,N) - D); <span class="comment">% Off-diagonals</span>
+0102     D(L) = -sum(D,2);                            <span class="comment">% Correct main diagonal of D</span>
+0103     DM(:,:,ell) = D;                                   <span class="comment">% Store current D in DM</span>
+0104 <span class="keyword">end</span>
+0105 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

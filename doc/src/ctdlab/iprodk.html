@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of iprodk</title>
+  <meta name="keywords" content="iprodk">
+  <meta name="description" content="Inner product of tensor A of arbitrary rank, and ktensor B of rank 1,">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>iprodk
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Inner product of tensor A of arbitrary rank, and ktensor B of rank 1,</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function x = iprodk(A,B,k) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Inner product of tensor A of arbitrary rank, and ktensor B of rank 1, 
+ excluding dimension k.  This function is used for fixed point iteration.
+ Input:
+   A = ktensor whose rank-1 approximation is sought
+   B = ktensor of rank 1
+   k = dimension to collapse around
+ Output:
+   x = vector of size size(A,k)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="rofpi1.html" class="code" title="function [T,err,alpha] = rofpi1(A,T,tol,maxit,vbs)">rofpi1</a>	Fixed point iteration for rank-1 update with provided initial guess.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function x = iprodk(A,B,k)</a>
+0002 <span class="comment">% Inner product of tensor A of arbitrary rank, and ktensor B of rank 1,</span>
+0003 <span class="comment">% excluding dimension k.  This function is used for fixed point iteration.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   A = ktensor whose rank-1 approximation is sought</span>
+0006 <span class="comment">%   B = ktensor of rank 1</span>
+0007 <span class="comment">%   k = dimension to collapse around</span>
+0008 <span class="comment">% Output:</span>
+0009 <span class="comment">%   x = vector of size size(A,k)</span>
+0010 
+0011     <span class="comment">% check that B is of rank 1</span>
+0012     <span class="keyword">if</span> length(B.lambda) &gt; 1
+0013         fprintf(<span class="string">'iprodk:  B must be rank 1.\n'</span>)
+0014         x=[];
+0015         <span class="keyword">return</span>
+0016     <span class="keyword">end</span>
+0017 
+0018     <span class="comment">% iterate through all dimensions except k</span>
+0019     dims = 1:ndims(A);
+0020     dims(k) = [];
+0021     
+0022     <span class="comment">% collapse</span>
+0023     <span class="comment">%coefMat = A.lambda;</span>
+0024     coefMat = A.lambda';
+0025     <span class="keyword">for</span> d = dims
+0026         <span class="comment">%coefMat = coefMat .* (A{d}'*B{d});</span>
+0027         tmp = full(B{d}' * A{d});
+0028         coefMat = coefMat .* tmp;
+0029     <span class="keyword">end</span>
+0030     coefMat = coefMat';
+0031     
+0032     <span class="comment">% take linear combination of vectors in dimension k</span>
+0033     x = A{k} * coefMat;
+0034 
+0035 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

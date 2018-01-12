@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of main_run_spectral</title>
+  <meta name="keywords" content="main_run_spectral">
+  <meta name="description" content="MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>main_run_spectral
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,
+ visualizes the result and runs simulations with the obtained controller.
+ Inputs:
+   The inputs: input1, input2, input3 and input4 and run corresponds to
+   setup 1,2,3,4 and 5 respectively in MAIN_PROGRAM. See MAIN_PROGRAM for
+   more info.
+ Outputs:
+   F - obtained desirability function as ktensor.
+
+ See also MAIN_PROGRAM.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="addartdiff.html" class="code" title="function [op] = addartdiff(op,conv,diff,artdiff_option,h,D2,fTens)">addartdiff</a>	ADDARTDIFF adds artificial diffusion to the operator op.</li><li><a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>	ALS_SYS_VAR is a modified version of the original ALS algorithm found</li><li><a href="checklambda.html" class="code" title="function checklambda(G,B,noise_cov,R,lambda)">checklambda</a>	CHECKLAMBDA checks that lambda is correctly specified for the special</li><li><a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="incorpregion.html" class="code" title="function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca)">incorpregion</a>	INCORPREGION modifies operator and boundary conditions to incooporate</li><li><a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>	MAKE_BC_SCA_VAR creates scalings for the boundary condition and goal</li><li><a href="makebasicspectral.html" class="code" title="function [noise_cov,R] = makebasicspectral(noise_cov,R,G,B)">makebasicspectral</a>	MAKEBASIC initalize basic variables. For example, if ord_of_acc is</li><li><a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>	MAKEBC creates the boundary conditions with scaling.</li><li><a href="makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="makefuncdyn.html" class="code" title="function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x)">makefuncdyn</a>	MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.</li><li><a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li><li><a href="maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>	MAKETENSDYN creates ktensor representation of symbolic functions, given below.</li><li><a href="visres.html" class="code" title="function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)">visres</a>	VISRES plots results from a run by MAIN_RUN.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/Inverted_Pendulum.html" class="code" title="">Inverted_Pendulum</a>	% Example - Inverted Pendulum</li><li><a href="../examples/Scalar_Unstable_System.html" class="code" title="">Scalar_Unstable_System</a>	% Example - Scalar Unstable System</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)</a>
+0002 <span class="comment">% MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</span>
+0003 <span class="comment">% visualizes the result and runs simulations with the obtained controller.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   The inputs: input1, input2, input3 and input4 and run corresponds to</span>
+0006 <span class="comment">%   setup 1,2,3,4 and 5 respectively in MAIN_PROGRAM. See MAIN_PROGRAM for</span>
+0007 <span class="comment">%   more info.</span>
+0008 <span class="comment">% Outputs:</span>
+0009 <span class="comment">%   F - obtained desirability function as ktensor.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% See also MAIN_PROGRAM.</span>
+0012 
+0013 <span class="comment">% Elis Stefansson, Aug 5 2015</span>
+0014 
+0015 start_whole = tic;
+0016 
+0017 <span class="comment">%% Step 1: extract input data</span>
+0018 
+0019 [d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc] = deal(input1{:});
+0020 
+0021 [x,f,G,B,noise_cov,q,R,lambda] = deal(input2{:});
+0022 
+0023 [artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging] = deal(input3{:});
+0024 
+0025 [saveplots,savedata,plotdata,sim_config] = deal(input4{:});
+0026 
+0027 fprintf([<span class="string">'Starting run '</span>,num2str(run),<span class="string">' with main_run \n'</span>])
+0028 
+0029 <span class="comment">%% Step 2: assign basics</span>
+0030 
+0031 <span class="comment">% check that lambda is correctly given for important special case</span>
+0032 <a href="checklambda.html" class="code" title="function checklambda(G,B,noise_cov,R,lambda)">checklambda</a>(G,B,noise_cov,R,lambda);
+0033 
+0034 <span class="comment">% assign basics</span>
+0035 [noise_cov,R] = <a href="makebasicspectral.html" class="code" title="function [noise_cov,R] = makebasicspectral(noise_cov,R,G,B)">makebasicspectral</a>(noise_cov,R,G,B);
+0036 
+0037 <span class="comment">%% Step 3: calculate differentiation operators and finite difference matrices</span>
+0038 
+0039 fprintf(<span class="string">'Creating differential operators ...\n'</span>);
+0040 start_diff = tic;
+0041 [n,grid,region,D,D2,D4,fd1,fd2] = makediffopspectral4(bdim,n,bcon,region);
+0042 toc(start_diff)
+0043 end_diff = toc(start_diff);
+0044 
+0045 <span class="comment">%% Step 4: calculate dynamics</span>
+0046 
+0047 fprintf(<span class="string">'Creating dynamics operator ...\n'</span>);
+0048 start_dynamics = tic;
+0049 <span class="comment">%create ktensors</span>
+0050 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = <a href="maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>(f,G,B,noise_cov,q,R,x,grid);
+0051 toc(start_dynamics)
+0052 end_dynamics = toc(start_dynamics);
+0053 
+0054 <span class="comment">%create MATLAB functions</span>
+0055 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = <a href="makefuncdyn.html" class="code" title="function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x)">makefuncdyn</a>(f,G,B,noise_cov,q,R,x);
+0056 
+0057 <span class="comment">%% Step 5: calculate operator</span>
+0058 
+0059 fprintf(<span class="string">'Creating PDE operator ...\n'</span>);
+0060 start_PDEop = tic;
+0061 [op,conv,diff] = <a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda);
+0062 toc(start_PDEop)
+0063 end_PDEop = toc(start_PDEop);
+0064 
+0065 <span class="comment">%% Step 6: add artificial diffusion to operator</span>
+0066 
+0067 <span class="keyword">if</span> isempty(artdiff_option) == 0
+0068     <span class="comment">% add artificial diffusion</span>
+0069     h = [];
+0070     [op] = <a href="addartdiff.html" class="code" title="function [op] = addartdiff(op,conv,diff,artdiff_option,h,D2,fTens)">addartdiff</a>(op,conv,diff,artdiff_option,h,D2,fTens);  <span class="comment">%%% TODO: NEED TO CHECK</span>
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%% Step 7: create boundary conditions</span>
+0074 
+0075 <span class="comment">% create scaling for bc</span>
+0076 <span class="keyword">if</span> isempty(bsca) == 1 || isempty(regsca) == 1
+0077     
+0078     <span class="keyword">if</span> sca_ver == 1
+0079         [bscat, regscat] = <a href="make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>(op,grid,region,bcon);    
+0080     <span class="keyword">elseif</span> sca_ver == 2
+0081         [bscat, regscat] = <a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>(op,bcon,region,regval,als_options,fd1,grid,x,n);
+0082     <span class="keyword">elseif</span> sca_ver == 3
+0083         <span class="comment">% temporarily option made for comparing with old results</span>
+0084         op = (h(1)^2*h(2)^2)*op;
+0085         bscat = ones(d,2);
+0086         regscat = 1;
+0087     <span class="keyword">else</span>
+0088         error(<span class="string">'wrong specification on boundary scaling'</span>);
+0089     <span class="keyword">end</span>
+0090     
+0091 <span class="keyword">end</span>
+0092 
+0093 <span class="keyword">if</span> isempty(bsca)
+0094     bsca = bscat;
+0095 <span class="keyword">end</span>
+0096 
+0097 <span class="keyword">if</span> isempty(regsca)
+0098     regsca = regscat;
+0099 <span class="keyword">end</span>
+0100 
+0101 <span class="comment">% make bc</span>
+0102 [bc] = <a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>(bcon,bsca,grid,x,n);
+0103 
+0104 <span class="comment">%% Step 8: set up boundary conditions for operator</span>
+0105 [op] = <a href="makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>(op,bcon,bsca,n,fd1);
+0106 
+0107 <span class="comment">%% Step 9: incooporate region in boundary conditions and operator</span>
+0108 
+0109 <span class="keyword">if</span> isempty(region) == 0
+0110     [op,bc] = <a href="incorpregion.html" class="code" title="function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca)">incorpregion</a>(op,bc,region,grid,regval,regsca);
+0111 <span class="keyword">end</span>
+0112 
+0113 <span class="comment">%% Step 10: compress operator</span>
+0114 
+0115 op_uncomp = op; <span class="comment">%save uncompressed op</span>
+0116 
+0117 fprintf(<span class="string">'Attempt to compress operator, rank(op)=%d\n'</span>, ncomponents(op));
+0118 rank_op_uncomp = ncomponents(op);
+0119 
+0120 start_compress_id = tic;
+0121 fprintf(<span class="string">'Target CTD: %d terms above tol\n'</span>, length(find(op.lambda&gt;tol_err_op)));
+0122 fprintf(<span class="string">'Running TENID with frobenius norm:\n'</span>)
+0123 [op,~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(op,tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(op),0);
+0124 op = fixsigns(arrange(op));
+0125 compress_time_id = toc(start_compress_id);
+0126 fprintf(<span class="string">'Number of components after TENID compression, %d\n'</span>, ncomponents(op));
+0127 toc(start_compress_id)
+0128 
+0129 start_compress = tic;
+0130 fprintf(<span class="string">'Running ALS:\n'</span>)
+0131 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(op,tol_err_op);
+0132 rank_op_comp = ncomponents(op);
+0133 fprintf(<span class="string">'Number of components after ALS compression, %d\n'</span>, ncomponents(op));
+0134 compress_time = toc(start_compress);
+0135 toc(start_compress)
+0136 
+0137 <span class="comment">%% Step 11: solve system</span>
+0138 
+0139 disp(<span class="string">'Beginning Solving'</span>);
+0140 
+0141 start_solve = tic;
+0142 <span class="keyword">if</span> isempty(als_variant) <span class="comment">%original</span>
+0143     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = <span class="keyword">...</span>
+0144         <a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>(op,bc,[],tol_err,als_options,debugging);
+0145     restart = []; <span class="comment">%no restarts for original</span>
+0146     <span class="comment">%save('F','F') %save just incase something does not work later</span>
+0147 <span class="keyword">else</span> <span class="comment">%variant</span>
+0148     [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell, restart] = <span class="keyword">...</span>
+0149         <a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>(op,bc,[],tol_err,als_options,als_variant,debugging);
+0150     <span class="comment">%save('F','F') %save just incase something does not work later</span>
+0151 <span class="keyword">end</span>
+0152 toc(start_solve)
+0153 time_solve = toc(start_solve);
+0154 
+0155 disp(<span class="string">'Solution complete'</span>);
+0156 
+0157 <span class="comment">%% Step 12: visualize results</span>
+0158 
+0159 <span class="keyword">if</span> plotdata
+0160 <span class="comment">% arrange input data</span>
+0161     F = arrange(F);
+0162     plotsolve = {F,err,enrich,t_step,Fcond,grid};
+0163     plotcomp = {op,err_op,enrich_op,t_step_op,cond_op};
+0164     plotdebug = {F_cell,b_cell,B_cell};
+0165 
+0166 <span class="comment">% plot results from run als and compress operator</span>
+0167     <span class="keyword">try</span>
+0168         fprintf(<span class="string">'Plotting results \n'</span>)
+0169         <a href="visres.html" class="code" title="function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)">visres</a>(plotsolve,plotcomp,plotdebug,n,debugging,0,0,restart,run)
+0170         fprintf(<span class="string">'Plotting complete \n'</span>)
+0171     <span class="keyword">catch</span>
+0172         fprintf(<span class="string">'Could not visualize results \n'</span>)
+0173     <span class="keyword">end</span>
+0174 <span class="keyword">end</span>
+0175 
+0176 <span class="comment">%% Step 13. run simulations</span>
+0177 
+0178 <span class="comment">% arrange input data</span>
+0179 <span class="comment">% sim_data = {lambda,grid,R,noise_cov,F*(1/EvalT(F,zeros(d,1),grid)),D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};</span>
+0180 <span class="comment">%</span>
+0181 <span class="comment">% % run simulation</span>
+0182 <span class="comment">% if isempty(sim_config) == 0</span>
+0183 <span class="comment">%     try</span>
+0184 <span class="comment">%         start_sim = tic;</span>
+0185 <span class="comment">%         fprintf('Starting simulations \n')</span>
+0186 <span class="comment">%         sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)</span>
+0187 <span class="comment">%         fprintf('Simulations complete \n')</span>
+0188 <span class="comment">%         toc(start_sim)</span>
+0189 <span class="comment">%         time_sim = toc(start_sim);</span>
+0190 <span class="comment">%     catch</span>
+0191 <span class="comment">%         fprintf('Could not run simulation \n')</span>
+0192 <span class="comment">%     end</span>
+0193 <span class="comment">% end</span>
+0194 
+0195 <span class="comment">%% Step 14: save data</span>
+0196 
+0197 time_whole = toc(start_whole);
+0198 
+0199 <span class="keyword">if</span> savedata == 1
+0200     
+0201     <span class="keyword">if</span> debugging == 1
+0202         
+0203         <span class="comment">% try to save F_cell,B_cell,b_cell separately since big files.</span>
+0204         <span class="keyword">try</span>
+0205             <span class="comment">%save F_cell</span>
+0206             pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0207             matfile = fullfile(pathname,[<span class="string">'F_cell_run'</span>,num2str(run)]);
+0208             save(matfile,<span class="string">'F_cell'</span>);
+0209         <span class="keyword">catch</span>
+0210             fprintf(<span class="string">'Could not save F_cell. Consider runs generating less data.'</span>);
+0211         <span class="keyword">end</span>
+0212         <span class="keyword">try</span>
+0213             <span class="comment">%save B_cell</span>
+0214             pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0215             matfile = fullfile(pathname,[<span class="string">'B_cell_run'</span>,num2str(run)]);
+0216             save(matfile,<span class="string">'B_cell'</span>);
+0217         <span class="keyword">catch</span>
+0218             fprintf(<span class="string">'Could not save B_cell. Consider runs generating less data.'</span>);
+0219         <span class="keyword">end</span>
+0220         <span class="keyword">try</span>
+0221             <span class="comment">%save b_cell</span>
+0222             pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0223             matfile = fullfile(pathname,[<span class="string">'b_cell_run'</span>,num2str(run)]);
+0224             save(matfile,<span class="string">'b_cell'</span>);
+0225         <span class="keyword">catch</span>
+0226             fprintf(<span class="string">'Could not save b_cell. Consider runs generating less data.'</span>);
+0227         <span class="keyword">end</span>
+0228         
+0229     <span class="keyword">end</span>
+0230     
+0231     clear F_cell B_cell b_cell
+0232 
+0233     save([save_folder,<span class="string">'spectral_rundata_run_'</span>,num2str(run)]);
+0234     
+0235 <span class="keyword">end</span>
+0236 
+0237 fprintf([<span class="string">'Run '</span>,num2str(run),<span class="string">' with main_run is complete \n'</span>])</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

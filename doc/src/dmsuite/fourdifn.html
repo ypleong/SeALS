@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fourdifn</title>
+  <meta name="keywords" content="fourdifn">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html dmsuite -->
+<h1>fourdifn
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [x, DM] = fourdifn(N,m,xmin, xmax) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">
+ The function [x, DM] = fourdif(N,m) computes the m'th derivative Fourier 
+ spectral differentiation matrix on grid with N equispaced points in [0,2pi)
+ 
+  Input:
+  N:        Size of differentiation matrix.
+  M:        Derivative required (non-negative integer)
+  xmin:     lower bound of the domain
+  xmax:     upper bound of the domain
+
+  Output:
+  x:        Equispaced points 0, 2pi/N, 4pi/N, ... , (N-1)2pi/N
+  DM:       m'th order differentiation matrix
+
+ 
+  Explicit formulas are used to compute the matrices for m=1 and 2. 
+  A discrete Fouier approach is employed for m&gt;2. The program 
+  computes the first column and first row and then uses the 
+  toeplitz command to create the matrix.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/makediffopinfspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopinfspectral(bdim,n,bcon,region)">makediffopinfspectral</a>	MAKEDIFFOP creates discretization grids and differentiation operators</li><li><a href="../../src/makediffopspectral.html" class="code" title="function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region)">makediffopspectral</a>	MAKEDIFFOP creates discretization grids and differentiation operators</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001     <a name="_sub0" href="#_subfunctions" class="code">function [x, DM] = fourdifn(N,m,xmin, xmax)</a>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% The function [x, DM] = fourdif(N,m) computes the m'th derivative Fourier</span>
+0004 <span class="comment">% spectral differentiation matrix on grid with N equispaced points in [0,2pi)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%  Input:</span>
+0007 <span class="comment">%  N:        Size of differentiation matrix.</span>
+0008 <span class="comment">%  M:        Derivative required (non-negative integer)</span>
+0009 <span class="comment">%  xmin:     lower bound of the domain</span>
+0010 <span class="comment">%  xmax:     upper bound of the domain</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Output:</span>
+0013 <span class="comment">%  x:        Equispaced points 0, 2pi/N, 4pi/N, ... , (N-1)2pi/N</span>
+0014 <span class="comment">%  DM:       m'th order differentiation matrix</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%  Explicit formulas are used to compute the matrices for m=1 and 2.</span>
+0018 <span class="comment">%  A discrete Fouier approach is employed for m&gt;2. The program</span>
+0019 <span class="comment">%  computes the first column and first row and then uses the</span>
+0020 <span class="comment">%  toeplitz command to create the matrix.</span>
+0021 
+0022 <span class="comment">%  For m=1 and 2 the code implements a &quot;flipping trick&quot; to</span>
+0023 <span class="comment">%  improve accuracy suggested by W. Don and A. Solomonoff in</span>
+0024 <span class="comment">%  SIAM J. Sci. Comp. Vol. 6, pp. 1253--1268 (1994).</span>
+0025 <span class="comment">%  The flipping trick is necesary since sin t can be computed to high</span>
+0026 <span class="comment">%  relative precision when t is small whereas sin (pi-t) cannot.</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">%  S.C. Reddy, J.A.C. Weideman 1998.  Corrected for MATLAB R13</span>
+0029 <span class="comment">%  by JACW, April 2003.</span>
+0030  
+0031 <span class="keyword">if</span> nargin &lt; 3
+0032     xmin = 0;
+0033     xmax = 2*pi;
+0034 <span class="keyword">end</span>
+0035 
+0036 
+0037     x=2*pi*(0:N-1)'/N;                       <span class="comment">% gridpoints</span>
+0038     h=2*pi/N;                                <span class="comment">% grid spacing</span>
+0039     zi=sqrt(-1);
+0040     kk=(1:N-1)';
+0041     n1=floor((N-1)/2); n2=ceil((N-1)/2);
+0042     <span class="keyword">if</span> m==0,                                 <span class="comment">% compute first column</span>
+0043       col1=[1; zeros(N-1,1)];                <span class="comment">% of zeroth derivative</span>
+0044       row1=col1;                             <span class="comment">% matrix, which is identity</span>
+0045 
+0046     <span class="keyword">elseif</span> m==1,                             <span class="comment">% compute first column</span>
+0047       <span class="keyword">if</span> rem(N,2)==0                         <span class="comment">% of 1st derivative matrix</span>
+0048     topc=cot((1:n2)'*h/2);
+0049         col1=[0; 0.5*((-1).^kk).*[topc; -flipud(topc(1:n1))]]; 
+0050       <span class="keyword">else</span>
+0051     topc=csc((1:n2)'*h/2);
+0052         col1=[0; 0.5*((-1).^kk).*[topc; flipud(topc(1:n1))]];
+0053       <span class="keyword">end</span>;
+0054       row1=-col1;                            <span class="comment">% first row</span>
+0055 
+0056     <span class="keyword">elseif</span> m==2,                             <span class="comment">% compute first column</span>
+0057       <span class="keyword">if</span> rem(N,2)==0                         <span class="comment">% of 2nd derivative matrix</span>
+0058     topc=csc((1:n2)'*h/2).^2;
+0059         col1=[-pi^2/3/h^2-1/6; -0.5*((-1).^kk).*[topc; flipud(topc(1:n1))]];
+0060       <span class="keyword">else</span>
+0061     topc=csc((1:n2)'*h/2).*cot((1:n2)'*h/2);
+0062         col1=[-pi^2/3/h^2+1/12; -0.5*((-1).^kk).*[topc; -flipud(topc(1:n1))]];
+0063       <span class="keyword">end</span>;
+0064       row1=col1;                             <span class="comment">% first row</span>
+0065 
+0066     <span class="keyword">else</span>                                     <span class="comment">% employ FFT to compute</span>
+0067       N1=floor((N-1)/2);                     <span class="comment">% 1st column of matrix for m&gt;2</span>
+0068       N2 = (-N/2)*rem(m+1,2)*ones(rem(N+1,2));  
+0069       mwave=zi*[(0:N1) N2 (-N1:-1)];
+0070       col1=real(ifft((mwave.^m).*fft([1 zeros(1,N-1)])));
+0071       <span class="keyword">if</span> rem(m,2)==0,
+0072     row1=col1;                           <span class="comment">% first row even derivative</span>
+0073       <span class="keyword">else</span>
+0074     col1=[0 col1(2:N)]'; 
+0075     row1=-col1;                          <span class="comment">% first row odd derivative</span>
+0076       <span class="keyword">end</span>;
+0077     <span class="keyword">end</span>;
+0078     DM=toeplitz(col1,row1);   
+0079     
+0080     <span class="comment">% Negative sum trick</span>
+0081      I = eye(N);                          <span class="comment">% Identity matrix.</span>
+0082      L = logical(I);                      <span class="comment">% Logical identity matrix.</span>
+0083      DM(L) = zeros(N,1);
+0084      DM(L) = -sum(DM,2);
+0085      
+0086     x = xmin+(xmax-xmin)/(2*pi)*x;
+0087     DM = DM*(xmax-xmin)/(2*pi);
+0088     
+0089</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

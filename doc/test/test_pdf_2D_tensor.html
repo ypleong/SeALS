@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_pdf_2D_tensor</title>
+  <meta name="keywords" content="test_pdf_2D_tensor">
+  <meta name="description" content="% Test Tensor Form PDF Evolution ND">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_pdf_2D_tensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Test Tensor Form PDF Evolution ND</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Test Tensor Form PDF Evolution ND</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>	HadTensProd performs Hadamand tensor products for a ktensor function F</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>	CP_ALS Compute a CP decomposition of any type of tensor.</li><li><a href="../src/create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li><li><a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>	F - ktensor</li><li><a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li><li><a href="../src/plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>	UNTITLED Summary of this function goes here</li><li><a href="plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>	Plot a 2d mesh using pcolor.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <span class="comment">%% Test Tensor Form PDF Evolution ND</span>
+0003 clear all
+0004 addpath(<span class="string">'../src/'</span>)
+0005 
+0006 
+0007 <span class="comment">%% Create operator in tensor form</span>
+0008 <span class="comment">% Initialization</span>
+0009 
+0010 dim = 2; <span class="comment">%only dim=2 here</span>
+0011 x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0012 n = [201, 301];
+0013 
+0014 <span class="comment">% Initial distribution</span>
+0015 bdim = [-5 25 ; -5 25];
+0016 dx(1) = (bdim(1,2)-bdim(1,1))/(n(1)-1);
+0017 dx(2) = (bdim(2,2)-bdim(2,1))/(n(2)-1);
+0018 x0 = [7,13];
+0019 sigma02 = 2.5;
+0020 sigma02Matrix = [2.3 0.4; 0.4 sigma02];
+0021 xvector{1} = [-5:dx(1):25]';
+0022 xvector{2} = [-5:dx(2):25]';
+0023 [xgrid,ygrid] = meshgrid(xvector{1},xvector{2});
+0024 xyvector = [xgrid(:) ygrid(:)];<span class="comment">%[reshape(xgrid,n(1)*n(2),1),reshape(ygrid,n(1)*n(2),1)];</span>
+0025 
+0026 
+0027 
+0028 <span class="comment">% Tensor parameters</span>
+0029 bcon = { {<span class="string">'d'</span>,0,0}, {<span class="string">'d'</span>,0,0}};
+0030 bsca = []; <span class="comment">%no manual scaling</span>
+0031 region = [];
+0032 regval = 1;
+0033 regsca = [];
+0034 sca_ver = 1;
+0035 
+0036 tol_err_op = 1e-6;
+0037 tol_err = 1e-9;
+0038 als_options = [];
+0039 als_variant = []; <span class="comment">%{10,50};</span>
+0040 debugging = 0;
+0041 
+0042 run = 1;
+0043 
+0044 
+0045 
+0046 fprintf([<span class="string">'Starting run '</span>,num2str(run),<span class="string">' with main_run \n'</span>])
+0047 
+0048 <span class="keyword">for</span> i=1:dim
+0049     gridT{i} = xvector{i};
+0050     nd(i) = n(i);
+0051     dxd(i) = dx(i);
+0052     acc(i,:) = [2,2]';
+0053 <span class="keyword">end</span>
+0054 
+0055 [D,D2,fd1,fd2] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,nd,dxd,acc,bcon,region);
+0056 
+0057 
+0058 <span class="comment">% Simulation Parameters</span>
+0059 dt = 0.005;
+0060 finalt = 2;
+0061 t = 0:dt:finalt;
+0062 q =  diag([0.2,0.4]); <span class="comment">%0.25;</span>
+0063 aspeed = [2;-2]; <span class="comment">%[0,3]';</span>
+0064 
+0065 xkalman = zeros(dim,length(t));
+0066 covkalman = zeros(dim,dim,length(t));
+0067 expec = zeros(dim,length(t));
+0068 cov = zeros(dim,dim,length(t));
+0069 
+0070 
+0071 cov(:,:,1) = sigma02Matrix;
+0072 expec(:,1) = x0;
+0073 
+0074 <span class="comment">% Kalman variables .. Equation xdot = a*x + noise</span>
+0075 xkalman(:,1) = x0;
+0076 covKalman(:,:,1) = sigma02Matrix;
+0077 
+0078 
+0079 
+0080 
+0081 <span class="comment">%% Create Cell Terms</span>
+0082 fFPE = sym(aspeed); <span class="comment">% constant speed</span>
+0083 
+0084 kpen = 3;
+0085 fFPE = [x(2);-sym(kpen)*sin(x(1))];
+0086 <span class="comment">%</span>
+0087 fPFEdiff = jacobian(fFPE,x);
+0088 
+0089 fTens  = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(fFPE ,x), gridT);
+0090 f_pTensqTens = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(diag(fPFEdiff) ,x), gridT);
+0091 dtTens = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(dt)     ,x), gridT);
+0092 qTens  = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(q)      ,x), gridT);
+0093 dtTen = <a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(dtTens{1}); 
+0094 
+0095 <span class="comment">% Create Operator</span>
+0096 op = <a href="../src/create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a> ( fTens, f_pTensqTens, D, D2, dtTen, gridT, tol_err_op);
+0097 <span class="keyword">for</span> i=1:dim
+0098     <span class="keyword">for</span> j = 1:dim
+0099         <span class="keyword">if</span> i == j
+0100             we{i,j} = xvector{j};
+0101         <span class="keyword">else</span>
+0102             we{i,j} = ones(n(j),1);
+0103         <span class="keyword">end</span>         
+0104     <span class="keyword">end</span>
+0105 <span class="keyword">end</span>
+0106 <span class="keyword">for</span> i=1:dim
+0107     weones{i} = ones(n(i),1);
+0108  <span class="keyword">end</span>
+0109 <span class="comment">% Create tensor structure</span>
+0110 p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))';
+0111 
+0112 <span class="comment">% p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n(2),n(1))' + ...</span>
+0113 <span class="comment">%      reshape(mvnpdf(xyvector,x0+[3;-4]',sigma02Matrix/0.2),n(2),n(1))' + ...</span>
+0114 <span class="comment">%      reshape(mvnpdf(xyvector,x0+[-1;-6]',sigma02Matrix/1.4),n(2),n(1))';</span>
+0115 
+0116 <span class="keyword">if</span> dim == 2
+0117     hh = pcolor(xvector{1},xvector{2},p0');
+0118     colorbar
+0119     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hh, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0120     xlabel(<span class="string">'x'</span>)
+0121     zlabel(<span class="string">'p(x)'</span>)
+0122     grid on
+0123 <span class="keyword">end</span>
+0124 
+0125 rankD = 5;
+0126 [p0compressed] = <a href="../src/cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>(tensor(p0),rankD);
+0127 p0compressed = p0compressed*(1/  <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(p0compressed, [], gridT, weones));
+0128 pk{1} = p0compressed;
+0129 
+0130 <span class="keyword">if</span> dim == 2
+0131     hh = pcolor(xvector{1},xvector{2},double(p0compressed)');
+0132     colorbar
+0133     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hh, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0134     xlabel(<span class="string">'x'</span>)
+0135     zlabel(<span class="string">'p(x)'</span>)
+0136     grid on
+0137 <span class="keyword">end</span>
+0138 
+0139 <span class="comment">%% Iterate over</span>
+0140 tic
+0141 <span class="keyword">for</span> k = 2:length(t)
+0142     
+0143      pk{k} = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>( op, pk{k-1});
+0144     [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(pk{k},tol_err_op);
+0145     
+0146 
+0147     <span class="keyword">for</span> i=1:dim
+0148         expec(i,k)  = <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, we(i,:));
+0149     <span class="keyword">end</span>
+0150               
+0151     xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
+0152     covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
+0153     
+0154 <span class="keyword">end</span>
+0155 toc
+0156 <span class="comment">%% Check Results</span>
+0157 <span class="comment">%plot2d(xvector,double(pk{end}))</span>
+0158 
+0159 <span class="comment">% Check Kalman</span>
+0160 figure
+0161 plot(t,xkalman,t,expec,<span class="string">'.'</span>)
+0162 xlabel(<span class="string">'time'</span>)
+0163 zlabel(<span class="string">'position'</span>)
+0164 legend(<span class="string">'KalmaX'</span>,<span class="string">'KalmanY'</span>,<span class="string">'FPE X'</span>,<span class="string">'FPE Y'</span> )
+0165 
+0166 <span class="comment">%Compare 2D map kalman and Tensor-FKE</span>
+0167 figure
+0168 <a href="plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))'-double(pk{end}) )
+0169 title(<span class="string">'Difference with kalman'</span>)
+0170 
+0171 
+0172 
+0173 <span class="comment">%% Measure</span>
+0174 zmes = [12,6]';
+0175 Rmes = diag([1 1]); <span class="comment">%0.5*[3,1;1,2]*[3,1;1,2];</span>
+0176 pz = reshape(mvnpdf(xyvector,zmes',Rmes),n(2),n(1))';
+0177 rankD = 2;
+0178 [zkcompressed] = <a href="../src/cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>(tensor(pz),rankD);
+0179 
+0180 pkpos = <a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>(pk{length(t)},zkcompressed);
+0181 pkpos = pkpos *(1/  <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pkpos, [], gridT, weones));
+0182 
+0183 HK = eye(dim);
+0184 
+0185 <span class="comment">% Kalman Measurement</span>
+0186 KalmanG = covKalman(:,:,end)*HK'*inv(HK*covKalman(:,:,end)*HK'+Rmes);
+0187 xposKalman = xkalman(:,end) + KalmanG*(zmes - HK*xkalman(:,end));
+0188 covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,end);
+0189 
+0190 <span class="keyword">for</span> i=1:dim
+0191     xpos(i)  = <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pkpos, [], gridT, we(i,:));
+0192 <span class="keyword">end</span>
+0193 <span class="comment">%% animated figure</span>
+0194 figure
+0195 ht_pdf = pcolor(xvector{1},xvector{2},double(pk{k})');
+0196 h = colorbar;
+0197 caxis([0 max(max(double(pk{1})))])
+0198 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0199 xlabel(<span class="string">'x'</span>)
+0200 ylabel(<span class="string">'y'</span>)
+0201 grid on
+0202 axis ([0,25,0,25])
+0203 grid on
+0204 <span class="keyword">for</span> k = 2:10:length(t)
+0205      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'CData'</span>, double(pk{k})' );
+0206      drawnow
+0207      pause(1.0/10.0);
+0208 <span class="keyword">end</span>
+0209 
+0210 <span class="comment">%% animated figure difference</span>
+0211 figure
+0212 ht_pdf = pcolor(xvector{1}',xvector{2}',reshape(mvnpdf(xyvector, xkalman(:,1)',covKalman(:,:,1)),n(1),n(2))'-double(pk{1})');
+0213 h = colorbar;
+0214 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0215 xlabel(<span class="string">'x'</span>)
+0216 ylabel(<span class="string">'y'</span>)
+0217 grid on
+0218 axis ([0,25,0,25])
+0219 grid on
+0220 <span class="keyword">for</span> k = 2:10:length(t)
+0221      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'CData'</span>, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n(2),n(1))-double(pk{k})');
+0222      drawnow
+0223      pause(1.0/10.0);
+0224 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

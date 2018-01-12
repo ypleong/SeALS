@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotkTensorCell</title>
+  <meta name="keywords" content="plotkTensorCell">
+  <meta name="description" content="Plot a sequence of ktensors">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>plotkTensorCell
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Plot a sequence of ktensors</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ handleoutput ] = plotkTensorCell( Fcell, gridT, seqVector, varargin ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Plot a sequence of ktensors</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>	Plots a visualization of the Tensor. Integrate over all dimensions</li><li><a href="plot2DtimeMFibers.html" class="code" title="function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )">plot2DtimeMFibers</a>	Plot the time evolution of the tensor marginalized for each dimension</li><li><a href="plotkTensor.html" class="code" title="function [ handleOutput ] = plotkTensor( F, gridT, varargin )">plotkTensor</a>	Plot a ktensor using different plotting styles</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function callbackSlider(source,~,Fcell,gridT,handleSlices,b_text)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ handleoutput ] = plotkTensorCell( Fcell, gridT, seqVector, varargin )</a>
+0002 <span class="comment">% Plot a sequence of ktensors</span>
+0003 
+0004 params = inputParser;
+0005 <span class="comment">% Check required parameters</span>
+0006 validateattributes(Fcell,{<span class="string">'cell'</span>},{<span class="string">'nonempty'</span>},<span class="string">'ktensor'</span>);
+0007 validateattributes(Fcell{1},{<span class="string">'ktensor'</span>},{<span class="string">'nonempty'</span>})
+0008 
+0009 dim = ndims(Fcell{1});
+0010 validateattributes(gridT,{<span class="string">'cell'</span>},{<span class="string">'numel'</span>,dim})
+0011 <span class="keyword">if</span> (isempty(seqVector))
+0012     seqVector = 1:length(Fcell);
+0013 <span class="keyword">else</span>
+0014     validateattributes(seqVector,{<span class="string">'double'</span>},{<span class="string">'numel'</span>,length(Fcell)})
+0015 <span class="keyword">end</span>
+0016     
+0017 <span class="comment">% Check optional parameters</span>
+0018 defaultPlotSeq = <span class="string">'slider'</span>;
+0019 expectedPlotSeq = {<span class="string">'marginalizedFiber'</span>,<span class="string">'video'</span>,<span class="string">'slider'</span>,<span class="string">'snapshots'</span>};
+0020 addParameter(params,<span class="string">'plotSeq'</span>,defaultPlotSeq,<span class="keyword">...</span>
+0021                  @(x) any(validatestring(x,expectedPlotSeq)));
+0022 addParameter(params,<span class="string">'skip'</span>,10,@(x) isnumeric(x)&amp;&amp; x&gt;0 &amp;&amp; x&lt;length(Fcell))
+0023 addParameter(params,<span class="string">'sliderArrow'</span>,0.02,@(x) isscalar(x) &amp;&amp; x&gt;0 &amp;&amp; x&lt;1)
+0024 
+0025 params.StructExpand = false;
+0026 opt = struct;
+0027 opt.fileName = <span class="string">'saveDefault.avi'</span>;
+0028 opt.saveVideo = 0;
+0029 
+0030 addParameter(params,<span class="string">'options'</span>,opt,@(x) isstruct(x))
+0031 addParameter(params,<span class="string">'nSnapshots'</span>,8,@(x) isscalar(x) &amp;&amp; isinteger(x) &amp;&amp; x&gt;1 &amp;&amp; x&lt;length(Fcell))
+0032 <span class="comment">%Parse parameters</span>
+0033 params.parse(varargin{:});
+0034 plotSeq = params.Results.plotSeq;
+0035 skipFrames = params.Results.skip;
+0036 options = params.Results.options;
+0037 arrowJumpSlider = params.Results.sliderArrow;
+0038 nSnapshots = params.Results.nSnapshots;
+0039 <span class="comment">%% Plot sequence</span>
+0040 
+0041 <span class="keyword">switch</span> plotSeq
+0042     <span class="keyword">case</span> <span class="string">'marginalizedFiber'</span>
+0043         <a href="plot2DtimeMFibers.html" class="code" title="function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )">plot2DtimeMFibers</a>( Fcell, seqVector, gridT )
+0044     <span class="keyword">case</span> <span class="string">'snapshots'</span>
+0045         <span class="keyword">for</span> k=1:nSnapshots
+0046             figure(k)
+0047             indexT = max(round(k*length(seqVector)/nSnapshots),1);
+0048             handleSlices = <a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>( Fcell{indexT}, gridT,[]);
+0049         <span class="keyword">end</span>
+0050     <span class="keyword">case</span> <span class="string">'video'</span>
+0051         hf = figure;
+0052         <span class="keyword">if</span> (options.saveVideo)
+0053                 title(<span class="string">'Probability Density Function Evolution'</span>);
+0054                 writerObj = VideoWriter(<span class="string">'pdf_gaussian_.avi'</span>);
+0055                 writerObj.Quality = 100;
+0056                 <span class="comment">%set(hf,'Visible','on');</span>
+0057                 open(writerObj);
+0058                 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0059         <span class="keyword">end</span>
+0060         handleSlices = <a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>( Fcell{1}, gridT,[]);
+0061         <span class="keyword">for</span> k = 2:skipFrames:length(seqVector)
+0062             <a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>( Fcell{k}, gridT, handleSlices);
+0063             pause(1.0/100);
+0064             <span class="keyword">if</span> (options.saveVideo)   
+0065                 writeVideo(writerObj, getframe(gcf));
+0066             <span class="keyword">end</span>  
+0067         <span class="keyword">end</span>
+0068         <span class="keyword">if</span> (options.saveVideo)   
+0069             close(writerObj);
+0070         <span class="keyword">end</span>  
+0071     <span class="keyword">case</span> <span class="string">'slider'</span>
+0072         h_figure = figure;
+0073         handleSlices = <a href="plotkTensor.html" class="code" title="function [ handleOutput ] = plotkTensor( F, gridT, varargin )">plotkTensor</a>( Fcell{1}, gridT );
+0074         b_text = uicontrol(<span class="string">'Parent'</span>,h_figure,<span class="string">'Style'</span>,<span class="string">'text'</span>,<span class="string">'Position'</span>,[51,50,30,23]);
+0075         callbackSliderAA = @(source,event) <a href="#_sub1" class="code" title="subfunction callbackSlider(source,~,Fcell,gridT,handleSlices,b_text)">callbackSlider</a>(source,event,Fcell,gridT,handleSlices,b_text);
+0076         
+0077         b_slider = uicontrol(<span class="string">'Parent'</span>,h_figure,<span class="string">'Style'</span>,<span class="string">'slider'</span>,<span class="string">'Position'</span>,[81,54,419,23],<span class="keyword">...</span>
+0078                 <span class="string">'value'</span>,1, <span class="string">'min'</span>,1, <span class="string">'max'</span>,length(seqVector), <span class="string">'SliderStep'</span>,[max(1/(length(seqVector)-1),arrowJumpSlider) max(1/(length(seqVector)-1),0.1)],<span class="string">'Callback'</span>, callbackSliderAA);
+0079 <span class="keyword">end</span>
+0080 
+0081 
+0082     <a name="_sub1" href="#_subfunctions" class="code">function callbackSlider(source,~,Fcell,gridT,handleSlices,b_text)</a>
+0083         sliderValue = round(source.Value);
+0084         source.Value = sliderValue;
+0085         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(b_text,<span class="string">'String'</span>,num2str(sliderValue));
+0086         <a href="plotkTensor.html" class="code" title="function [ handleOutput ] = plotkTensor( F, gridT, varargin )">plotkTensor</a>( Fcell{sliderValue}, gridT, <span class="string">'handleInput'</span>, handleSlices);
+0087     <span class="keyword">end</span>
+0088     
+0089 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

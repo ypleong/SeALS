@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of hessian</title>
+  <meta name="keywords" content="hessian">
+  <meta name="description" content="HESSIAN generates the Hessian operator as a cell array with ktensor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>hessian
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>HESSIAN generates the Hessian operator as a cell array with ktensor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [hess] = hessian(D, D2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> HESSIAN generates the Hessian operator as a cell array with ktensor
+ elements where the ktensors corresponds to the entires in the usual
+ Hessian matrix.
+ Input: 
+   D - cell with first order derivatives operators. D{i} is
+   differentiation with respect to dimension i.
+   D2 - cell with first order derivatives operators. D2{i} is
+   differentiation with respect to dimension i.
+ Output:
+   hess - the Hessian operator.
+
+ See also <a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">MAKEOP</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>	SRMULTM multiplies two ktensor operators A and B. The result is a new</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [hess] = hessian(D, D2)</a>
+0002 <span class="comment">% HESSIAN generates the Hessian operator as a cell array with ktensor</span>
+0003 <span class="comment">% elements where the ktensors corresponds to the entires in the usual</span>
+0004 <span class="comment">% Hessian matrix.</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%   D - cell with first order derivatives operators. D{i} is</span>
+0007 <span class="comment">%   differentiation with respect to dimension i.</span>
+0008 <span class="comment">%   D2 - cell with first order derivatives operators. D2{i} is</span>
+0009 <span class="comment">%   differentiation with respect to dimension i.</span>
+0010 <span class="comment">% Output:</span>
+0011 <span class="comment">%   hess - the Hessian operator.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% See also MAKEOP</span>
+0014 
+0015 d = ndims(D{1});
+0016 hess = cell(d,d);
+0017 
+0018 <span class="keyword">for</span> i=1:d
+0019     <span class="keyword">for</span> j=i:d
+0020         
+0021         <span class="keyword">if</span> i==j
+0022             hess{i,j} = D2{i};
+0023         <span class="keyword">else</span>
+0024             hess{i,j} = <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(D{i},D{j});
+0025         <span class="keyword">end</span>
+0026         
+0027         <span class="keyword">if</span> i ~= j
+0028             hess{j,i} = hess{i,j};
+0029         <span class="keyword">end</span>
+0030         
+0031     <span class="keyword">end</span>
+0032 <span class="keyword">end</span>
+0033 
+0034 <span class="keyword">end</span>
+0035</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

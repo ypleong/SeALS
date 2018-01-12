@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_gram</title>
+  <meta name="keywords" content="test_gram">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_gram
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/gram.html" class="code" title="function G = gram(A)">gram</a>	Gram matrix of a tensor A.  Normally you might exploit symmetry, but</li><li><a href="../../../src/ctdlab/gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>	gram matrix of tensors A and B.</li><li><a href="../../../src/ctdlab/gram2log.html" class="code" title="function G = gram2log(A,B)">gram2log</a>	gram matrix of tensors A and B.</li><li><a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>	Create random sparse ctd with normally distributed elements.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;
+0002 
+0003 fprintf(<span class="string">'which -all gram\n'</span>)
+0004 which -all <a href="../../../src/ctdlab/gram.html" class="code" title="function G = gram(A)">gram</a>
+0005 fprintf(<span class="string">'which -all gram2\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>
+0007 fprintf(<span class="string">'which -all gram2log\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/gram2log.html" class="code" title="function G = gram2log(A,B)">gram2log</a>
+0009 
+0010 ok = 1;
+0011 
+0012 d = 10;
+0013 n = 1024;
+0014 r = 10;
+0015 A = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n,r,1);
+0016 B = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n,r,1);
+0017 
+0018 g1 = <a href="../../../src/ctdlab/gram.html" class="code" title="function G = gram(A)">gram</a>(A);
+0019 g2 = <a href="../../../src/ctdlab/gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>(A,A);
+0020 g3 = <a href="../../../src/ctdlab/gram2log.html" class="code" title="function G = gram2log(A,B)">gram2log</a>(A,A);
+0021 
+0022 err1 = norm(g1-g2,<span class="string">'fro'</span>)/norm(g1,<span class="string">'fro'</span>);
+0023 err2 = norm(g1-g3,<span class="string">'fro'</span>)/norm(g1,<span class="string">'fro'</span>);
+0024 fprintf(<span class="string">'err1 = %e\n'</span>, err1)
+0025 fprintf(<span class="string">'err2 = %e\n'</span>, err2)
+0026 
+0027 g4 = <a href="../../../src/ctdlab/gram.html" class="code" title="function G = gram(A)">gram</a>(A-B);
+0028 g5 = <a href="../../../src/ctdlab/gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>(A-B,A-B);
+0029 g6 = <a href="../../../src/ctdlab/gram2log.html" class="code" title="function G = gram2log(A,B)">gram2log</a>(A-B,A-B);
+0030 err3 = norm(g4-g5,<span class="string">'fro'</span>)/norm(g4,<span class="string">'fro'</span>);
+0031 err4 = norm(g4-g6,<span class="string">'fro'</span>)/norm(g4,<span class="string">'fro'</span>);
+0032 fprintf(<span class="string">'err3 = %e\n'</span>, err3)
+0033 fprintf(<span class="string">'err4 = %e\n'</span>, err4)
+0034 
+0035 <span class="keyword">if</span> max([err1;err2;err3;err4]) &gt; 1e-14
+0036   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0037 <span class="keyword">else</span>
+0038   fprintf(<span class="string">'PASSED\n'</span>)
+0039 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_pdf_2D_PFE</title>
+  <meta name="keywords" content="test_pdf_2D_PFE">
+  <meta name="description" content="% Test Finite Difference PDF Evolution 2 dimensions">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_pdf_2D_PFE
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Test Finite Difference PDF Evolution 2 dimensions</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Test Finite Difference PDF Evolution 2 dimensions</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>	UNTITLED Summary of this function goes here</li><li><a href="plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>	Plot a 2d mesh using pcolor.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Test Finite Difference PDF Evolution 2 dimensions</span>
+0002 
+0003 clear all
+0004 <span class="comment">% Initial distribution</span>
+0005 
+0006 dim = 2;
+0007 dx = 0.1;
+0008 x0 = [7,13];<span class="comment">%7:6+dim;</span>
+0009 sigma02 = 2.5;
+0010 xvector = [-5:dx:20]';
+0011 <span class="comment">%RotA = orth(randn(dim,dim));</span>
+0012 sigma02Matrix = [2.4 0.4; 0.4 sigma02];<span class="comment">%diag(sigma02+x0/dim/2);</span>
+0013 n = length(xvector);
+0014 tic
+0015 [xgrid,ygrid] = meshgrid(xvector,xvector);
+0016 xyvector = [reshape(xgrid,n*n,1),reshape(ygrid,n*n,1)];
+0017 <span class="comment">%p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n,n);</span>
+0018 
+0019 p0 = reshape(mvnpdf(xyvector,x0,sigma02Matrix),n,n)' + <span class="keyword">...</span>
+0020      reshape(mvnpdf(xyvector,x0+[3;-4]',sigma02Matrix/0.2),n,n)' + <span class="keyword">...</span>
+0021      reshape(mvnpdf(xyvector,x0+[-1;-6]',sigma02Matrix/1.4),n,n)';
+0022  p0 = p0/trapz(xvector,trapz(xvector,p0));
+0023 toc
+0024 <span class="comment">% tic</span>
+0025 <span class="comment">% for i=1:n</span>
+0026 <span class="comment">%     for j=1:n</span>
+0027 <span class="comment">%         p0(i,j) = mvnpdf([xvector(i) xvector(j)],x0,sigma02Matrix) ;</span>
+0028 <span class="comment">%     end</span>
+0029 <span class="comment">% end</span>
+0030 <span class="comment">% toc</span>
+0031 <span class="comment">%p0 = normpdf(x,x0,sqrt(sigma02));</span>
+0032 
+0033 <span class="keyword">if</span> dim == 2
+0034     hh = pcolor(xvector,xvector,p0);
+0035     colorbar
+0036     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hh, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0037     xlabel(<span class="string">'x'</span>)
+0038     zlabel(<span class="string">'p(x)'</span>)
+0039     grid on
+0040 <span class="keyword">end</span>
+0041 
+0042 
+0043 <span class="comment">% Simulation Parameters</span>
+0044 dt = 0.01;
+0045 t = 0:dt:2;
+0046 px = zeros(n,n,length(t));
+0047 xkalman = zeros(dim,length(t));
+0048 covkalman = zeros(dim,dim,length(t));
+0049 expec = zeros(dim,length(t));
+0050 expec2 = zeros(dim,length(t));
+0051 cov = zeros(dim,dim,length(t));
+0052 q = diag([0.4,0.6]); <span class="comment">%0.25; [0.5 0.1; 0.1 0.8]</span>
+0053 aspeed = [0;0]; <span class="comment">%[2;-2]; %[0,3]';</span>
+0054 
+0055 xkalman(:,1) = x0;
+0056 covKalman(:,:,1) = sigma02Matrix;
+0057 <span class="comment">% Equation xdot = a*x + noise</span>
+0058 expec(:,1) = x0;
+0059 cov(:,:,1) = sigma02Matrix;
+0060 px(:,:,1) = p0;
+0061 tic
+0062 <span class="keyword">for</span> k = 2:length(t)
+0063     
+0064     <span class="keyword">for</span> i=2:n-1
+0065         <span class="keyword">for</span> j=2:n-1
+0066             fx = aspeed(1)*(px(i,j+1,k-1)-px(i,j-1,k-1))/dx/2;
+0067             fy = aspeed(2)*(px(i+1,j,k-1)-px(i-1,j,k-1))/dx/2;
+0068             gx(1,1) = q(2,2)/2*( px(i+1,j,k-1)-2*px(i,j,k-1)+px(i-1,j,k-1))/dx^2;
+0069             gx(1,2) = q(1,2)/2*( px(i+1,j+1,k-1)-px(i-1,j,k-1)-px(i,j-1,k-1)+px(i-1,j-1,k-1))/4/dx^2;
+0070             gx(2,1) = q(2,1)/2*( px(i+1,j+1,k-1)-px(i-1,j,k-1)-px(i,j-1,k-1)+px(i-1,j-1,k-1))/4/dx^2;
+0071             gx(2,2) = q(1,1)/2*( px(i,j+1,k-1)-2*px(i,j,k-1)+ px(i,j-1,k-1))/dx^2;
+0072              
+0073             px(i,j,k) = px(i,j,k-1) - dt*(fx+fy) + dt*sum(sum(gx));
+0074         <span class="keyword">end</span>
+0075     <span class="keyword">end</span>
+0076     <span class="comment">%get expected values</span>
+0077 
+0078     expec(:,k)  = [ trapz( xvector, xvector'.*trapz(xvector, px(:,:,k),1 ) )
+0079                   trapz( xvector, xvector.*trapz(xvector, px(:,:,k),2 ) )];
+0080               
+0081     xgridDiff = xgrid - expec(1,k);
+0082     ygridDiff = ygrid - expec(2,k);
+0083    
+0084     cov(1,1,k) = trapz( xvector, trapz(xvector,xgridDiff.*xgridDiff.*px(:,:,k) ));
+0085     cov(1,2,k) = trapz( xvector, trapz(xvector,xgridDiff.*ygridDiff.*px(:,:,k) ));
+0086     cov(2,1,k) = cov(1,2,k);
+0087     cov(2,2,k) = trapz( xvector, trapz(xvector,ygridDiff.*ygridDiff.*px(:,:,k) ));
+0088 
+0089     xkalman(:,k) = xkalman(:,k-1) + aspeed*dt;
+0090     covKalman(:,:,k) = covKalman(:,:,k-1) + q*dt;
+0091 <span class="keyword">end</span>
+0092 toc
+0093 <span class="keyword">if</span> dim == 2
+0094     hh = pcolor(xvector,xvector,px(:,:,end));
+0095     colorbar
+0096     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hh, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0097     xlabel(<span class="string">'x'</span>)
+0098     zlabel(<span class="string">'p(x)'</span>)
+0099     grid on
+0100 <span class="keyword">end</span>
+0101 
+0102 figure
+0103 plot(t,xkalman,t,expec,<span class="string">'.'</span>)
+0104 xlabel(<span class="string">'time'</span>)
+0105 zlabel(<span class="string">'position'</span>)
+0106 legend(<span class="string">'KalmaX'</span>,<span class="string">'KalmanY'</span>,<span class="string">'FPE X'</span>,<span class="string">'FPE Y'</span> )
+0107 
+0108 figure
+0109 <a href="plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>( xvector, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)-px(:,:,end) )
+0110 title(<span class="string">'Difference with kalman'</span>)
+0111 
+0112 figure
+0113 <a href="plot2d.html" class="code" title="function [  ] = plot2d( xvector,zmatrix )">plot2d</a>( xvector, reshape(mvnpdf(xyvector,expec(:,end)',cov(:,:,end)),n,n) - px(:,:,end) )
+0114 
+0115 
+0116 figure
+0117 plot(t,squeeze(covKalman(1,1,:)),<span class="string">'b'</span>,t,squeeze(cov(1,1,:)),<span class="string">'b--'</span>,t,squeeze(covKalman(2,2,:)),<span class="string">'r'</span>,t,squeeze(cov(2,2,:)),<span class="string">'r--'</span>)
+0118 xlabel(<span class="string">'time'</span>)
+0119 zlabel(<span class="string">'position'</span>)
+0120 legend(<span class="string">'KalmaX'</span>,<span class="string">'FPE X'</span>,<span class="string">'KalmanY'</span>,<span class="string">'FPE Y'</span>)
+0121 
+0122 
+0123 
+0124 <span class="comment">% Measure</span>
+0125 zmes = [12,17]';
+0126 Rmes = diag([1 1]); <span class="comment">%0.5*[3,1;1,2]*[3,1;1,2];</span>
+0127 pz = reshape(mvnpdf(xyvector,zmes',Rmes),n,n);
+0128 pzpos = pz.*px(:,:,end);
+0129 pzposNorm = trapz(xvector,trapz(xvector,pzpos));
+0130 pzpos = pzpos/pzposNorm;
+0131 
+0132 <span class="comment">% subplot(2,2,1)</span>
+0133 <span class="comment">% plot2d( xvector,px(:,:,end) )</span>
+0134 <span class="comment">% subplot(2,2,2)</span>
+0135 <span class="comment">% plot2d( xvector,pz )</span>
+0136 <span class="comment">% subplot(2,2,3)</span>
+0137 <span class="comment">% plot2d( xvector,pzpos )</span>
+0138 <span class="comment">% subplot(2,2,4)</span>
+0139 <span class="comment">% hold on</span>
+0140 <span class="comment">% hh = surf(xvector,xvector,px(:,:,end),'b');</span>
+0141 <span class="comment">% set(hh, 'EdgeColor', 'none');</span>
+0142 <span class="comment">% hh = surf(xvector,xvector,pz);</span>
+0143 <span class="comment">% set(hh, 'EdgeColor', 'none');</span>
+0144 <span class="comment">% hh = surf(xvector,xvector,pzpos);</span>
+0145 <span class="comment">% set(hh, 'EdgeColor', 'none');</span>
+0146 
+0147 
+0148 xpos = [ trapz( xvector, xvector'.*trapz(xvector, pzpos,1 ) )
+0149          trapz( xvector,  xvector.*trapz(xvector, pzpos,2 ) )];
+0150 xgridDiff = xgrid - xpos(1);
+0151 ygridDiff = ygrid - xpos(2);
+0152 covpos= [ trapz( xvector, trapz(xvector,xgridDiff.*xgridDiff.*pzpos ))  trapz( xvector, trapz(xvector,xgridDiff.*ygridDiff.*pzpos ))
+0153                trapz( xvector, trapz(xvector,xgridDiff.*ygridDiff.*pzpos ))  trapz( xvector, trapz(xvector,ygridDiff.*ygridDiff.*pzpos ))];
+0154 
+0155 HK = eye(dim);
+0156 
+0157 <span class="comment">% Kalman Measurement</span>
+0158 KalmanG = covKalman(:,:,end)*HK'*inv(HK*covKalman(:,:,end)*HK'+Rmes);
+0159 xposKalman = xkalman(:,end) + KalmanG*(zmes - HK*xkalman(:,end));
+0160 covKalmanPos = (eye(dim)-KalmanG*HK)*covKalman(:,:,end);
+0161 
+0162 fprintf([<span class="string">'Measure update: Mean values '</span>,num2str(xposKalman,4),<span class="string">' Kalman, '</span>,num2str(xpos, 4) , <span class="string">' Tensor-FPE \n'</span>])
+0163 fprintf([<span class="string">'Measure update: Mean cov '</span>,num2str(covKalmanPos,4),<span class="string">' Kalman, '</span>,num2str(covpos, 4) , <span class="string">' Tensor-FPE \n'</span>])
+0164 
+0165 <span class="comment">%%  animated figure</span>
+0166 figure
+0167 ht_pdf = surf(xvector,xvector,p0);
+0168 h = colorbar;
+0169 caxis([0 max(max(p0))])
+0170 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0171 xlabel(<span class="string">'x'</span>)
+0172 ylabel(<span class="string">'y'</span>)
+0173 grid on
+0174 axis ([0,20,0,20])
+0175 grid on
+0176 <span class="keyword">for</span> i = 2:1:length(t)
+0177      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'ZData'</span>, px(:,:,i) );
+0178      drawnow
+0179      pause(1.0/100.0);
+0180 <span class="keyword">end</span>
+0181 
+0182 
+0183 <span class="comment">%% animated figure difference</span>
+0184 figure
+0185 ht_pdf = pcolor(xvector,xvector,reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)- px(:,:,1) );
+0186 h = colorbar;
+0187 <span class="comment">%set(h, 'ylim', [0 0.25])</span>
+0188 caxis([0 0.25])
+0189 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0190 xlabel(<span class="string">'x'</span>)
+0191 ylabel(<span class="string">'y'</span>)
+0192 grid on
+0193 axis ([0,25,0,25])
+0194 grid on
+0195 <span class="keyword">for</span> k = 2:10:length(t)
+0196      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'CData'</span>, reshape(mvnpdf(xyvector, xkalman(:,k)',covKalman(:,:,end)),n,n)- px(:,:,k)  );
+0197      drawnow
+0198      pause(1.0/10.0);
+0199 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als</title>
+  <meta name="keywords" content="als">
+  <meta name="description" content="Rank reduction by standard ALS.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>als
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Rank reduction by standard ALS.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Rank reduction by standard ALS.
+
+ Required arguments:
+   A = sparse ktensor to reduce
+   tol = desired relative accuracy
+   stucktol = tolerance for being &quot;stuck&quot;
+   delta = all elements below this value are set to zero.  If [], no
+     truncation is performed.
+   r0 = initial separation rank.
+   rmax = maximum separation rank of approximation.  If [], defaults to
+     rank of A.
+
+ Optional arguments:  See inputParser for defaults.
+   maxit = maximum number of iterations.
+   B = initial guess.  If empty, generate random sparse ktensor of rank r0
+   density = density of random factors.  If empty, use same density as A.
+   dimorder = D-vector, the order in which dimensions are fit in als.
+     Defaults to 1:D.
+   Anorm = norm of A.  Can re-use if previously computed, otherwise it is
+     computed within the main ALS iteration.
+   errtype = type of error to use.  'rel' for relative or 'abs' for
+     absolute.  Default is 'rel'.
+   verbose = 1, print iteration info.  0, none.
+
+ Output:
+   B = low-rank approximation of A
+   err = error per ALS iteration
+   Anorm = norm of A.  You might want this if it was expensive to compute.
+   ext = strcuture containing info about the calculation</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="alsi.html" class="code" title="function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)">alsi</a>	Main ALS iteration.  See als.m for arguments</li><li><a href="knnz.html" class="code" title="function n=knnz(A)">knnz</a>	Count the non-zero elements of a spktensor</li><li><a href="knumel.html" class="code" title="function n = knumel(A)">knumel</a>	Number of elements in a ktensor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/ctdlab/tests/test_als.html" class="code" title="">test_als</a>	</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function A=rankup(A)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)</a>
+0002 <span class="comment">% Rank reduction by standard ALS.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Required arguments:</span>
+0005 <span class="comment">%   A = sparse ktensor to reduce</span>
+0006 <span class="comment">%   tol = desired relative accuracy</span>
+0007 <span class="comment">%   stucktol = tolerance for being &quot;stuck&quot;</span>
+0008 <span class="comment">%   delta = all elements below this value are set to zero.  If [], no</span>
+0009 <span class="comment">%     truncation is performed.</span>
+0010 <span class="comment">%   r0 = initial separation rank.</span>
+0011 <span class="comment">%   rmax = maximum separation rank of approximation.  If [], defaults to</span>
+0012 <span class="comment">%     rank of A.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Optional arguments:  See inputParser for defaults.</span>
+0015 <span class="comment">%   maxit = maximum number of iterations.</span>
+0016 <span class="comment">%   B = initial guess.  If empty, generate random sparse ktensor of rank r0</span>
+0017 <span class="comment">%   density = density of random factors.  If empty, use same density as A.</span>
+0018 <span class="comment">%   dimorder = D-vector, the order in which dimensions are fit in als.</span>
+0019 <span class="comment">%     Defaults to 1:D.</span>
+0020 <span class="comment">%   Anorm = norm of A.  Can re-use if previously computed, otherwise it is</span>
+0021 <span class="comment">%     computed within the main ALS iteration.</span>
+0022 <span class="comment">%   errtype = type of error to use.  'rel' for relative or 'abs' for</span>
+0023 <span class="comment">%     absolute.  Default is 'rel'.</span>
+0024 <span class="comment">%   verbose = 1, print iteration info.  0, none.</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Output:</span>
+0027 <span class="comment">%   B = low-rank approximation of A</span>
+0028 <span class="comment">%   err = error per ALS iteration</span>
+0029 <span class="comment">%   Anorm = norm of A.  You might want this if it was expensive to compute.</span>
+0030 <span class="comment">%   ext = strcuture containing info about the calculation</span>
+0031     
+0032     D = ndims(A);
+0033     
+0034     <span class="comment">% parse optional inputs and/or set defaults</span>
+0035     params=inputParser;
+0036     params.addParamValue(<span class="string">'B'</span>,[],@(x) (isequal(class(x),<span class="string">'ktensor'</span>) || <span class="keyword">...</span>
+0037         isempty(x)))
+0038     params.addParamValue(<span class="string">'density'</span>,<a href="knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A)/<a href="knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A),<span class="keyword">...</span>
+0039         @(x) (isscalar(x) &amp;&amp; x&gt;0));
+0040     params.addParamValue(<span class="string">'maxit'</span>,100,@(x) isscalar(x) &amp;&amp; x&gt;0);
+0041     params.addParamValue(<span class="string">'verbose'</span>,0,@isscalar);
+0042     params.addParamValue(<span class="string">'dimorder'</span>,1:D, @(x) isequal(sort(x),1:D));
+0043     params.addParamValue(<span class="string">'Anorm'</span>,[],@(x) (isscalar(x) &amp;&amp; x&gt;=0)||isempty(x));
+0044     params.addParamValue(<span class="string">'errtype'</span>,<span class="string">'rel'</span>,@(x) (ischar(x) &amp;&amp; (isequal(x,<span class="string">'rel'</span>) <span class="keyword">...</span>
+0045         || isequal(x,<span class="string">'abs'</span>))));
+0046     params.parse(varargin{:});
+0047 
+0048     <span class="comment">% copy params</span>
+0049     B=params.Results.B;
+0050     density=params.Results.density;
+0051     maxit=params.Results.maxit;
+0052     verbose=params.Results.verbose;
+0053     dimorder=params.Results.dimorder;
+0054     Anorm=params.Results.Anorm;
+0055     errtype=params.Results.errtype;
+0056     
+0057     <span class="comment">% if the input is rank 1, exit without doing anything.</span>
+0058     <span class="keyword">if</span> length(A.lambda)==1
+0059         <span class="keyword">if</span> verbose
+0060             disp(<span class="string">'Tensor already has rank 1, no reduction possible.'</span>)
+0061         <span class="keyword">end</span>
+0062         B = A;
+0063         err = 0;
+0064         <span class="keyword">return</span>
+0065     <span class="keyword">end</span>
+0066     
+0067     <span class="comment">% start with rank 1 by default</span>
+0068     <span class="keyword">if</span> isempty(r0)
+0069       r0 = 1;
+0070     <span class="keyword">end</span>
+0071     
+0072     <span class="comment">% if rmax is empty or larger than rank(A), set to rank(A)</span>
+0073     <span class="keyword">if</span> isempty(rmax) &amp;&amp; isempty(B)
+0074         rmax = length(A.lambda);
+0075     <span class="keyword">end</span>
+0076     <span class="keyword">if</span> isempty(rmax) &amp;&amp; ~isempty(B)
+0077         rmax = length(B.lambda);
+0078     <span class="keyword">end</span>
+0079     
+0080     <span class="comment">% if no initial guess specified, generate a random sparse one</span>
+0081     <span class="keyword">if</span> ~isempty(B)
+0082         r0 = length(B.lambda);
+0083     <span class="keyword">end</span>
+0084     
+0085     <span class="comment">% print parameters</span>
+0086     <span class="keyword">if</span> verbose
+0087         fprintf(<span class="string">'***als.m: Required parameters\n'</span>)
+0088         fprintf(<span class="string">'      tol = %g, stucktol = %g, delta = %g, rmax = %d\n\n'</span>,<span class="keyword">...</span>
+0089             tol,stucktol,delta,rmax)
+0090         fprintf(<span class="string">'***                   Optional parameters\n'</span>)
+0091         disp(params.Results)
+0092         fprintf(<span class="string">'\n'</span>)
+0093     <span class="keyword">end</span>  
+0094     
+0095     <span class="comment">% extra info for analysis</span>
+0096     ext.Bnorm = [];
+0097     ext.ls_cond = [];    
+0098     ext.lambda_l1 = [];
+0099     ext.nsig_svals = [];
+0100     ext.rank_iter = [];
+0101     
+0102     <span class="comment">% Main iteration</span>
+0103     err = zeros(1,rmax-r0+1);
+0104     <span class="keyword">for</span> rnk = r0:rmax
+0105         
+0106         <span class="comment">% if you haven't converged and rnk equals rank of A, exit.</span>
+0107         <span class="keyword">if</span> (r0&lt;rmax) &amp;&amp; (rnk==length(A.lambda))
+0108             <span class="comment">% Message added by MR</span>
+0109             fprintf(<span class="string">'Rank of reduction = rank of original matrix.\n'</span>)
+0110             fprintf(<span class="string">'Returning original matrix!\n'</span>)
+0111             B = A;
+0112             <span class="keyword">return</span>
+0113         <span class="keyword">end</span>
+0114         
+0115         <span class="comment">% track total iteration count (includes subcalls)</span>
+0116         iter = 1+rnk-r0;
+0117         
+0118         <span class="comment">% if not the first iteration, increase the rank by 1 using a random</span>
+0119         <span class="comment">% term with specified density</span>
+0120         <span class="keyword">if</span> rnk &gt; r0
+0121             B = <a href="#_sub1" class="code" title="subfunction A=rankup(A)">rankup</a>(B);
+0122         <span class="keyword">end</span>
+0123 
+0124         <span class="comment">% fit using main ALS iteration</span>
+0125         [B,err_r,Anorm,ext] = <a href="alsi.html" class="code" title="function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)">alsi</a>(A,rnk,tol,stucktol,delta,ext,<span class="keyword">...</span>
+0126             <span class="string">'density'</span>,density,<span class="string">'B'</span>,B,<span class="string">'maxit'</span>,maxit,<span class="string">'verbose'</span>,verbose,<span class="keyword">...</span>
+0127             <span class="string">'dimorder'</span>,dimorder,<span class="string">'Anorm'</span>,Anorm,<span class="string">'errtype'</span>,errtype);
+0128         err(iter) = err_r(end);
+0129         
+0130         
+0131         <span class="comment">% check for convergence</span>
+0132         <span class="keyword">if</span> err(iter)&lt;tol
+0133             err = err(1:iter);
+0134             <span class="keyword">return</span>
+0135         <span class="keyword">end</span>
+0136         
+0137         <span class="comment">% if at max rank, exit</span>
+0138         <span class="keyword">if</span> rnk == rmax
+0139             <span class="keyword">if</span> verbose
+0140                 fprintf(<span class="string">'***als.m: No tensor of rank rmax'</span>)
+0141                 fprintf(<span class="string">' found for desired accuracy.\n'</span>)
+0142             <span class="keyword">end</span>
+0143             
+0144             <span class="keyword">return</span>
+0145         <span class="keyword">end</span>
+0146         
+0147     <span class="keyword">end</span>
+0148 
+0149 <span class="keyword">end</span>
+0150 
+0151 <a name="_sub1" href="#_subfunctions" class="code">function A=rankup(A)</a>
+0152 <span class="comment">% Increase rank of spktensor by 1, using random component</span>
+0153 
+0154     D=ndims(A);
+0155     
+0156     B=cell(1,D);
+0157     <span class="keyword">for</span> d=1:D
+0158         B{d}=randn(size(A.U{d},1),1);
+0159     <span class="keyword">end</span>
+0160     
+0161     <span class="comment">% Normalize the contributing term</span>
+0162     B = ktensor(1,B);
+0163     B = normalize(B);
+0164     
+0165     <span class="comment">% Set the norm to be similar to the tensor A</span>
+0166     <span class="comment">% Note, I made the guess an order of magnitude smaller than the</span>
+0167     <span class="comment">% smallest s-values because we hope for a fast decay in s-values -MR</span>
+0168     B.lambda = min(abs(A.lambda))/10;
+0169     
+0170     A = A+B;
+0171     A = arrange(A);
+0172 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_pdf_1D</title>
+  <meta name="keywords" content="test_pdf_1D">
+  <meta name="description" content="% Test Finite Difference PDF Evolution">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_pdf_1D
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Test Finite Difference PDF Evolution</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Test Finite Difference PDF Evolution</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Test Finite Difference PDF Evolution</span>
+0002 clear all
+0003 <span class="comment">% Initial distribution</span>
+0004 
+0005 dx = 0.05;
+0006 x0 = 2;
+0007 sigma02 = 0.5;
+0008 x = [-5:dx:25]';
+0009 p0 = normpdf(x,x0,sqrt(sigma02));
+0010 <span class="comment">%p0 = p0 + normpdf(x,x0+3,sqrt(sigma02/0.8));</span>
+0011 p0 = p0/sum(p0)/dx;
+0012 
+0013 plot(x,p0)
+0014 xlabel(<span class="string">'x'</span>)
+0015 ylabel(<span class="string">'p(x)'</span>)
+0016 grid on
+0017 
+0018 
+0019 <span class="comment">% Simulation Parameters</span>
+0020 dt = 0.01;
+0021 t = 0:dt:15;
+0022 px = zeros(length(x),length(t));
+0023 xkalman = zeros(length(t),1);
+0024 covKalman = zeros(length(t),1);
+0025 exp = zeros(length(t),1);
+0026 exp2 = zeros(length(t),1);
+0027 cov = zeros(length(t),1);
+0028 q = 0.25; <span class="comment">%0.25;</span>
+0029 aspeed = 1;
+0030 
+0031 xkalman(1) = x0;
+0032 covKalman(1) = sigma02;
+0033 <span class="comment">% Equation xdot = a*x + noise</span>
+0034 exp(1) = x0;
+0035 cov(1) = sigma02;
+0036 px(:,1) = p0;
+0037 <span class="keyword">for</span> i = 2:length(t)
+0038     <span class="keyword">for</span> j=2:length(x)-1
+0039         fx = aspeed*(px(j+1,i-1)-px(j-1,i-1))/dx/2;
+0040         gx = q/2*(px(j+1,i-1)-2*px(j,i-1)+px(j-1,i-1))/dx^2;
+0041         px(j,i) = px(j,i-1) - dt*fx + dt*gx;
+0042     <span class="keyword">end</span>
+0043     <span class="comment">%get expected values</span>
+0044     exp(i)  = px(:,i)'*x*dx;
+0045     exp2(i) = px(:,i)'*(x.^2)*dx;
+0046     cov(i) = exp2(i) - exp(i).^2;
+0047     cov(i) = sum(px(:,i).*(x - exp(i)).*(x - exp(i)))*dx;
+0048     
+0049     <span class="comment">%trapz(x,(x-exp(i)).*(x-exp(i)).*px(:,i) );</span>
+0050     
+0051     xkalman(i) = xkalman(i-1) + aspeed*dt;
+0052     xkalman(i);
+0053     covKalman(i) = covKalman(i-1) + q*dt;
+0054     px(:,i) = px(:,i)/sum(px(:,i))/dx;
+0055 <span class="keyword">end</span>
+0056 
+0057 figure
+0058 plot(x,normpdf(x,exp(end),sqrt(cov(end))),x,px(:,end),x,normpdf(x,xkalman(end),sqrt(covKalman(end))))
+0059 legend(<span class="string">'recoverNormal'</span>,<span class="string">'px'</span>,<span class="string">'Kalman'</span>)
+0060 
+0061 
+0062 <span class="comment">%% Error</span>
+0063 RMS_mean = sqrt(mean((xkalman-exp).^2));
+0064 RMS_cov  = sqrt(mean((covKalman-cov).^2));
+0065 
+0066 figure
+0067 plot(t,covKalman,t,cov)
+0068 
+0069 
+0070 <span class="comment">%% Measurement</span>
+0071 zmes = 11;
+0072 Rmes = 2;
+0073 pz = normpdf(x,zmes,sqrt(Rmes));
+0074 pzpos = zeros(length(x),1);
+0075 <span class="keyword">for</span> j=1:length(x)
+0076     pzpos(j) = px(j,end)*pz(j);
+0077 <span class="keyword">end</span>
+0078 pzpos = pzpos/sum(pzpos)/dx;
+0079 plot(x,pzpos)
+0080 title(<span class="string">'posterior'</span>)
+0081 xpos = pzpos'*x*dx;
+0082 covpos = sum(pzpos.*(x - xpos).*(x - xpos))*dx;
+0083 <span class="comment">% Kalman Measurement</span>
+0084 KalmanG = covKalman(end)/(covKalman(end)+Rmes);
+0085 xposKalman = xkalman(end) + KalmanG*(zmes - xkalman(end));
+0086 covKalmanPos = covKalman(end)*(1-KalmanG);
+0087 
+0088 plot(x,px(:,end),x,pz,x,pzpos)
+0089 legend(<span class="string">'prior'</span>,<span class="string">'measure'</span>,<span class="string">'posterior'</span>)
+0090 
+0091 plot(sum(px)*dx)
+0092 
+0093 hf = figure;
+0094 hold on
+0095 ht_pdf = plot(x,p0);
+0096 ht_gaussian = plot(x,normpdf(x,exp(1),sqrt(cov(1))));
+0097 <span class="comment">%legend('Non Linear', 'Gaussian Approximation')</span>
+0098 axis ([-3,15,-0.1,1])
+0099 grid on
+0100 save_to_file = 1;
+0101 <span class="keyword">if</span> (save_to_file  )
+0102     FPS = 25;  
+0103     str_title = [<span class="string">'Probability Density Function Evolution. Simple case.'</span>];
+0104     writerObj = VideoWriter(<span class="string">'pdf_gaussian.avi'</span>);
+0105     writerObj.FrameRate = FPS;
+0106     myVideo.Quality = 100;
+0107     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hf,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0108     open(writerObj);
+0109     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0110 <span class="keyword">end</span>
+0111 <span class="keyword">for</span> i = 2:5:length(t)
+0112      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'YData'</span>, px(:,i) );
+0113      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_gaussian, <span class="string">'YData'</span>, normpdf(x,exp(i),sqrt(cov(i))) );
+0114      drawnow
+0115      pause(1.0/50.0);
+0116      <span class="keyword">if</span> (save_to_file )
+0117          M = getframe(gcf); <span class="comment">%hardcopy(hf, '-dzbuffer', '-r0');</span>
+0118          writeVideo(writerObj, M);
+0119      <span class="keyword">end</span>
+0120 <span class="keyword">end</span>
+0121 <span class="keyword">if</span> (save_to_file  )
+0122     close(writerObj);
+0123 <span class="keyword">end</span>
+0124 
+0125 [cov(end),covKalman(end)]
+0126 
+0127 
+0128 figure
+0129 plot(t,exp,t,xkalman)
+0130 xlabel(<span class="string">'Time(s)'</span>)
+0131 ylabel(<span class="string">'Mean Position(m)'</span>)
+0132 
+0133 figure
+0134 plot(t,cov,t,covKalman)
+0135 xlabel(<span class="string">'Time(s)'</span>)
+0136 ylabel(<span class="string">'Mean Cov'</span>)
+0137 title(<span class="string">'check that both lines are similar'</span>)
+0138 
+0139 figure
+0140 h=pcolor(x,t,px') <span class="comment">%,'EdgeColor','none')</span>
+0141 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0142 xlabel(<span class="string">'X(m)'</span>)
+0143 ylabel(<span class="string">'Time(s)'</span>)
+0144 zlabel(<span class="string">'Pdf(x,t)'</span>)
+0145 title(<span class="string">'Pdf Evolution'</span>)
+0146 colorbar
+0147 
+0148</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

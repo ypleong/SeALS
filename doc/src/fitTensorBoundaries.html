@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fitTensorBoundaries</title>
+  <meta name="keywords" content="fitTensorBoundaries">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>fitTensorBoundaries
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">
+  Adjust the boundaries of the pdf to lambda sigmas around the mean
+
+       Input:
+  tens, 
+  gridT, 
+  meanT, 
+  covT, 
+  ngridT, 
+  lambda
+       Output:
+  tensorOutput, 
+  gridTnew</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="interpTensor.html" class="code" title="function [ tensOutput ] = interpTensor( tens, oldgridT, newgridT )">interpTensor</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )</a>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  Adjust the boundaries of the pdf to lambda sigmas around the mean</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%       Input:</span>
+0006 <span class="comment">%  tens,</span>
+0007 <span class="comment">%  gridT,</span>
+0008 <span class="comment">%  meanT,</span>
+0009 <span class="comment">%  covT,</span>
+0010 <span class="comment">%  ngridT,</span>
+0011 <span class="comment">%  lambda</span>
+0012 <span class="comment">%       Output:</span>
+0013 <span class="comment">%  tensorOutput,</span>
+0014 <span class="comment">%  gridTnew</span>
+0015 
+0016 
+0017     <span class="comment">% Check input</span>
+0018     validateattributes(tens,{<span class="string">'ktensor'</span>},{<span class="string">'nonempty'</span>})
+0019     dim = ndims(tens);
+0020     validateattributes(gridT,{<span class="string">'cell'</span>},{<span class="string">'numel'</span>,dim})
+0021     validateattributes(meanT,{<span class="string">'double'</span>},{<span class="string">'numel'</span>,dim})
+0022     validateattributes(ngridT,{<span class="string">'double'</span>},{<span class="string">'numel'</span>,dim})
+0023     validateattributes(covT,{<span class="string">'double'</span>},{<span class="string">'size'</span>,[dim,dim]})
+0024     validateattributes(lambda,{<span class="string">'double'</span>},{<span class="string">'numel'</span>,1})
+0025     
+0026     
+0027     gridTnew = cell(dim,1);
+0028     bdim = zeros(dim,2);
+0029     dx = zeros(dim,1);
+0030     <span class="keyword">for</span> i=1:dim
+0031         bdim(i,:) = [meanT(i)-lambda*sqrt(covT(i,i)) meanT(i)+lambda*sqrt(covT(i,i))];
+0032         dx(i) = (bdim(i,2)-bdim(i,1))/(ngridT(i)-1);
+0033         gridTnew{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+0034     <span class="keyword">end</span>
+0035     tensorOutput = <a href="interpTensor.html" class="code" title="function [ tensOutput ] = interpTensor( tens, oldgridT, newgridT )">interpTensor</a>(tens,gridT,gridTnew);
+0036     
+0037 <span class="keyword">end</span>
+0038</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,33 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  run_tests -> test_getterms;
+  run_tests -> test_gram;
+  run_tests -> test_k;
+  run_tests -> test_krand;
+  run_tests -> test_mvm;
+  run_tests -> test_norms;
+  run_tests -> test_paths;
+  run_tests -> test_poswts;
+  run_tests -> test_tenid;
+  run_tests -> test_trncel;
+  run_tests -> test_trncspmat;
+  run_tests -> test_trncsval;
+  run_tests -> test_vvpwm;
+
+  run_tests [URL="run_tests.html"];
+  test_als [URL="test_als.html"];
+  test_getterms [URL="test_getterms.html"];
+  test_gram [URL="test_gram.html"];
+  test_k [URL="test_k.html"];
+  test_krand [URL="test_krand.html"];
+  test_mmm [URL="test_mmm.html"];
+  test_mvm [URL="test_mvm.html"];
+  test_norms [URL="test_norms.html"];
+  test_paths [URL="test_paths.html"];
+  test_poswts [URL="test_poswts.html"];
+  test_tenid [URL="test_tenid.html"];
+  test_trncel [URL="test_trncel.html"];
+  test_trncspmat [URL="test_trncspmat.html"];
+  test_trncsval [URL="test_trncsval.html"];
+  test_vvpwm [URL="test_vvpwm.html"];
+}

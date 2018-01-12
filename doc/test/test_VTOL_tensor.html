@@ -1,0 +1,408 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_VTOL_tensor</title>
+  <meta name="keywords" content="test_VTOL_tensor">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_VTOL_tensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>	HadTensProd performs Hadamand tensor products for a ktensor function F</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/createOP_VTOL.html" class="code" title="function [ op ] = createOP_VTOL(D, D2, gridT, tol_err_op, u, tau, g, epsilon, x, dt, q )">createOP_VTOL</a>	UNTITLED Summary of this function goes here</li><li><a href="../src/createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>	Create weights for integration</li><li><a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="../src/fitTensorBoundaries.html" class="code" title="function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )">fitTensorBoundaries</a>	</li><li><a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>	F - ktensor</li><li><a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li><li><a href="../src/meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>	Compute the mean and covariance of a tensor</li><li><a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>	Plots a visualization of the Tensor. For each pair of dimensions it</li><li><a href="../src/plot2DslicesAroundPointGaussian.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPointGaussian(covPK, point, gridT, handleInput )">plot2DslicesAroundPointGaussian</a>	Plots a visualization of the Tensor. For each pair of dimensions it</li><li><a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>	x:[6,1] state ( x, xdot, y, ydot, theta, thetadot)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 close all
+0003 
+0004 dim = 6;
+0005 x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0006 
+0007 <span class="comment">% Parameters</span>
+0008 g = 9.81;
+0009 epsilon = 0.01;
+0010 
+0011 <span class="comment">% Simulation Parameters</span>
+0012 dt = 0.001;
+0013 t = 0:dt:15;
+0014 xGT = zeros(dim,length(t)); <span class="comment">% State: x,vx,y,vy,theta,vtheta</span>
+0015 xGT(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; <span class="comment">% static</span>
+0016 
+0017 xref = 2; <span class="comment">%+ cos(t(i)*2*pi/20);</span>
+0018 yref = 6; <span class="comment">%+ sin(t(i)*2*pi/20);</span>
+0019 
+0020 <span class="comment">%% Kalman Estimation Preparation</span>
+0021 xhat = zeros(dim,length(t));
+0022 xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
+0023 Phat = zeros(dim,dim,length(t));
+0024 Phat(:,:,1) = diag([0.5^2,0.1^2,0.5^2,0.1^2,0.01^2,0.005^2]);
+0025 
+0026 G = [0 0 0
+0027  1 0 0
+0028  0 0 0
+0029  0 1 0
+0030  0 0 0
+0031  0 0 1];
+0032 
+0033 Q = 1.0*diag([0.1^2, 0.1^2, 0.01^2]);
+0034 
+0035 GQGp = G*Q*G';
+0036 sigmaX2 = 0.04^2;
+0037 sigmaY2 = 0.04^2;
+0038 R = diag([sigmaX2,sigmaY2]);
+0039 zmes = zeros(2,length(t));
+0040 HK = [1 0 0 0 0 0
+0041       0 0 1 0 0 0];
+0042 
+0043 <span class="comment">%% Tensor Estimation Preparation</span>
+0044 
+0045 <span class="comment">% Initial distribution</span>
+0046 n = [81 51 81 51 81 51];
+0047 bdim = [-1 3; -0.5 0.5;3 7; -0.6 0.6;-0.08 0.08; -0.06 0.06]; 
+0048 diagSigma = diag(Phat(:,:,1));
+0049 qdiag = diag(GQGp)+ones(dim,1)*0.01^2;
+0050 q =  diag( qdiag );
+0051 
+0052 <span class="comment">% Tensor parameters</span>
+0053 
+0054 <span class="keyword">for</span> i=1:dim
+0055    bcon{i} = {<span class="string">'d'</span>,0,0};
+0056 <span class="keyword">end</span>
+0057 bcon{5} = {<span class="string">'p'</span>}; <span class="comment">% angle</span>
+0058 
+0059 <span class="comment">% Grid Configuration</span>
+0060 fprintf (<span class="string">'The grid size is %d in dimension %d \n'</span>, [n',(1:dim)']')
+0061 <span class="keyword">for</span> i=1:dim
+0062     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+0063     gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+0064 <span class="keyword">end</span>
+0065 
+0066 sigma02Matrix = diag(diagSigma); <span class="comment">% [0.8 0.2; 0.2 sigma02];</span>
+0067 <span class="keyword">for</span> i=1:dim
+0068    p0vector{i} =  normpdf(gridT{i},xhat(i,1),sqrt(diagSigma(i))); <span class="comment">%*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;</span>
+0069 <span class="keyword">end</span>
+0070 pk{1} = ktensor(p0vector);
+0071 <a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>( pk{1}, xhat(:,1), gridT);
+0072 expec = zeros(dim,length(t));
+0073 covT = zeros(dim,dim,length(t));
+0074 
+0075 covT(:,:,1) = sigma02Matrix;
+0076 expec(:,1) = xhat(:,1);
+0077 
+0078 bsca = []; <span class="comment">%no manual scaling</span>
+0079 region = [];
+0080 regval = 1;
+0081 regsca = [];
+0082 sca_ver = 1;
+0083 
+0084 tol_err_op = 1e-5;
+0085 tol_err = 1e-8;
+0086 als_options = [];
+0087 als_variant = []; 
+0088 
+0089 <span class="keyword">for</span> i=1:dim
+0090     acc(:,i) = [2,2]';
+0091 <span class="keyword">end</span>
+0092 [D,D2,fd1,fd2] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,n,dx,acc,bcon,region);
+0093 
+0094 <span class="comment">% Create weights for integration</span>
+0095 <span class="keyword">for</span> i=1:dim
+0096     <span class="keyword">for</span> j = 1:dim
+0097         <span class="keyword">if</span> i == j
+0098             weMean{i,j} = gridT{j};
+0099         <span class="keyword">else</span>
+0100             weMean{i,j} = ones(n(j),1);
+0101         <span class="keyword">end</span>         
+0102     <span class="keyword">end</span>
+0103 <span class="keyword">end</span>
+0104 <span class="keyword">for</span> i=1:dim
+0105     weOnes{i} = ones(n(i),1);
+0106 <span class="keyword">end</span>
+0107 weCov = cell(dim,dim,dim);
+0108 <span class="keyword">for</span> i=1:dim
+0109     <span class="keyword">for</span> j = 1:dim
+0110         weCov(i,j,:) = weOnes;
+0111         <span class="keyword">if</span> i == j
+0112             weCov{i,j,i} = gridT{j}.*gridT{j};
+0113         <span class="keyword">else</span>
+0114             weCov{i,j,i} = gridT{i};
+0115             weCov{i,j,j} = gridT{j};
+0116         <span class="keyword">end</span>         
+0117     <span class="keyword">end</span>
+0118 <span class="keyword">end</span>
+0119 
+0120 
+0121 
+0122 use_tensor = 1;
+0123 <span class="comment">%% Time Evolution</span>
+0124 time1 = tic;
+0125 <span class="keyword">for</span> k = 2:length(t)
+0126    
+0127     <span class="comment">% Get Control</span>
+0128     uControl(k) =  g - 0.3*(xhat(3,k-1)-yref)  - 0.9*xhat(4,k-1);
+0129     tauControl(k) = -6*xhat(5,k-1) - 6*xhat(6,k-1) + 0.2*(xhat(1,k-1)-xref) + 1.0*xhat(2,k-1);
+0130     <span class="comment">% Propagate</span>
+0131     xGT(:,k) =  xGT(:,k-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( xGT(:,k-1), uControl(k), tauControl(k), epsilon, g );
+0132     <span class="comment">% Kalman</span>
+0133     F = [0 1 0 0 0 0
+0134          0 0 0 0 (-tauControl(k)*cos(xhat(5,k-1))-epsilon*tauControl(k)*sin(xhat(5,k-1))) 0
+0135          0 0 0 1 0 0
+0136          0 0 0 0 (-tauControl(k)*sin(xhat(5,k-1))+epsilon*tauControl(k)*cos(xhat(5,k-1))) 0
+0137          0 0 0 0 0 1
+0138          0 0 0 0 0 0];
+0139     xhat(:,k) =  xhat(:,k-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( xhat(:,k-1), uControl(k), tauControl(k), epsilon, g );
+0140     Phat(:,:,k) = F*Phat(:,:,k-1)*F' + dt*GQGp;
+0141     
+0142     
+0143     <span class="comment">% Tensor</span>
+0144     <span class="keyword">if</span> (use_tensor)
+0145 <span class="comment">%         for i=1:dim % rebuild the grid</span>
+0146 <span class="comment">%             bdim(i,:) = [xhat(i,k)-10*sqrt(Phat(i,i,k)) xhat(i,k)+10*sqrt(Phat(i,i,k))]</span>
+0147 <span class="comment">%             dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);</span>
+0148 <span class="comment">%             gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';</span>
+0149 <span class="comment">%         end</span>
+0150         
+0151         op = <a href="../src/createOP_VTOL.html" class="code" title="function [ op ] = createOP_VTOL(D, D2, gridT, tol_err_op, u, tau, g, epsilon, x, dt, q )">createOP_VTOL</a>(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
+0152         pk{k} = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>( op, pk{k-1});
+0153         <span class="comment">%length(pk{k}.lambda)</span>
+0154         <span class="keyword">if</span> length(pk{k}.lambda) &gt; 1
+0155             [pk{k},~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(pk{k},tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(pk{k}),0);
+0156 
+0157             pk{k} = fixsigns(arrange(pk{k}));
+0158             [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(pk{k},tol_err_op);
+0159 
+0160         <span class="keyword">end</span>
+0161 
+0162         <span class="comment">% Get Mean and Covariance values</span>
+0163         <span class="keyword">for</span> i=1:dim
+0164             expec(i,k)  = <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, weMean(i,:));
+0165         <span class="keyword">end</span>
+0166         <span class="keyword">for</span> i=1:dim
+0167             <span class="keyword">for</span> j = 1:dim
+0168                 covT(i,j,k) = <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);
+0169             <span class="keyword">end</span>
+0170         <span class="keyword">end</span>
+0171     <span class="keyword">end</span>
+0172     diagT(:,k) = diag(covT(:,:,k));
+0173     <span class="keyword">if</span> ( mod(k,10)==0 )
+0174         
+0175         <span class="comment">% assume measure wkth nokse R</span>
+0176         z = [xGT(1,k) + randn(1)*sqrt(sigmaX2) 
+0177              xGT(3,k) + randn(1)*sqrt(sigmaY2)];
+0178         zmes(:,k) = z;
+0179         SG = HK*Phat(:,:,k)*HK' + R;
+0180         KG = Phat(:,:,k)*HK'/(SG);
+0181         xhat(:,k) = xhat(:,k) + KG*(z - HK*xhat(:,k));
+0182         Phat(:,:,k) = (eye(6) - KG*HK)*Phat(:,:,k);
+0183         
+0184         <span class="keyword">if</span> (use_tensor)
+0185             <span class="keyword">for</span> i=1:dim
+0186                 <span class="keyword">for</span> j=1:length(z)
+0187                     <span class="keyword">if</span> ( HK(j,i) == 1 )
+0188                         pz{i} =  normpdf(gridT{i},z(j),sqrt(R(j,j))); <span class="comment">%*0.5 + normpdf(gridT{i},2*x0(i),sqrt(diagSigma(i)))*0.5;</span>
+0189                     <span class="keyword">elseif</span> (all(HK(:,i)==0) )
+0190                         pz{i} = ones(n(i),1);
+0191                     <span class="keyword">end</span>
+0192                 <span class="keyword">end</span>
+0193             <span class="keyword">end</span>
+0194 
+0195             zkcompressed = ktensor(pz);
+0196             <span class="comment">% Direct PDF Bayesian Measurement</span>
+0197             pk{k} = <a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>(pk{k},zkcompressed);
+0198             pk{k} = pk{k} *(1/  <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, weOnes));
+0199             
+0200 
+0201             [ expec(:,k), covT(:,:,k) ] = <a href="../src/meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>( pk{k}, gridT, weMean, weCov, weOnes );
+0202 <span class="comment">%             for i=1:dim</span>
+0203 <span class="comment">%                 expec(i,k)  = intTens(pk{k}, [], gridT, we(i,:));</span>
+0204 <span class="comment">%             end</span>
+0205 <span class="comment">%             for i=1:dim</span>
+0206 <span class="comment">%                 for j = 1:dim</span>
+0207 <span class="comment">%                     covT(i,j,k) = intTens(pk{k}, [], gridT, weCov(i,j,:)) - expec(i,k)*expec(j,k);</span>
+0208 <span class="comment">%                 end</span>
+0209 <span class="comment">%             end</span>
+0210             
+0211             
+0212             [ pk{k}, gridT, dx] = <a href="../src/fitTensorBoundaries.html" class="code" title="function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )">fitTensorBoundaries</a>( pk{k}, gridT, expec(:,k), covT(:,:,k), n, 6 );
+0213             [D,D2,~,~] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,n,dx,acc,bcon,region);
+0214             op = <a href="../src/createOP_VTOL.html" class="code" title="function [ op ] = createOP_VTOL(D, D2, gridT, tol_err_op, u, tau, g, epsilon, x, dt, q )">createOP_VTOL</a>(D, D2, gridT, tol_err_op, uControl(k), tauControl(k), g, epsilon, x, dt, q);
+0215             [ weMean, weCov, weOnes ] = <a href="../src/createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>( gridT, n );
+0216             <span class="comment">%figure</span>
+0217             <span class="comment">%plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT )</span>
+0218             
+0219             
+0220             
+0221         <span class="keyword">end</span>
+0222         
+0223     <span class="keyword">end</span>
+0224     
+0225 <span class="keyword">end</span>
+0226 toc(time1)
+0227 
+0228 
+0229 <span class="comment">%% Tensor plot</span>
+0230 
+0231 <span class="comment">% handleSlices = plot2DslicesAroundPoint( pk{1}, expec(:,1), gridT);</span>
+0232 <span class="comment">% for k = 2:10:length(t)</span>
+0233 <span class="comment">%     plot2DslicesAroundPoint( pk{k}, expec(:,k), gridT, handleSlices)</span>
+0234 <span class="comment">%     pause(1.0/1);</span>
+0235 <span class="comment">% end</span>
+0236 <span class="comment">%% Plot</span>
+0237 <span class="comment">%afigure;</span>
+0238 
+0239 afigure
+0240 subplot(2,4,1)
+0241 plot(t,xGT(1,:))
+0242 grid on
+0243 xlabel(<span class="string">'Time(s)'</span>)
+0244 ylabel(<span class="string">'X'</span>)
+0245 subplot(2,4,2)
+0246 plot(t,xGT(2,:))
+0247 grid on
+0248 xlabel(<span class="string">'Time(s)'</span>)
+0249 ylabel(<span class="string">'VX'</span>)
+0250 subplot(2,4,3)
+0251 plot(t,xGT(3,:))
+0252 grid on
+0253 xlabel(<span class="string">'Time(s)'</span>)
+0254 ylabel(<span class="string">'Y'</span>)
+0255 subplot(2,4,4)
+0256 plot(t,xGT(4,:))
+0257 grid on
+0258 xlabel(<span class="string">'Time(s)'</span>)
+0259 ylabel(<span class="string">'VY'</span>)
+0260 subplot(2,4,5)
+0261 plot(t,xGT(5,:))
+0262 grid on
+0263 xlabel(<span class="string">'Time(s)'</span>)
+0264 ylabel(<span class="string">'\theta'</span>)
+0265 subplot(2,4,6)
+0266 plot(t,xGT(6,:))
+0267 grid on
+0268 xlabel(<span class="string">'Time(s)'</span>)
+0269 ylabel(<span class="string">'Theta Dot'</span>)
+0270 subplot(2,4,7)
+0271 plot(t,uControl)
+0272 grid on
+0273 xlabel(<span class="string">'Time(s)'</span>)
+0274 ylabel(<span class="string">'u input'</span>)
+0275 subplot(2,4,8)
+0276 plot(t,tauControl)
+0277 grid on
+0278 xlabel(<span class="string">'Time(s)'</span>)
+0279 ylabel(<span class="string">'\tau input'</span>)
+0280 
+0281 afigure
+0282 hold on
+0283 plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:) )
+0284 scatter ( zmes(1,:), zmes(2,:),2)
+0285 legend(<span class="string">'truth'</span>,<span class="string">'kalman'</span>)
+0286 xlabel(<span class="string">'X'</span>)
+0287 ylabel(<span class="string">'Y'</span>)
+0288 
+0289 afigure
+0290 hold on
+0291 plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
+0292 plot( t, sqrt( (xGT(1,:)-expec(1,:)).^2 + (xGT(3,:)- expec(3,:)).^2) )
+0293 grid on
+0294 xlabel(<span class="string">'Time(s)'</span>)
+0295 ylabel(<span class="string">'Estimation Error(m)'</span>)
+0296 
+0297 hf = figure
+0298 hold on
+0299 axis ([0,4,3,8])
+0300 scatter(xref,yref)
+0301 xlabel(<span class="string">'X'</span>)
+0302 ylabel(<span class="string">'Y'</span>)
+0303 title(<span class="string">'VTOL Simulation'</span>)
+0304 ht_pdf = quiver(xGT(1,1),xGT(3,1),-sin(xGT(5,1)),cos(xGT(5,1)));
+0305 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf,<span class="string">'linewidth'</span>,2);
+0306 ht_scatter = plot(xGT(1,1),xGT(3,1));
+0307 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_scatter,<span class="string">'linewidth'</span>,2);
+0308 grid on
+0309 
+0310 <span class="keyword">for</span> k=1:length(t)
+0311    detPhat(k) = det(Phat(:,:,k)); 
+0312 <span class="keyword">end</span>
+0313 
+0314 save_to_file = 1;
+0315 <span class="keyword">if</span> (save_to_file  )
+0316     FPS = 25;  
+0317     writerObj = VideoWriter(<span class="string">'pdf_gaussian_VTOL_.avi'</span>);
+0318     writerObj.FrameRate = FPS;
+0319     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hf,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0320     open(writerObj);
+0321     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0322     pause(5)
+0323 <span class="keyword">end</span>
+0324 <span class="keyword">for</span> i = 2:5:length(t)
+0325      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'XData'</span>, xGT(1,i), <span class="keyword">...</span>
+0326                    <span class="string">'YData'</span>, xGT(3,i), <span class="keyword">...</span>
+0327                    <span class="string">'UData'</span>, -sin(xGT(5,i)), <span class="keyword">...</span><span class="comment"> </span>
+0328                    <span class="string">'VData'</span>, cos(xGT(5,i)) );
+0329      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_scatter, <span class="string">'XData'</span>, xGT(1,1:i), <span class="keyword">...</span>
+0330                    <span class="string">'YData'</span>, xGT(3,1:i)  );
+0331      drawnow
+0332      pause(1.0/100.0);
+0333     <span class="keyword">if</span> (save_to_file )
+0334         M = getframe(gcf); 
+0335         writeVideo(writerObj, M);
+0336     <span class="keyword">end</span>  
+0337 <span class="keyword">end</span>
+0338 <span class="keyword">if</span> (save_to_file  )
+0339     close(writerObj);
+0340 <span class="keyword">end</span>
+0341 
+0342 
+0343 
+0344 <span class="comment">%%</span>
+0345 k = 1;
+0346 <span class="keyword">for</span> i=1:dim
+0347     bdim(i,:) = [xhat(i,k)-10*sqrt(Phat(i,i,k)) xhat(i,k)+10*sqrt(Phat(i,i,k))]
+0348     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+0349     gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+0350 <span class="keyword">end</span>
+0351 handleSlices = <a href="../src/plot2DslicesAroundPointGaussian.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPointGaussian(covPK, point, gridT, handleInput )">plot2DslicesAroundPointGaussian</a>(Phat(:,:,1), xhat(:,1), gridT);
+0352 <span class="keyword">for</span> k = 2:30:length(t)
+0353     <span class="keyword">for</span> i=1:dim
+0354         bdim(i,:) = [xhat(i,k)-4*sqrt(Phat(i,i,k)) xhat(i,k)+4*sqrt(Phat(i,i,k))]
+0355         dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1);
+0356         gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))';
+0357     <span class="keyword">end</span>
+0358     <a href="../src/plot2DslicesAroundPointGaussian.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPointGaussian(covPK, point, gridT, handleInput )">plot2DslicesAroundPointGaussian</a>(Phat(:,:,k), xhat(:,k), gridT, handleSlices);
+0359     drawnow
+0360     pause(1.0/100.0); 
+0361     k/length(t)
+0362 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,20 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  doxysearch -> strtok;
+  mfileparse -> mexexts;
+  mfileparse -> openfile;
+  mfileparse -> splitcode;
+  mfileparse -> strtok;
+  searchindex -> openfile;
+  searchindex -> strtok;
+
+  doxyread [URL="doxyread.html"];
+  doxysearch [URL="doxysearch.html"];
+  doxywrite [URL="doxywrite.html"];
+  mexexts [URL="mexexts.html"];
+  mfileparse [URL="mfileparse.html"];
+  openfile [URL="openfile.html"];
+  searchindex [URL="searchindex.html"];
+  splitcode [URL="splitcode.html"];
+  strtok [URL="strtok.html"];
+}

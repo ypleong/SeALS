@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of intTensWeights</title>
+  <meta name="keywords" content="intTensWeights">
+  <meta name="description" content="n - number of grid points in each dimension.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>intTensWeights
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>n - number of grid points in each dimension.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [w] = intTensWeights(n, bdim, gridt) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> n - number of grid points in each dimension. 
+ bdim - the dimensions of the hyperrectangle domain; bdim(i,1) and
+   bdim(i,2) is the lower and upper boundary in dimension i.
+ gridt - grid type 'p' - periodic (fourier), 'c' - chebyshev</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/dmsuite/clencurt.html" class="code" title="function [w] = clencurt(N, a, b)">clencurt</a>	CLENCURT nodes x (Chebyshev points) and weights w</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [w] = intTensWeights(n, bdim, gridt)</a>
+0002 
+0003 <span class="comment">% n - number of grid points in each dimension.</span>
+0004 <span class="comment">% bdim - the dimensions of the hyperrectangle domain; bdim(i,1) and</span>
+0005 <span class="comment">%   bdim(i,2) is the lower and upper boundary in dimension i.</span>
+0006 <span class="comment">% gridt - grid type 'p' - periodic (fourier), 'c' - chebyshev</span>
+0007 
+0008 <span class="comment">% NOTE: DOES NOT INCLUDE INTERIOR BC</span>
+0009 
+0010 nd = length(n);
+0011 
+0012 w = cell(1,nd);
+0013 
+0014 <span class="keyword">for</span> ii = 1:nd
+0015     <span class="keyword">if</span> gridt(ii) == <span class="string">'p'</span>
+0016         w{ii} = 2*pi*ones(1,n(ii))/n(ii);
+0017     <span class="keyword">elseif</span> gridt(ii) == <span class="string">'c'</span>
+0018         w{ii} = <a href="../src/dmsuite/clencurt.html" class="code" title="function [w] = clencurt(N, a, b)">clencurt</a>(n(ii), bdim(ii,1), bdim(ii,2));
+0019     <span class="keyword">end</span>
+0020 <span class="keyword">end</span>
+0021</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

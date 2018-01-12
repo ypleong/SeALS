@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kones</title>
+  <meta name="keywords" content="kones">
+  <meta name="description" content="Generate a (dense) ones tensor.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>kones
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Generate a (dense) ones tensor.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function one = kones(D,N) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Generate a (dense) ones tensor.
+ Input:
+   D = number of dimensions
+   N = scalar or D-vector specifying the size of each dimension</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/ctdlab/tests/test_k.html" class="code" title="">test_k</a>	</li><li><a href="../../src/ctdlab/tests/test_vvpwm.html" class="code" title="">test_vvpwm</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function one = kones(D,N)</a>
+0002 <span class="comment">% Generate a (dense) ones tensor.</span>
+0003 <span class="comment">% Input:</span>
+0004 <span class="comment">%   D = number of dimensions</span>
+0005 <span class="comment">%   N = scalar or D-vector specifying the size of each dimension</span>
+0006 
+0007     U = cell(1,D);
+0008     
+0009     <span class="keyword">if</span> length(N)==1
+0010         N = N*ones(1,D);
+0011     <span class="keyword">end</span>
+0012 
+0013     <span class="keyword">for</span> d=1:D
+0014         U{d} = ones(N(d),1);
+0015     <span class="keyword">end</span>
+0016     
+0017     one = ktensor(1,U);
+0018     one = normalize(one);
+0019 
+0020 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

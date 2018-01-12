@@ -1,0 +1,527 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_pdf_ND_tensor_run</title>
+  <meta name="keywords" content="test_pdf_ND_tensor_run">
+  <meta name="description" content="% Test Tensor Form PDF Evolution ND">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_pdf_ND_tensor_run
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Test Tensor Form PDF Evolution ND</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Test Tensor Form PDF Evolution ND</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>	HadTensProd performs Hadamand tensor products for a ktensor function F</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/checkGridFit.html" class="code" title="function [ outputCheck ] = checkGridFit( gridT, meanT, covT, lambdaMin, lambdaMax )">checkGridFit</a>	Check if the given gaussian fits for the given grid</li><li><a href="../src/createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>	Create weights for integration</li><li><a href="../src/create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="../src/fitTensorBoundaries.html" class="code" title="function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )">fitTensorBoundaries</a>	</li><li><a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>	F - ktensor</li><li><a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li><li><a href="../src/meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>	Compute the mean and covariance of a tensor</li><li><a href="../src/plot2DProjectionPoint.html" class="code" title="function [ handleOutput ] = plot2DProjectionPoint(points, handleInput )">plot2DProjectionPoint</a>	</li><li><a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>	Plots a visualization of the Tensor. For each pair of dimensions it</li><li><a href="../src/tempCall.html" class="code" title="function [ f2 ] = tempCall ( fD, t, x )">tempCall</a>	Call the symbolic function handle with arguments x1, ... xN using the</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <span class="comment">%% Test Tensor Form PDF Evolution ND</span>
+0003 clear all
+0004 
+0005 <span class="comment">%% Initialization, User-defined variables</span>
+0006 
+0007 
+0008 caseStr = <span class="string">'ND_forward'</span>;
+0009 caseStr = <span class="string">'pendulum2D'</span>;
+0010 
+0011     
+0012 <span class="keyword">if</span> strcmp(<span class="string">'ND_forward'</span>,caseStr) 
+0013      <span class="comment">% This is just a constant velocity dynamics in N dimensions</span>
+0014      
+0015     dim = 6; <span class="comment">% change it!</span>
+0016     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0017     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0018    
+0019     measure = 0;
+0020     fFPE = zeros(dim,1);
+0021     <span class="keyword">for</span> i=1:dim
+0022         fFPE(i) = 3; <span class="comment">%i*3;</span>
+0023         n(i) = 61+10*i;
+0024         x0(i) = i;
+0025         bdim(i,:) = [-2 4*i];
+0026         bcon{i} = {<span class="string">'d'</span>,0,0};
+0027         diagSigma(i) = 0.1*i;
+0028         qdiag(i) = 0.1;
+0029     <span class="keyword">end</span>
+0030     xhat = x0;
+0031     qdiag = 0.001*ones(dim,1);
+0032     fitBoundary = 1;
+0033 
+0034 <span class="keyword">elseif</span> strcmp(<span class="string">'yifei_2D_1'</span>,caseStr) 
+0035     
+0036     <span class="comment">% Linear pendulum</span>
+0037     
+0038     dim = 2;
+0039     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0040     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0041     measure = 0;
+0042     a=0.125;
+0043     b=-0.5;
+0044     fFPE = [x(2);-b*x(2)-x(1)-a*x(2)*x(1)^2 - a*x(2)^3];
+0045     n = [61 61];
+0046     x0 = [0.0, 1];
+0047     diagSigma = [0.03 0.001];
+0048     bdim = [-4 4
+0049            -4 4];
+0050     <span class="comment">%bcon = { {'p'}, {'d',0,0}};</span>
+0051 
+0052 
+0053 <span class="keyword">elseif</span> strcmp(<span class="string">'pendulum2D'</span>,caseStr) 
+0054     
+0055     <span class="comment">% Linear pendulum</span>
+0056     
+0057     dim = 2;
+0058     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0059     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0060     measure = 0;
+0061     fFPE = [x(2);-x(1)];
+0062     n = [201 201];
+0063     x0 = [0.2, 0.01];
+0064     diagSigma = [0.03 0.001];
+0065     bdim = [-pi pi
+0066            -10 10];
+0067     bcon = { {<span class="string">'p'</span>}, {<span class="string">'d'</span>,0,0}};
+0068     
+0069 <span class="keyword">elseif</span> strcmp(<span class="string">'pendulum2D_NL'</span>,caseStr) 
+0070      <span class="comment">% This is the classical non-linear pendulum in 2d</span>
+0071      
+0072     dim = 2;
+0073     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0074     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0075    
+0076     measure = 0;
+0077     kpen = (2*pi/3)^2;
+0078     fFPE = [x(2);-kpen*sin(x(1))];
+0079     n = [101 101];
+0080     x0 = [0.7, 0.1];
+0081     diagSigma = [0.6 0.5];
+0082     bdim = [-pi pi
+0083            -15 15];
+0084     bcon = { {<span class="string">'p'</span>}, {<span class="string">'d'</span>,0,0}};
+0085     qdiag = [0.001 0.01];
+0086     
+0087 <span class="keyword">elseif</span> strcmp(<span class="string">'2d_pos'</span>,caseStr) 
+0088      <span class="comment">% This case is the simple double integrator (constant speed)</span>
+0089     <span class="comment">% It checks the use of smaller measurements than the size of the state</span>
+0090     <span class="comment">% vector</span>
+0091     
+0092     dim = 2;
+0093     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0094     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)       
+0095     measure = 1;
+0096     mesureFreq = 10;
+0097     HK = [1 0];
+0098     
+0099     fFPE = [x(2);0];
+0100     n = [201 301];
+0101     x0 = [0.0, 0.50];
+0102     x0hat = [0.0, 0.00];
+0103     diagSigma = [0.05 0.4];
+0104     bdim = [-4 5
+0105            -4 4];
+0106     bcon = { {<span class="string">'d'</span>,0,0}, {<span class="string">'d'</span>,0,0}};
+0107     qdiag = [0.001 0.1];
+0108     
+0109 <span class="keyword">elseif</span> strcmp(<span class="string">'3d_pos'</span>,caseStr)
+0110     <span class="comment">% This case is the simple integrator in the third dimension</span>
+0111     
+0112     dim = 3;
+0113     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0114     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0115     
+0116     measure = 0;
+0117     mesureFreq = 1000;
+0118     HK = [1 0 0];
+0119     fFPE = [x(2);x(3);0];
+0120     n = [101 101 121];
+0121     x0 = [0.0, 0.0, 0.50]';
+0122     x0hat = x0; <span class="comment">% [0.0, 0.0, 0.00]';</span>
+0123     diagSigma = [0.1 0.2 0.3];
+0124     bdim = [-4 6
+0125            -4 4
+0126            -4 4];
+0127     bcon = { {<span class="string">'d'</span>,0,0}, {<span class="string">'d'</span>,0,0},{<span class="string">'d'</span>,0,0}};
+0128     qdiag = [0.001 0.001 0.002];
+0129     fitBoundary = 0;
+0130     
+0131 <span class="keyword">elseif</span> strcmp(<span class="string">'nd_hypersphere'</span>,caseStr) 
+0132     dim = 3;
+0133     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0134     fprintf (<span class="string">'Running case  &quot;%s&quot;  with %d dimensions\n'</span>, caseStr, dim)
+0135     <span class="comment">% This case shows the ability of the tensor framework to recover the</span>
+0136     <span class="comment">% projection of a hypershere on a plane of the same dimensions</span>
+0137     
+0138     measure = 0;
+0139     mesureFreq = 1000;
+0140     HK = [1 0 0];
+0141     
+0142     fFPE = [x(2);x(3);0];
+0143     n = [201 201 301];
+0144     x0 = [0.0, 0.0, 0.50]';
+0145     x0hat = [0.0, 0.0, 0.00]';
+0146     diagSigma = [0.1 0.2 0.3];
+0147     bdim = [-4 6
+0148            -4 4
+0149            -4 4];
+0150     bcon = { {<span class="string">'d'</span>,0,0}, {<span class="string">'d'</span>,0,0},{<span class="string">'d'</span>,0,0}};
+0151     qdiag = [0.001 0.05 0.02];
+0152 <span class="keyword">elseif</span> (strcmp(<span class="string">'nonLinear4D'</span>,caseStr))
+0153     dim = 4;
+0154     x = sym(<span class="string">'x'</span>,[dim,1]); <span class="comment">%do not change</span>
+0155     fFPE = [x(2);x(3);x(4);-x(3)*(kpen1+kpen2)-sin(x(1))*kpen1*kpen2];
+0156     kpen1 = (2*pi/3)^2; 
+0157     measure = 0;
+0158 <span class="keyword">else</span>
+0159     error(<span class="string">'No case was specified'</span>)
+0160 <span class="keyword">end</span>
+0161 
+0162 <span class="comment">% Consistency checks</span>
+0163 <span class="keyword">if</span> (length(fFPE) ~= dim )
+0164    error(<span class="string">'the dimensions of the dynamics are not &quot;dim&quot;'</span>) <span class="comment">%check</span>
+0165 <span class="keyword">end</span>
+0166 <span class="comment">% Derived Variables</span>
+0167 <span class="keyword">if</span> (~exist(<span class="string">'x0hat'</span>,<span class="string">'var'</span>))
+0168    x0hat = x0; 
+0169 <span class="keyword">end</span>
+0170 <span class="keyword">for</span> i=1:dim
+0171     dx(i) = (bdim(i,2)-bdim(i,1))/(n(i)-1); <span class="comment">% grid space</span>
+0172     gridT{i} =  (bdim(i,1):dx(i):bdim(i,2))'; <span class="comment">% grid vector</span>
+0173 <span class="keyword">end</span>
+0174 sigma02Matrix = diag(diagSigma); <span class="comment">% [0.8 0.2; 0.2 sigma02];</span>
+0175 <span class="keyword">for</span> i=1:dim
+0176    p0vector{i} =  normpdf(gridT{i},x0hat(i),sqrt(diagSigma(i))); 
+0177 <span class="keyword">end</span>
+0178 
+0179 
+0180 <span class="comment">%% Model parameters</span>
+0181 
+0182 <span class="keyword">if</span> (~exist(<span class="string">'qdiag'</span>,<span class="string">'var'</span>) )
+0183     qdiag = zeros(dim,1);
+0184     <span class="keyword">for</span> i=1:dim
+0185         qdiag(i) = 0.3; 
+0186     <span class="keyword">end</span>
+0187 <span class="keyword">end</span>
+0188 q =  diag( qdiag );
+0189 
+0190 <span class="keyword">if</span> (~exist(<span class="string">'mesureFreq'</span>,<span class="string">'var'</span>))
+0191    mesureFreq = 1; 
+0192 <span class="keyword">end</span>
+0193 
+0194 <span class="keyword">if</span> (~exist(<span class="string">'fitBoundary'</span>,<span class="string">'var'</span>))
+0195    fitBoundary = 0; 
+0196 <span class="keyword">end</span>
+0197 lambdaMin = 4;
+0198 lambdaInitial = 6;
+0199 lambdaMax = 10;
+0200 
+0201 <span class="comment">% Simulation Parameters</span>
+0202 dt = 0.0005;
+0203 finalt = 20;
+0204 t = 0:dt:finalt;
+0205 
+0206 pk = cell(length(t),1);
+0207 zkcompressed = cell(length(t),1);
+0208 pk{1} =  ktensor(p0vector);
+0209 xGT = zeros(dim,length(t));
+0210 xkalman = zeros(dim,length(t));
+0211 covKalman = zeros(dim,dim,length(t));
+0212 expec = zeros(dim,length(t));
+0213 cov = zeros(dim,dim,length(t));
+0214 pz = cell(dim,1);
+0215 
+0216 <span class="comment">% Step up variables</span>
+0217 cov(:,:,1) = sigma02Matrix;
+0218 expec(:,1) = x0hat;
+0219 <span class="comment">% visualize, check boundaries</span>
+0220 <a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>( pk{1}, expec(:,1), gridT,[],<span class="string">'surf'</span>);
+0221 
+0222 xGT(:,1) = x0;
+0223 xkalman(:,1) = x0hat;
+0224 covKalman(:,:,1) = sigma02Matrix;
+0225 
+0226 <span class="comment">%% Tensor parameters</span>
+0227 <span class="keyword">if</span> (~exist(<span class="string">'bcon'</span>,<span class="string">'var'</span>) )
+0228     <span class="keyword">for</span> i=1:dim
+0229         bcon{i} = {<span class="string">'d'</span>,0,0};
+0230     <span class="keyword">end</span>
+0231 <span class="keyword">end</span>
+0232 bsca = []; <span class="comment">%no manual scaling</span>
+0233 region = [];
+0234 regval = 1;
+0235 regsca = [];
+0236 sca_ver = 1;
+0237 
+0238 tol_err_op = 1e-5;
+0239 tol_err = 1e-6;
+0240 maxIter = 200;
+0241 als_options = [];
+0242 als_variant = []; <span class="comment">%{10,50};</span>
+0243 debugging = 0;
+0244 explicit = 1;
+0245 
+0246 fFPE_function = matlabFunction(fFPE,<span class="string">'Vars'</span>,x);
+0247 fFPEdiff = jacobian(fFPE,x);
+0248 fFPEdiff_function = matlabFunction(fFPEdiff,<span class="string">'Vars'</span>,x);
+0249 
+0250 <span class="keyword">for</span> i=1:dim
+0251     acc(:,i) = [2,2]';
+0252 <span class="keyword">end</span>
+0253 [D,D2,~,~] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,n,dx,acc,bcon,region);
+0254 op = <a href="../src/create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a> ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
+0255 [ weMean, weCov, weOnes ] = <a href="../src/createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>( gridT, n );
+0256 
+0257 <span class="comment">%% Iterate over</span>
+0258 
+0259 time1 = tic;
+0260 <span class="keyword">for</span> k = 2:length(t)
+0261     <span class="comment">% plot by:</span>
+0262     <span class="comment">% plotkTensor( pk{k}, gridT )</span>
+0263     <span class="keyword">if</span> ( explicit == 1 )
+0264         pk{k} = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>( op, pk{k-1});
+0265         <span class="keyword">if</span> length(pk{k}.lambda) &gt; 1
+0266             [pk{k},~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(pk{k},tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(pk{k}),0);
+0267 
+0268             pk{k} = fixsigns(arrange(pk{k}));
+0269             [pk{k}, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(pk{k},tol_err_op,maxIter);
+0270         <span class="keyword">end</span>
+0271         
+0272     <span class="keyword">else</span> 
+0273         [pk{k}, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = <span class="keyword">...</span>
+0274         <a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>(op,pk{k-1},[],tol_err,als_options,debugging);
+0275     <span class="keyword">end</span>
+0276     
+0277     <span class="comment">% Get Mean and Covariance values</span>
+0278     [ expec(:,k), cov(:,:,k) ] = <a href="../src/meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>( pk{k}, gridT, weMean, weCov, weOnes );
+0279     
+0280     <span class="comment">% Check conditions to fit boundaries</span>
+0281     <span class="keyword">if</span> ( fitBoundary )
+0282         checkBoundary =  <a href="../src/checkGridFit.html" class="code" title="function [ outputCheck ] = checkGridFit( gridT, meanT, covT, lambdaMin, lambdaMax )">checkGridFit</a>( gridT, expec(:,k), cov(:,:,k), lambdaMin, lambdaMax );
+0283         <span class="keyword">if</span> ( any(checkBoundary) )
+0284             [ pk{k}, gridT, dx] = <a href="../src/fitTensorBoundaries.html" class="code" title="function [ tensorOutput, gridTnew, dx ] = fitTensorBoundaries( tens, gridT, meanT, covT, ngridT, lambda )">fitTensorBoundaries</a>( pk{k}, gridT, expec(:,k), cov(:,:,k), n, lambdaInitial );
+0285             [D,D2,~,~] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,n,dx,acc,bcon,region);
+0286             op = <a href="../src/create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a> ( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x);
+0287             [ weMean, weCov, weOnes ] = <a href="../src/createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>( gridT, n );
+0288         <span class="keyword">end</span>
+0289     <span class="keyword">end</span>
+0290     
+0291     <span class="comment">% Integrate the GT</span>
+0292     xGT(:,k)  = deval(ode45( @(t,x) <a href="../src/tempCall.html" class="code" title="function [ f2 ] = tempCall ( fD, t, x )">tempCall</a>(fFPE_function,t,x),[t(k-1) t(k)], xGT(:,k-1)'),t(k));
+0293     
+0294     <span class="comment">% Integrate KF</span>
+0295     xkalman(:,k)  = deval(ode45( @(t,x) <a href="../src/tempCall.html" class="code" title="function [ f2 ] = tempCall ( fD, t, x )">tempCall</a>(fFPE_function,t,x),[t(k-1) t(k)], xkalman(:,k-1)'),t(k));
+0296     <span class="comment">%stm = (eye(dim) + fFPEdiff_function(xkalman(:,k-1))*dt);</span>
+0297     <span class="comment">%covKalman(:,:,k) = stm*covKalman(:,:,k-1)*stm'+dt*q;</span>
+0298 
+0299 
+0300     <span class="comment">%% Measure</span>
+0301     <span class="keyword">if</span> (measure &amp;&amp; mod(k,mesureFreq)==0 )
+0302         Rmeas = diag(HK*diag(diagSigma)*HK');
+0303         mMes = size(HK);
+0304         zmes = HK*xGT(:,k) + randn(mMes(1),1).*sqrt(Rmeas)';
+0305 
+0306         <span class="keyword">for</span> i=1:dim
+0307             <span class="keyword">for</span> j=1:length(zmes)
+0308                 <span class="keyword">if</span> ( HK(j,i) == 1 )
+0309                     pz{i} =  normpdf(gridT{i},zmes(j),sqrt(Rmeas(j,j))); 
+0310                 <span class="keyword">elseif</span> (all(HK(:,i)==0) )
+0311                     pz{i} = ones(n(i),1);
+0312                 <span class="keyword">end</span>
+0313             <span class="keyword">end</span>
+0314         <span class="keyword">end</span>
+0315 
+0316         zkcompressed{k} = ktensor(pz);
+0317 
+0318         <span class="comment">% Direct PDF Bayesian Measurement</span>
+0319         pk{k} = <a href="../src/HadTensProd.html" class="code" title="function res = HadTensProd(F,G)">HadTensProd</a>(pk{k},zkcompressed{k});
+0320         pk{k} = pk{k} *(1/  <a href="../src/intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, weOnes));
+0321         
+0322         [ expecAf(:,k), covAf(:,:,k) ] = <a href="../src/meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>( pk{k}, gridT, weMean, weCov, weOnes );
+0323     
+0324         <span class="comment">% Kalman Measurement</span>
+0325         SG = HK*covKalman(:,:,k)*HK' + Rmeas;
+0326         KG = covKalman(:,:,k)*HK'/(SG);
+0327         xkalman(:,k) = xkalman(:,k) + KG*(zmes - HK*xkalman(:,k));
+0328         covKalman(:,:,k) = (eye(dim) - KG*HK)*covKalman(:,:,k);               
+0329     <span class="keyword">end</span>
+0330     kend = k;
+0331 <span class="keyword">end</span>
+0332 toc(time1)
+0333 <span class="comment">%% Save Results</span>
+0334 saveResults =1;
+0335 <span class="keyword">if</span> (exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>))
+0336     caseNum = 1;
+0337     <span class="keyword">while</span>( exist([caseStr,<span class="string">'_'</span>,num2str(caseNum)],<span class="string">'dir'</span>))
+0338         caseNum = caseNum+1;
+0339     <span class="keyword">end</span>
+0340     folderName = [caseStr,<span class="string">'_'</span>,num2str(caseNum)];
+0341     mkdir(folderName)
+0342     <span class="keyword">try</span>
+0343         save([folderName,<span class="string">'/case_'</span>, caseStr, datestr(now, <span class="string">'dd-mmm-yyyy'</span>),<span class="string">'.mat'</span>],<span class="string">'caseStr'</span>,<span class="string">'x'</span> <span class="keyword">...</span>
+0344              ,<span class="string">'cov'</span>,<span class="string">'covKalman'</span>,<span class="string">'dt'</span>,<span class="string">'fFPE'</span>,<span class="string">'op'</span>,<span class="string">'x0'</span>,<span class="string">'x0hat'</span>,<span class="string">'xkalman'</span>,<span class="string">'xGT'</span>,<span class="string">'bdim'</span>,<span class="string">'t'</span>,<span class="string">'q'</span>,<span class="string">'expec'</span>,<span class="string">'n'</span>  <span class="keyword">...</span>
+0345              ,<span class="string">'dim'</span>,<span class="string">'gridT'</span>,<span class="string">'n'</span>,<span class="string">'bcon'</span>,<span class="string">'zkcompressed'</span>,<span class="string">'pk'</span>,<span class="string">'-v7.3'</span>)
+0346     <span class="keyword">catch</span>
+0347         save([folderName,<span class="string">'\case_'</span>, caseStr, datestr(now, <span class="string">'dd-mmm-yyyy'</span>),<span class="string">'.mat'</span>],<span class="string">'-v7.3'</span>)
+0348     <span class="keyword">end</span>
+0349     
+0350 <span class="keyword">end</span>
+0351 <span class="comment">%% Check Plots</span>
+0352 
+0353 <span class="comment">% State Vector</span>
+0354 afigure
+0355 plot(t,xkalman,t,expec,<span class="string">'.'</span>)
+0356 xlabel(<span class="string">'time(s)'</span>)
+0357 zlabel(<span class="string">'position'</span>)
+0358 <span class="keyword">for</span> i=1:dim
+0359     legString{i}= strcat(<span class="string">'Kalman '</span> , num2str(i)); 
+0360 <span class="keyword">end</span>
+0361 <span class="keyword">for</span> i=1:dim
+0362     legString{dim+i}=strcat(<span class="string">'FPE '</span> , num2str(i)); 
+0363 <span class="keyword">end</span>
+0364 legend(legString)
+0365 <span class="keyword">for</span> k=1:length(t)
+0366    trCov(k) = det(cov(:,:,k)); 
+0367    trCovKalman(k) = det(covKalman(:,:,k)); 
+0368 <span class="keyword">end</span>
+0369 
+0370 <span class="comment">% Covariance</span>
+0371 figure
+0372 plot(t,trCov,t,trCovKalman,<span class="string">'.'</span>)
+0373 xlabel(<span class="string">'time'</span>)
+0374 ylabel(<span class="string">'cov det'</span>)
+0375 legend(<span class="string">'FPE'</span>,<span class="string">'Kalman'</span>)
+0376 <span class="keyword">if</span> (exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>))
+0377    saveas(gcf,[folderName,<span class="string">'/covVsKalman.eps'</span>])
+0378    saveas(gcf,[folderName,<span class="string">'/covVsKalman.png'</span>])
+0379    saveas(gcf,[folderName,<span class="string">'/covVsKalman.fig'</span>])
+0380 <span class="keyword">end</span>
+0381 
+0382 <span class="comment">% Error</span>
+0383 figure
+0384 plot(t,sqrt(sum((expec-xGT).^2)),t,sqrt(sum((xkalman-xGT).^2)))
+0385 xlabel(<span class="string">'time(s)'</span>)
+0386 ylabel(<span class="string">'mean error'</span>)
+0387 title(<span class="string">'State Norm Error for the double integrator with measurements'</span>)
+0388 legend(<span class="string">'Tensor'</span>,<span class="string">'Kalman'</span>)
+0389 <span class="keyword">if</span> (exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>))
+0390    saveas(gcf,[folderName,<span class="string">'/errorVsKalman.png'</span>])
+0391 <span class="keyword">end</span>
+0392 
+0393 
+0394 <span class="comment">%% animated figure</span>
+0395 hf = figure;
+0396 save_to_file = 0;
+0397 <span class="keyword">if</span> (save_to_file &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0398     FPS = 25;  
+0399     pause(1)
+0400     str_title = [<span class="string">'Probability Density Function Evolution'</span>];
+0401     writerObj = VideoWriter([folderName,<span class="string">'/pdf_gaussian_.avi'</span>]);
+0402     writerObj.FrameRate = FPS;
+0403     writerObj.Quality = 100;
+0404     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hf,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0405     open(writerObj);
+0406     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0407     pause(2)
+0408 <span class="keyword">end</span>
+0409 hold on
+0410 handleSlices = <a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>( pk{1}, x0, gridT,[],<span class="string">'pcolor'</span>);
+0411 handleSlices_kalman = <a href="../src/plot2DProjectionPoint.html" class="code" title="function [ handleOutput ] = plot2DProjectionPoint(points, handleInput )">plot2DProjectionPoint</a>( xkalman(:,1) );
+0412 handleSlices_mean = <a href="../src/plot2DProjectionPoint.html" class="code" title="function [ handleOutput ] = plot2DProjectionPoint(points, handleInput )">plot2DProjectionPoint</a>( expec(:,1) );
+0413 legend(<span class="string">'PDF'</span>,<span class="string">'Kalman'</span>,<span class="string">'Mean'</span>)
+0414 <span class="keyword">for</span> k = 2:10:length(t)
+0415     <a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>( pk{k}, expec(:,k), gridT, handleSlices,<span class="string">'pcolor'</span>);
+0416     <a href="../src/plot2DProjectionPoint.html" class="code" title="function [ handleOutput ] = plot2DProjectionPoint(points, handleInput )">plot2DProjectionPoint</a>(expec(:,k), handleSlices_mean );
+0417     <a href="../src/plot2DProjectionPoint.html" class="code" title="function [ handleOutput ] = plot2DProjectionPoint(points, handleInput )">plot2DProjectionPoint</a>(xkalman(:,k), handleSlices_kalman );
+0418     pause(1.0/10);
+0419     <span class="keyword">if</span> (save_to_file  &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0420         M = getframe(gcf);
+0421         writeVideo(writerObj, M);
+0422     <span class="keyword">end</span>        
+0423 <span class="keyword">end</span>
+0424 
+0425 
+0426 <span class="keyword">if</span> (save_to_file   &amp;&amp; exist(<span class="string">'saveResults'</span>,<span class="string">'var'</span>) )
+0427     close(writerObj);
+0428 <span class="keyword">end</span>
+0429 <span class="comment">%%</span>
+0430 
+0431 kend = k
+0432 <span class="comment">%%</span>
+0433 figure
+0434 <span class="keyword">for</span> k=1:kend
+0435     
+0436     <span class="keyword">if</span> (~isempty(zkcompressed{k}))
+0437         <a href="../src/plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>( zkcompressed{k}, x0, gridT,[]);
+0438         ee
+0439     <span class="keyword">end</span>
+0440 <span class="keyword">end</span>
+0441 
+0442 <span class="comment">%%</span>
+0443 nLambda = zeros(length(t),1);
+0444 normLambda = zeros(length(t),1);
+0445 qLambda = zeros(length(t),1);
+0446 
+0447 <span class="keyword">for</span> k = 1:kend 
+0448     nLambda(k) = length(pk{k}.lambda);
+0449     normLambda(k) = sum(pk{k}.lambda);
+0450     qLambda(k) = pk{k}.lambda(1)/normLambda(k);
+0451 <span class="keyword">end</span>
+0452 afigure
+0453 plot(t,qLambda)
+0454 title(<span class="string">'Ration between the first two \lambda coefficients'</span>)
+0455 xlabel(<span class="string">'time(s)'</span>)
+0456 ylabel(<span class="string">'\lambda_1/\lambda_2'</span>)
+0457 
+0458 afigure
+0459 plot(t, nLambda)
+0460 title(<span class="string">'Number of tensor coefficients'</span>)
+0461 xlabel(<span class="string">'time'</span>)
+0462 ylabel(<span class="string">'coefficients'</span>)
+0463 
+0464 
+0465 afigure
+0466 plotLambda = zeros(length(t),max(nLambda));
+0467 <span class="keyword">for</span> k = 1:kend
+0468     plotLambda(k,1:nLambda(k)) = pk{k}.lambda;
+0469 <span class="keyword">end</span>
+0470 semilogy(t,plotLambda,<span class="string">'d'</span>)
+0471 title(<span class="string">'\lambda Evolution with time'</span>)
+0472 xlabel(<span class="string">'time(s)'</span>)
+0473 ylabel(<span class="string">'\lambda'</span>)
+0474 
+0475 <span class="comment">%</span>
+0476 afigure
+0477 plot(1:k-1,timeWithout(1:k-1)*1000,1:k-1,timeWith*1000)
+0478 xlabel(<span class="string">'iteration'</span>)
+0479 ylabel(<span class="string">'time(ms)'</span>)
+0480 legend(<span class="string">'Random Init'</span>,<span class="string">'Previous Iteration'</span>)
+0481 title(<span class="string">'als2 Tensor Initialization with previous iteration'</span>)</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

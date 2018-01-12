@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of trncel</title>
+  <meta name="keywords" content="trncel">
+  <meta name="description" content="Absolute truncation of factor matrices.  All entries less than delta in">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>trncel
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Absolute truncation of factor matrices.  All entries less than delta in</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function A = trncel(A,delta) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Absolute truncation of factor matrices.  All entries less than delta in
+ magnitude are removed.
+
+ Input:
+   A = ctd
+   delta = truncation tolerance. If delta is empty or 0, do nothing.
+
+ Output:
+   A = ctd</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="trncspmat.html" class="code" title="function A = trncspmat(A,delta)">trncspmat</a>	For a sparse matrix, truncate all elements less than delta using a mask.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="alsi.html" class="code" title="function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)">alsi</a>	Main ALS iteration.  See als.m for arguments</li><li><a href="../../src/ctdlab/tests/test_trncel.html" class="code" title="">test_trncel</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function A = trncel(A,delta)</a>
+0002 <span class="comment">% Absolute truncation of factor matrices.  All entries less than delta in</span>
+0003 <span class="comment">% magnitude are removed.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% Input:</span>
+0006 <span class="comment">%   A = ctd</span>
+0007 <span class="comment">%   delta = truncation tolerance. If delta is empty or 0, do nothing.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Output:</span>
+0010 <span class="comment">%   A = ctd</span>
+0011 
+0012     <span class="comment">% if delta empty or 0, do nothing</span>
+0013     <span class="keyword">if</span> isempty(delta) || delta==0
+0014         <span class="keyword">return</span>
+0015     <span class="keyword">end</span>
+0016 
+0017     <span class="comment">% truncate each dimension</span>
+0018     <span class="keyword">for</span> d=1:ndims(A)
+0019         A.U{d}=<a href="trncspmat.html" class="code" title="function A = trncspmat(A,delta)">trncspmat</a>(A.U{d},delta);
+0020     <span class="keyword">end</span>
+0021     
+0022     <span class="comment">% re-normalize</span>
+0023     A = normalize(A);
+0024     
+0025 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of visres</title>
+  <meta name="keywords" content="visres">
+  <meta name="description" content="VISRES plots results from a run by MAIN_RUN.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>visres
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>VISRES plots results from a run by MAIN_RUN.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> VISRES plots results from a run by MAIN_RUN.
+ Inputs:
+   plotsolve - cell with the following data:
+      F - obtained solution from als run.
+      err - achieved error in als run.
+      enrich - when F increased in rank during als run.
+      t_step - how much time iterations in als run took.
+      Fcond - contition number of F during als run.
+      grid - grid points in each dimension.
+   plotcompress - cell with the following data:
+      op - compressed operator
+      err_op - achieved error during compress operator.
+      enrich_op - when op increased in rank during compress operator.
+      t_step_op - how much time iterations took when compressing operator.
+      cond_op - condition number of op during compress operator
+   plotdebug is a cell with the following data:
+      F_cell - F during als run.
+      b_cell - RHS vectors during als run.
+      B_cell - als matrices during als run.
+   n - number of grid in each dimension
+      debugging - 1 if F_cell,B_cell,b_cell shall be documented.
+      saveplots - 1 if plots shall be saved.
+      run - index separating different runs from MAIN_RUN
+ Outputs: (OBS: are just saved)
+   visres_output - cell with the following data:
+      (np = no precondition, p = precondition)
+      normF_vector_np - norms of F during als run with np.
+      normF_vector_p  - norms of F during als run with p.
+      normb_vector_np - norms of RHS vector during als run with np.
+      normb_vector_p  - norms of RHS vector during als run with p.
+      condB_vector_np - condition number for als matrices during als run 
+      with np.
+      condB_vector_p  - condition number for als matrices during als run
+      with p.
+      condB_each_dim  - condition number for als matrices during als run. 
+      Row is iteration number and column is dimension.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function visres(plotsolve,plotcomp,plotdebug,n,debugging,saveplots,savedata,restart,run)</a>
+0002 <span class="comment">% VISRES plots results from a run by MAIN_RUN.</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   plotsolve - cell with the following data:</span>
+0005 <span class="comment">%      F - obtained solution from als run.</span>
+0006 <span class="comment">%      err - achieved error in als run.</span>
+0007 <span class="comment">%      enrich - when F increased in rank during als run.</span>
+0008 <span class="comment">%      t_step - how much time iterations in als run took.</span>
+0009 <span class="comment">%      Fcond - contition number of F during als run.</span>
+0010 <span class="comment">%      grid - grid points in each dimension.</span>
+0011 <span class="comment">%   plotcompress - cell with the following data:</span>
+0012 <span class="comment">%      op - compressed operator</span>
+0013 <span class="comment">%      err_op - achieved error during compress operator.</span>
+0014 <span class="comment">%      enrich_op - when op increased in rank during compress operator.</span>
+0015 <span class="comment">%      t_step_op - how much time iterations took when compressing operator.</span>
+0016 <span class="comment">%      cond_op - condition number of op during compress operator</span>
+0017 <span class="comment">%   plotdebug is a cell with the following data:</span>
+0018 <span class="comment">%      F_cell - F during als run.</span>
+0019 <span class="comment">%      b_cell - RHS vectors during als run.</span>
+0020 <span class="comment">%      B_cell - als matrices during als run.</span>
+0021 <span class="comment">%   n - number of grid in each dimension</span>
+0022 <span class="comment">%      debugging - 1 if F_cell,B_cell,b_cell shall be documented.</span>
+0023 <span class="comment">%      saveplots - 1 if plots shall be saved.</span>
+0024 <span class="comment">%      run - index separating different runs from MAIN_RUN</span>
+0025 <span class="comment">% Outputs: (OBS: are just saved)</span>
+0026 <span class="comment">%   visres_output - cell with the following data:</span>
+0027 <span class="comment">%      (np = no precondition, p = precondition)</span>
+0028 <span class="comment">%      normF_vector_np - norms of F during als run with np.</span>
+0029 <span class="comment">%      normF_vector_p  - norms of F during als run with p.</span>
+0030 <span class="comment">%      normb_vector_np - norms of RHS vector during als run with np.</span>
+0031 <span class="comment">%      normb_vector_p  - norms of RHS vector during als run with p.</span>
+0032 <span class="comment">%      condB_vector_np - condition number for als matrices during als run</span>
+0033 <span class="comment">%      with np.</span>
+0034 <span class="comment">%      condB_vector_p  - condition number for als matrices during als run</span>
+0035 <span class="comment">%      with p.</span>
+0036 <span class="comment">%      condB_each_dim  - condition number for als matrices during als run.</span>
+0037 <span class="comment">%      Row is iteration number and column is dimension.</span>
+0038 <span class="comment">%</span>
+0039 <span class="comment">% See also MAIN_RUN.</span>
+0040 
+0041 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0042 
+0043 <span class="comment">%% Extract data</span>
+0044 [F,err,enrich,t_step,Fcond,grid] = deal(plotsolve{:});
+0045 
+0046 [op,err_op,enrich_op,t_step_op,cond_op] = deal(plotcomp{:});
+0047 
+0048 [F_cell,b_cell,B_cell] = deal(plotdebug{:});
+0049 
+0050 d = length(grid);
+0051 
+0052 <span class="comment">%% Plot data from als run</span>
+0053 
+0054 <span class="comment">% general data</span>
+0055 fig = figure;
+0056 
+0057 <span class="comment">% convergence</span>
+0058 subplot(2,2,1);
+0059 semilogy(err,<span class="string">'LineWidth'</span>,2);
+0060 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0061 ylabel(<span class="string">'error'</span>,<span class="string">'FontSize'</span>,14);
+0062 title(<span class="string">'Convergence of F'</span>,<span class="string">'FontSize'</span>,14);
+0063 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12);
+0064 hold on;
+0065 <span class="keyword">for</span> i=1:length(enrich)
+0066     plot(enrich(i),err(enrich(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,10);
+0067 <span class="keyword">end</span>
+0068 <span class="keyword">for</span> i=1:length(restart)
+0069     plot(restart(i),err(restart(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,10);
+0070 <span class="keyword">end</span>
+0071 hold off;
+0072 
+0073 <span class="comment">% time per iteration</span>
+0074 subplot(2,2,2);
+0075 plot(t_step,<span class="string">'LineWidth'</span>,2);
+0076 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0077 ylabel(<span class="string">'Time(s)'</span>,<span class="string">'FontSize'</span>,14);
+0078 title(<span class="string">'Computation Time'</span>,<span class="string">'FontSize'</span>,14);
+0079 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0080 hold on;
+0081 <span class="keyword">for</span> i=1:length(enrich)
+0082     plot(enrich(i),t_step(enrich(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,10);
+0083 <span class="keyword">end</span>
+0084 <span class="keyword">for</span> i=1:length(restart)
+0085     plot(restart(i),err(restart(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,10);
+0086 <span class="keyword">end</span>
+0087 hold off;
+0088 
+0089 <span class="comment">% weighting of basis functions</span>
+0090 subplot(2,2,3);
+0091 semilogy(F.lambda,<span class="string">'LineWidth'</span>,2);
+0092 xlabel(<span class="string">'Basis Number'</span>,<span class="string">'FontSize'</span>,14);
+0093 ylabel(<span class="string">'Weight'</span>,<span class="string">'FontSize'</span>,14);
+0094 title(<span class="string">'Composition of F'</span>,<span class="string">'FontSize'</span>,14);
+0095 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0096 
+0097 <span class="comment">% conditioning number for F</span>
+0098 subplot(2,2,4);
+0099 plot(Fcond,<span class="string">'LineWidth'</span>,2);
+0100 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0101 ylabel(<span class="string">'Cond'</span>,<span class="string">'FontSize'</span>,14);
+0102 title(<span class="string">'Condition number of F'</span>,<span class="string">'FontSize'</span>,14);
+0103 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0104 
+0105 <span class="keyword">if</span> saveplots == 1
+0106     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0107     matfig = fullfile(pathname,[<span class="string">'solve_run'</span>,num2str(run)]);
+0108     saveas(fig,matfig);
+0109 <span class="keyword">end</span>
+0110 
+0111 <span class="comment">% additional plots if dimension equals 1 or 2</span>
+0112 <span class="keyword">if</span> d == 1
+0113     
+0114     sol = double(F)';
+0115     
+0116     fig = figure;
+0117     plot(grid{1},sol)
+0118     xlabel(<span class="string">'x'</span>); ylabel(<span class="string">'\Psi'</span>)
+0119     title(<span class="string">'\Psi'</span>);
+0120     
+0121     <span class="keyword">if</span> saveplots == 1
+0122         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0123         matfig = fullfile(pathname,[<span class="string">'solution_run'</span>,num2str(run)]);
+0124         saveas(fig,matfig);
+0125     <span class="keyword">end</span>
+0126     
+0127 <span class="keyword">end</span>
+0128 
+0129 <span class="keyword">if</span> d == 2
+0130     
+0131     sol = double(F)';
+0132     [x1mesh,x2mesh] = meshgrid(grid{1},grid{2});
+0133     
+0134     figure;
+0135     contour(grid{1},grid{2},sol)
+0136     xlabel(<span class="string">'x_1'</span>);ylabel(<span class="string">'x_2'</span>);
+0137     
+0138     <span class="comment">% plot solution as 2D-plot</span>
+0139     fig = figure;
+0140     imagesc(grid{1},grid{2},sol); axis xy
+0141     xlabel(<span class="string">'x_1'</span>);ylabel(<span class="string">'x_2'</span>);
+0142     title(<span class="string">'\Psi - 2D'</span>);
+0143     
+0144     <span class="keyword">if</span> saveplots == 1
+0145         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0146         matfig = fullfile(pathname,[<span class="string">'solution_2D_run'</span>,num2str(run)]);
+0147         saveas(fig,matfig);
+0148     <span class="keyword">end</span>
+0149     
+0150     <span class="comment">% plot solution as 3D-plot</span>
+0151     fig = figure;
+0152     surf(x1mesh,x2mesh,sol,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0153     xlabel(<span class="string">'x_1'</span>);ylabel(<span class="string">'x_2'</span>);zlabel(<span class="string">'\Psi'</span>);
+0154     title(<span class="string">'\Psi - 3D'</span>);
+0155     
+0156     <span class="keyword">if</span> saveplots == 1
+0157         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0158         matfig = fullfile(pathname,[<span class="string">'solution_3D_run'</span>,num2str(run)]);
+0159         saveas(fig,matfig);
+0160     <span class="keyword">end</span>
+0161     
+0162 <span class="keyword">end</span>
+0163 
+0164 <span class="comment">%% Plot data from compressing operator</span>
+0165 
+0166 fig = figure;
+0167 
+0168 <span class="comment">% convergence</span>
+0169 subplot(2,2,1);
+0170 semilogy(err_op,<span class="string">'LineWidth'</span>,2);
+0171 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0172 ylabel(<span class="string">'error'</span>,<span class="string">'FontSize'</span>,14);
+0173 title(<span class="string">'Convergence of Operator'</span>,<span class="string">'FontSize'</span>,14);
+0174 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12);
+0175 hold on;
+0176 <span class="keyword">for</span> i=1:length(enrich_op)
+0177     plot(enrich_op(i),err_op(enrich_op(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,10);
+0178 <span class="keyword">end</span>
+0179 hold off;
+0180 
+0181 <span class="comment">% time per iteration</span>
+0182 subplot(2,2,2);
+0183 plot(t_step_op,<span class="string">'LineWidth'</span>,2);
+0184 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0185 ylabel(<span class="string">'Time(s)'</span>,<span class="string">'FontSize'</span>,14);
+0186 title(<span class="string">'Computation Time'</span>,<span class="string">'FontSize'</span>,14);
+0187 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0188 hold on;
+0189 <span class="keyword">for</span> i=1:length(enrich_op)
+0190     plot(enrich_op(i),t_step_op(enrich_op(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,10);
+0191 <span class="keyword">end</span>
+0192 hold off;
+0193 
+0194 <span class="comment">% weighting of basis functions</span>
+0195 subplot(2,2,3);
+0196 semilogy(op.lambda,<span class="string">'LineWidth'</span>,2);
+0197 xlabel(<span class="string">'Basis Number'</span>,<span class="string">'FontSize'</span>,14);
+0198 ylabel(<span class="string">'Weight'</span>,<span class="string">'FontSize'</span>,14);
+0199 title(<span class="string">'Composition of Operator'</span>,<span class="string">'FontSize'</span>,14);
+0200 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0201 
+0202 <span class="keyword">if</span> saveplots == 1
+0203     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0204     matfig = fullfile(pathname,[<span class="string">'compress_op_run'</span>,num2str(run)]);
+0205     saveas(fig,matfig);
+0206 <span class="keyword">end</span>
+0207 
+0208 <span class="comment">% conditioning number for op</span>
+0209 subplot(2,2,4);
+0210 plot(cond_op,<span class="string">'LineWidth'</span>,2);
+0211 xlabel(<span class="string">'iteration'</span>,<span class="string">'FontSize'</span>,14);
+0212 ylabel(<span class="string">'Cond'</span>,<span class="string">'FontSize'</span>,14);
+0213 title(<span class="string">'Condition number of Operator'</span>,<span class="string">'FontSize'</span>,14);
+0214 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0215 
+0216 <span class="keyword">if</span> saveplots == 1
+0217     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0218     matfig = fullfile(pathname,[<span class="string">'compress_op_run'</span>,num2str(run)]);
+0219     saveas(fig,matfig);
+0220 <span class="keyword">end</span>
+0221 
+0222 <span class="comment">%% plot first five basis functions in each dimension</span>
+0223 pdim = ceil(sqrt(d));
+0224 fig = figure;
+0225 
+0226 <span class="keyword">if</span> length(enrich) &lt; 5
+0227     
+0228     <span class="keyword">for</span> i=1:d
+0229         
+0230         subplot(pdim,pdim,i)
+0231         tit = sprintf(<span class="string">'dimension = %d'</span>, i);
+0232         <span class="comment">%fil = sprintf('basis_%d.eps', i);</span>
+0233         plot(F.U{i}(:,1:length(enrich)),<span class="string">'LineWidth'</span>,2);
+0234         hold on;
+0235         plot([1 n(i)],[0 0], <span class="string">'--'</span>, <span class="string">'Color'</span>,[.3 .3 .3], <span class="string">'LineWidth'</span>,1);
+0236         hold off;
+0237         title(tit,<span class="string">'FontSize'</span>,12);
+0238         axis([1 n(i) -inf inf])
+0239         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'xtick'</span>,[])
+0240         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'ytick'</span>,[])
+0241         axis off
+0242         
+0243     <span class="keyword">end</span>
+0244     
+0245 <span class="keyword">else</span>
+0246     
+0247     <span class="keyword">for</span> i=1:d
+0248         
+0249         subplot(pdim,pdim,i)
+0250         tit = sprintf(<span class="string">'dimension = %d'</span>, i);
+0251         <span class="comment">%fil = sprintf('basis_%d.eps', i);</span>
+0252         plot(F.U{i}(:,1:5),<span class="string">'LineWidth'</span>,2);
+0253         hold on;
+0254         plot([1 n(i)],[0 0], <span class="string">'--'</span>, <span class="string">'Color'</span>,[.3 .3 .3], <span class="string">'LineWidth'</span>,1);
+0255         hold off;
+0256         title(tit,<span class="string">'FontSize'</span>,12);
+0257         axis([1 n(i) -inf inf])
+0258         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'xtick'</span>,[])
+0259         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'ytick'</span>,[])
+0260         axis off;
+0261         
+0262     <span class="keyword">end</span>
+0263     
+0264 <span class="keyword">end</span>
+0265 
+0266 <span class="keyword">if</span> saveplots == 1
+0267     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0268     matfig = fullfile(pathname,[<span class="string">'basis_first_run'</span>,num2str(run)]);
+0269     saveas(fig,matfig);
+0270 <span class="keyword">end</span>
+0271 
+0272 <span class="comment">%% plot all basis functions in each dimension</span>
+0273 fig = figure;
+0274 
+0275 <span class="keyword">for</span> i=1:d
+0276     
+0277     subplot(pdim,pdim,i)
+0278     tit = sprintf(<span class="string">'dimension = %d'</span>, i);
+0279     <span class="comment">%fil = sprintf('basis_%d.eps', i);</span>
+0280     plot(F.U{i}(:,1:end),<span class="string">'LineWidth'</span>,2);
+0281     hold on;
+0282     plot([1 n(i)],[0 0], <span class="string">'--'</span>, <span class="string">'Color'</span>,[.3 .3 .3], <span class="string">'LineWidth'</span>,1);
+0283     hold off;
+0284     title(tit,<span class="string">'FontSize'</span>,12);
+0285     axis([1 n(i) -inf inf])
+0286     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'xtick'</span>,[])
+0287     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'ytick'</span>,[])
+0288     axis off;
+0289     
+0290 <span class="keyword">end</span>
+0291 
+0292 <span class="keyword">if</span> saveplots == 1
+0293     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0294     matfig = fullfile(pathname,[<span class="string">'basis_all_run'</span>,num2str(run)]);
+0295     saveas(fig,matfig);
+0296 <span class="keyword">end</span>
+0297 
+0298 <span class="comment">%% plot norm of solutions F</span>
+0299 <span class="keyword">if</span> debugging == 1
+0300     
+0301     sizeFcell = size(F_cell);
+0302     
+0303     <span class="comment">% no precondition</span>
+0304     Fcell_vector_np = F_cell{1,4};
+0305     Fcell_iter_np = [];
+0306     Fcell_enrich_np = 1;
+0307     Fcell_restart_np = [];
+0308     
+0309     <span class="comment">% precondition</span>
+0310     Fcell_vector_p = F_cell{1,4};
+0311     Fcell_iter_p = [];
+0312     Fcell_enrich_p = 1;
+0313     
+0314     <span class="comment">% create Fcell_vector from Fcell</span>
+0315     <span class="keyword">for</span> i = 1:sizeFcell(1)
+0316         
+0317         <span class="comment">% OBS: adding rank and new iteration do not coincide for F</span>
+0318         Fcell_iter_np = [Fcell_iter_np, length(Fcell_vector_np)+1];
+0319         Fcell_iter_p = [Fcell_iter_p, length(Fcell_vector_p)+1];
+0320         
+0321         c = F_cell{i,1};
+0322         Fcell_vector_np = [Fcell_vector_np, c];
+0323         Fcell_vector_p = [Fcell_vector_p, c];
+0324         
+0325         <span class="keyword">if</span> any(restart==i)
+0326             Fcell_restart_np = [Fcell_restart_np length(Fcell_vector_np)+1];
+0327         <span class="keyword">end</span>
+0328         
+0329         c = F_cell{i,2};
+0330         <span class="keyword">if</span> isempty(c) == 0
+0331             Fcell_vector_p = [Fcell_vector_p, c];
+0332         <span class="keyword">end</span>
+0333         
+0334         c = F_cell{i,3};
+0335         <span class="keyword">if</span> isempty(c) == 0
+0336             Fcell_vector_np = [Fcell_vector_np, c];
+0337             Fcell_vector_p = [Fcell_vector_p, c];
+0338             
+0339             Fcell_enrich_np = [Fcell_enrich_np, length(Fcell_vector_np)];
+0340             Fcell_enrich_p = [Fcell_enrich_p, length(Fcell_vector_p)];
+0341         <span class="keyword">end</span>
+0342         
+0343     <span class="keyword">end</span>
+0344     
+0345     <span class="comment">% take norm of F_cell_vector</span>
+0346     normF_vector_np = ones(1,length(Fcell_vector_np));
+0347     normF_vector_p = ones(1,length(Fcell_vector_p));
+0348     
+0349     <span class="keyword">for</span> i = 1:length(Fcell_vector_np)
+0350         normF_vector_np(i) = norm(Fcell_vector_np{i});
+0351     <span class="keyword">end</span>
+0352     
+0353     <span class="keyword">for</span> i = 1:length(Fcell_vector_p)
+0354         normF_vector_p(i) = norm(Fcell_vector_p{i});
+0355     <span class="keyword">end</span>
+0356     
+0357     <span class="comment">% plot without precondition</span>
+0358     fig = figure;
+0359     semilogy(normF_vector_np,<span class="string">'LineWidth'</span>,1);
+0360     xlabel(<span class="string">'updated F'</span>,<span class="string">'FontSize'</span>,14);
+0361     ylabel(<span class="string">'norm(F)'</span>,<span class="string">'FontSize'</span>,14);
+0362     title(<span class="string">'norm(F)'</span>,<span class="string">'FontSize'</span>,14);
+0363     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0364     hold on
+0365     <span class="keyword">for</span> i = 1:length(Fcell_iter_np)
+0366         plot(Fcell_iter_np(i),normF_vector_np(Fcell_iter_np(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0367     <span class="keyword">end</span>
+0368     <span class="keyword">for</span> i = 1:length(Fcell_enrich_np)
+0369         plot(Fcell_enrich_np(i),normF_vector_np(Fcell_enrich_np(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0370     <span class="keyword">end</span>
+0371     <span class="keyword">for</span> i = 1:length(Fcell_restart_np)
+0372         plot(Fcell_restart_np(i),normF_vector_np(Fcell_restart_np(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,5);
+0373     <span class="keyword">end</span>
+0374     hold off;
+0375     
+0376     <span class="keyword">if</span> saveplots == 1
+0377         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0378         matfig = fullfile(pathname,[<span class="string">'normF_np_run'</span>,num2str(run)]);
+0379         saveas(fig,matfig);
+0380     <span class="keyword">end</span>
+0381     
+0382     <span class="comment">% plot with precondition</span>
+0383     fig = figure;
+0384     semilogy(normF_vector_p,<span class="string">'LineWidth'</span>,1);
+0385     xlabel(<span class="string">'updated F'</span>,<span class="string">'FontSize'</span>,14);
+0386     ylabel(<span class="string">'norm(F)'</span>,<span class="string">'FontSize'</span>,14);
+0387     title(<span class="string">'norm(F) - including precondition'</span>,<span class="string">'FontSize'</span>,14);
+0388     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0389     hold on
+0390     <span class="keyword">for</span> i = 1:length(Fcell_iter_p)
+0391         plot(Fcell_iter_p(i),normF_vector_p(Fcell_iter_p(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0392     <span class="keyword">end</span>
+0393     <span class="keyword">for</span> i = 1:length(Fcell_enrich_p)
+0394         plot(Fcell_enrich_p(i),normF_vector_p(Fcell_enrich_p(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0395     <span class="keyword">end</span>
+0396     hold off;
+0397     
+0398     <span class="keyword">if</span> saveplots == 1
+0399         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0400         matfig = fullfile(pathname,[<span class="string">'normF_p_run'</span>,num2str(run)]);
+0401         saveas(fig,matfig);
+0402     <span class="keyword">end</span>
+0403     
+0404 <span class="keyword">end</span>
+0405 
+0406 <span class="comment">%% plot norm of b</span>
+0407 
+0408 <span class="keyword">if</span> debugging == 1
+0409     
+0410     size_bcell = size(b_cell);
+0411     
+0412     <span class="comment">% no precondition</span>
+0413     normb_vector_np = [];
+0414     iter_vector_np = 1;
+0415     enrich_vector_np = 1;
+0416     restart_vector_np = [];
+0417     
+0418     <span class="comment">% precondition</span>
+0419     normb_vector_p = [];
+0420     iter_vector_p = 1;
+0421     enrich_vector_p = 1;
+0422     
+0423     <span class="keyword">for</span> i = 1:size_bcell(1)
+0424         
+0425         c = b_cell{i,1};
+0426         
+0427         iter_vector_np = [iter_vector_np length(normb_vector_np)+1];
+0428         iter_vector_p = [iter_vector_p length(normb_vector_p)+1];
+0429         
+0430         add = ones(1,length(c));
+0431         <span class="keyword">for</span> j = 1:length(c)
+0432             add(j) = norm(c{j});
+0433         <span class="keyword">end</span>
+0434         normb_vector_np = [normb_vector_np add];
+0435         normb_vector_p = [normb_vector_p add];
+0436         
+0437         <span class="keyword">if</span> any(restart==i)
+0438             restart_vector_np = [restart_vector_np length(normb_vector_np)+1];
+0439         <span class="keyword">end</span>
+0440         
+0441         <span class="keyword">if</span> isempty(b_cell{i,2}) == 0 &amp;&amp; i ~= size_bcell(1)
+0442             enrich_vector_np = [enrich_vector_np length(normb_vector_np)+1];
+0443             enrich_vector_p = [enrich_vector_p length(normb_vector_p)+1];
+0444             
+0445             c = b_cell{i,2};
+0446             
+0447             add = ones(1,length(c));
+0448             <span class="keyword">for</span> j = 1:length(c)
+0449                 add(j) = norm(c{j});
+0450             <span class="keyword">end</span>
+0451             normb_vector_p = [normb_vector_p add];
+0452             
+0453         <span class="keyword">end</span>
+0454     <span class="keyword">end</span>
+0455     
+0456     <span class="comment">% plot without precondition</span>
+0457     fig = figure;
+0458     semilogy(normb_vector_np,<span class="string">'LineWidth'</span>,1);
+0459     xlabel(<span class="string">'updated RHS vector'</span>,<span class="string">'FontSize'</span>,14);
+0460     ylabel(<span class="string">'norm'</span>,<span class="string">'FontSize'</span>,14);
+0461     title(<span class="string">'norm for RHS vectors'</span>,<span class="string">'FontSize'</span>,14);
+0462     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0463     hold on
+0464     <span class="comment">% add iter</span>
+0465     <span class="keyword">for</span> i = 1:length(iter_vector_np)
+0466         plot(iter_vector_np(i), normb_vector_np(iter_vector_np(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0467     <span class="keyword">end</span>
+0468     <span class="comment">% add enrich</span>
+0469     <span class="keyword">for</span> i = 1:length(enrich_vector_np)
+0470         plot(enrich_vector_np(i), normb_vector_np(enrich_vector_np(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0471     <span class="keyword">end</span>
+0472     <span class="comment">% add restart</span>
+0473     <span class="keyword">for</span> i = 1:length(restart_vector_np)
+0474         plot(restart_vector_np(i), normb_vector_np(restart_vector_np(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,5);
+0475     <span class="keyword">end</span>
+0476     hold off
+0477     
+0478     <span class="keyword">if</span> saveplots == 1
+0479         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0480         matfig = fullfile(pathname,[<span class="string">'normb_np_run'</span>,num2str(run)]);
+0481         saveas(fig,matfig);
+0482     <span class="keyword">end</span>
+0483     
+0484     <span class="comment">% plot with precondition</span>
+0485     fig = figure;
+0486     semilogy(normb_vector_p,<span class="string">'LineWidth'</span>,1);
+0487     xlabel(<span class="string">'updated RHS vector'</span>,<span class="string">'FontSize'</span>,14);
+0488     ylabel(<span class="string">'norm'</span>,<span class="string">'FontSize'</span>,14);
+0489     title(<span class="string">'Norm for RHS vectors - including precondition'</span>,<span class="string">'FontSize'</span>,14);
+0490     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0491     hold on
+0492     <span class="comment">% add iter</span>
+0493     <span class="keyword">for</span> i = 1:length(iter_vector_p)
+0494         plot(iter_vector_p(i), normb_vector_p(iter_vector_p(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0495     <span class="keyword">end</span>
+0496     <span class="comment">% add enrich</span>
+0497     <span class="keyword">for</span> i = 1:length(enrich_vector_p)
+0498         plot(enrich_vector_p(i), normb_vector_p(enrich_vector_p(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0499     <span class="keyword">end</span>
+0500     hold off
+0501     
+0502     <span class="keyword">if</span> saveplots == 1
+0503         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0504         matfig = fullfile(pathname,[<span class="string">'normb_p_run'</span>,num2str(run)]);
+0505         saveas(fig,matfig);
+0506     <span class="keyword">end</span>
+0507     
+0508 <span class="keyword">end</span>
+0509 
+0510 <span class="comment">%% plot square root of norm of ALS matrix without precondition.</span>
+0511 <span class="comment">% By taking square root, you are able to compare the magnitude with the</span>
+0512 <span class="comment">% magnitude of the RHS vector b</span>
+0513 
+0514 <span class="keyword">if</span> debugging == 1
+0515     
+0516     size_Bcell = size(B_cell);
+0517     
+0518     <span class="comment">% no precondition</span>
+0519     normB_vector_np = [];
+0520     iter_vector_np = 1;
+0521     enrich_vector_np = 1;
+0522     restart_vector_np = [];
+0523     
+0524     <span class="keyword">for</span> i = 1:size_bcell(1)
+0525         
+0526         c = B_cell{i,1};
+0527         
+0528         iter_vector_np = [iter_vector_np length(normB_vector_np)+1];
+0529         
+0530         add = ones(1,length(c));
+0531         <span class="keyword">for</span> j = 1:length(c)
+0532             add(j) = sqrt(norm(c{j}));
+0533         <span class="keyword">end</span>
+0534         normB_vector_np = [normB_vector_np add];
+0535         
+0536         <span class="keyword">if</span> any(restart==i)
+0537             restart_vector_np = [restart_vector_np length(normB_vector_np)+1];
+0538         <span class="keyword">end</span>
+0539         
+0540         <span class="keyword">if</span> isempty(B_cell{i,2}) == 0 &amp;&amp; i ~= size_bcell(1)
+0541             enrich_vector_np = [enrich_vector_np length(normB_vector_np)+1];
+0542         <span class="keyword">end</span>
+0543     <span class="keyword">end</span>
+0544     
+0545     <span class="comment">% plot</span>
+0546     fig = figure;
+0547     semilogy(normB_vector_np,<span class="string">'LineWidth'</span>,1);
+0548     xlabel(<span class="string">'updated ALS matrix'</span>,<span class="string">'FontSize'</span>,14);
+0549     ylabel(<span class="string">'square root of norm'</span>,<span class="string">'FontSize'</span>,14);
+0550     title(<span class="string">'Square root of the ALS matrix norm'</span>,<span class="string">'FontSize'</span>,14);
+0551     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0552     hold on
+0553     <span class="comment">% add iter</span>
+0554     <span class="keyword">for</span> i = 1:length(iter_vector_np)
+0555         plot(iter_vector_np(i), normB_vector_np(iter_vector_np(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0556     <span class="keyword">end</span>
+0557     <span class="comment">% add enrich</span>
+0558     <span class="keyword">for</span> i = 1:length(enrich_vector_np)
+0559         plot(enrich_vector_np(i), normB_vector_np(enrich_vector_np(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0560     <span class="keyword">end</span>
+0561     <span class="comment">% add restart</span>
+0562     <span class="keyword">for</span> i = 1:length(restart_vector_np)
+0563         plot(restart_vector_np(i), normB_vector_np(restart_vector_np(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,5);
+0564     <span class="keyword">end</span>
+0565     hold off
+0566     
+0567     <span class="keyword">if</span> saveplots == 1
+0568         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0569         matfig = fullfile(pathname,[<span class="string">'normB_np_run'</span>,num2str(run)]);
+0570         saveas(fig,matfig);
+0571     <span class="keyword">end</span>
+0572     
+0573 <span class="keyword">end</span>
+0574 
+0575 <span class="comment">%% plot condition number of ALS matrices with/without precondition and in each dimension</span>
+0576 <span class="keyword">if</span> debugging == 1
+0577     
+0578     size_Bcell = size(B_cell);
+0579     
+0580     <span class="comment">% no precondition</span>
+0581     condB_vector_np = [];
+0582     iter_vector_np = 1;
+0583     enrich_vector_np = 1;
+0584     restart_vector_np = [];
+0585     
+0586     <span class="comment">% precondition</span>
+0587     condB_vector_p = [];
+0588     iter_vector_p = 1;
+0589     enrich_vector_p = 1;
+0590     
+0591     <span class="comment">% each dimension plots</span>
+0592     enrich_each_dim = [];
+0593     restart_each_dim = [];
+0594     
+0595     <span class="keyword">for</span> i = 1:size_Bcell(1)
+0596         
+0597         c = B_cell{i,1};
+0598         
+0599         iter_vector_np = [iter_vector_np length(condB_vector_np)+1];
+0600         iter_vector_p = [iter_vector_p length(condB_vector_p)+1];
+0601         
+0602         add = ones(1,length(c));
+0603         <span class="keyword">for</span> j = 1:length(c)
+0604             add(j) = cond(c{j});
+0605         <span class="keyword">end</span>
+0606         condB_vector_np = [condB_vector_np add];
+0607         condB_vector_p = [condB_vector_p add];
+0608         
+0609         <span class="keyword">if</span> any(restart==i)
+0610             restart_vector_np = [restart_vector_np length(condB_vector_np)+1];
+0611             restart_each_dim = [restart_each_dim i];
+0612         <span class="keyword">end</span>
+0613         
+0614         <span class="keyword">if</span> isempty(B_cell{i,2}) == 0 &amp;&amp; i ~= size_Bcell(1)
+0615             enrich_vector_np = [enrich_vector_np length(condB_vector_np)+1];
+0616             enrich_vector_p = [enrich_vector_p length(condB_vector_p)+1];
+0617             enrich_each_dim = [enrich_each_dim i];
+0618             
+0619             c = B_cell{i,2};
+0620             
+0621             add = ones(1,length(c));
+0622             <span class="keyword">for</span> j = 1:length(c)
+0623                 add(j) = cond(c{j});
+0624             <span class="keyword">end</span>
+0625             condB_vector_p = [condB_vector_p add];
+0626             
+0627         <span class="keyword">end</span>
+0628     <span class="keyword">end</span>
+0629     
+0630     condB_each_dim = reshape(condB_vector_np,length(condB_vector_np)/d,d);
+0631     
+0632     <span class="comment">% plot without precondition</span>
+0633     fig = figure;
+0634     semilogy(condB_vector_np,<span class="string">'LineWidth'</span>,1);
+0635     xlabel(<span class="string">'updated ALS matrix'</span>,<span class="string">'FontSize'</span>,14);
+0636     ylabel(<span class="string">'condition number'</span>,<span class="string">'FontSize'</span>,14);
+0637     title(<span class="string">'Condition number for ALS matrices'</span>,<span class="string">'FontSize'</span>,14);
+0638     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0639     hold on
+0640     <span class="comment">% add iter</span>
+0641     <span class="keyword">for</span> i = 1:length(iter_vector_np)
+0642         plot(iter_vector_np(i), condB_vector_np(iter_vector_np(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0643     <span class="keyword">end</span>
+0644     <span class="comment">% add enrich</span>
+0645     <span class="keyword">for</span> i = 1:length(enrich_vector_np)
+0646         plot(enrich_vector_np(i), condB_vector_np(enrich_vector_np(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0647     <span class="keyword">end</span>
+0648     <span class="comment">% add restart</span>
+0649     <span class="keyword">for</span> i = 1:length(restart_vector_np)
+0650         plot(restart_vector_np(i), condB_vector_np(restart_vector_np(i)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,5);
+0651     <span class="keyword">end</span>
+0652     hold off
+0653     
+0654     <span class="keyword">if</span> saveplots == 1
+0655         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0656         matfig = fullfile(pathname,[<span class="string">'condB_np_run'</span>,num2str(run)]);
+0657         saveas(fig,matfig);
+0658     <span class="keyword">end</span>
+0659     
+0660     <span class="comment">% plot with precondition</span>
+0661     fig = figure;
+0662     semilogy(condB_vector_p,<span class="string">'LineWidth'</span>,1);
+0663     xlabel(<span class="string">'updated ALS matrix'</span>,<span class="string">'FontSize'</span>,14);
+0664     ylabel(<span class="string">'condition number'</span>,<span class="string">'FontSize'</span>,14);
+0665     title(<span class="string">'Condition number for ALS matrices - including precondition'</span>,<span class="string">'FontSize'</span>,14);
+0666     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0667     hold on
+0668     <span class="comment">% add iter</span>
+0669     <span class="keyword">for</span> i = 1:length(iter_vector_p)
+0670         plot(iter_vector_p(i), condB_vector_p(iter_vector_p(i)),<span class="string">'bo'</span>,<span class="string">'MarkerSize'</span>,5);
+0671     <span class="keyword">end</span>
+0672     <span class="comment">% add enrich</span>
+0673     <span class="keyword">for</span> i = 1:length(enrich_vector_p)
+0674         plot(enrich_vector_p(i), condB_vector_p(enrich_vector_p(i)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0675     <span class="keyword">end</span>
+0676     hold off
+0677     
+0678     <span class="keyword">if</span> saveplots == 1
+0679         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0680         matfig = fullfile(pathname,[<span class="string">'condB_p_run'</span>,num2str(run)]);
+0681         saveas(fig,matfig);
+0682     <span class="keyword">end</span>
+0683     
+0684     <span class="comment">% plot in each dimension (without precondition)</span>
+0685     pdim = ceil(sqrt(d));
+0686     fig = figure;
+0687     
+0688     <span class="keyword">for</span> i = 1:d
+0689         subplot(pdim,pdim,i);
+0690         condB_each_dim_i = condB_each_dim(:,i);
+0691         semilogy(condB_each_dim_i,<span class="string">'LineWidth'</span>,1);
+0692         xlabel(<span class="string">'updated ALS matrix'</span>,<span class="string">'FontSize'</span>,8);
+0693         ylabel(<span class="string">'condition number'</span>,<span class="string">'FontSize'</span>,8);
+0694         title([<span class="string">'Condition number for ALS matrices in dimension '</span>,num2str(i)],<span class="string">'FontSize'</span>,8);
+0695         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'FontSize'</span>,12)
+0696         hold on
+0697         <span class="comment">% add enrich</span>
+0698         <span class="keyword">for</span> j = 1:length(enrich_each_dim)
+0699             plot(enrich_each_dim(j), condB_each_dim_i(enrich_each_dim(j)),<span class="string">'r*'</span>,<span class="string">'MarkerSize'</span>,5);
+0700         <span class="keyword">end</span>
+0701         <span class="comment">% add restart</span>
+0702         <span class="keyword">for</span> j = 1:length(restart_each_dim)
+0703             plot(restart_each_dim(j), condB_each_dim_i(restart_each_dim(j)),<span class="string">'gs'</span>,<span class="string">'MarkerSize'</span>,5);
+0704         <span class="keyword">end</span>
+0705         hold off
+0706     <span class="keyword">end</span>
+0707     
+0708     <span class="keyword">if</span> saveplots == 1
+0709         pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0710         matfig = fullfile(pathname,[<span class="string">'condB_each_dim_run'</span>,num2str(run)]);
+0711         saveas(fig,matfig);
+0712     <span class="keyword">end</span>
+0713     
+0714 <span class="keyword">end</span>
+0715 
+0716 <span class="comment">%% save data</span>
+0717 <span class="keyword">if</span> savedata == 1
+0718     clear fig;
+0719     pathname = fileparts(<span class="string">'./saved_data/'</span>);
+0720     matfile = fullfile(pathname,[<span class="string">'visdata_run'</span>,num2str(run)]);
+0721     save(matfile);
+0722 <span class="keyword">end</span>
+0723</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

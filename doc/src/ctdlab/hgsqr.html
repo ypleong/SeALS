@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of hgsqr</title>
+  <meta name="keywords" content="hgsqr">
+  <meta name="description" content="Authors:">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>hgsqr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Authors:</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Q,R,piv,k] = hgsqr(A,tol) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Authors:
+ Matthew Reynolds
+ David Biagioni
+
+ This is a hacked version of dgsqr, where we use the SVD to get k
+
+ inputs:
+ A - input matrix
+ tol - tolerance for pivoting, exiting program
+
+ outputs:
+ Q - orthogonal matrix
+ R - Upper Triangular matrix, A = QR
+ piv - vector keeping track of the pivots
+ k - number of pivots made</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Q,R,piv,k] = hgsqr(A,tol)</a>
+0002 <span class="comment">% Authors:</span>
+0003 <span class="comment">% Matthew Reynolds</span>
+0004 <span class="comment">% David Biagioni</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% This is a hacked version of dgsqr, where we use the SVD to get k</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% inputs:</span>
+0009 <span class="comment">% A - input matrix</span>
+0010 <span class="comment">% tol - tolerance for pivoting, exiting program</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% outputs:</span>
+0013 <span class="comment">% Q - orthogonal matrix</span>
+0014 <span class="comment">% R - Upper Triangular matrix, A = QR</span>
+0015 <span class="comment">% piv - vector keeping track of the pivots</span>
+0016 <span class="comment">% k - number of pivots made</span>
+0017 
+0018 <span class="comment">% Compute the norm of A used for termination of the algorithm</span>
+0019 nA = norm(A);
+0020 
+0021 <span class="comment">% Take the svd of the matrix</span>
+0022 [~,sv,~] = svd(A);
+0023 sv = diag(sv);
+0024 maxrnk = length(sv(sv/sv(1) &gt; tol));
+0025 
+0026 <span class="comment">% Initialize matrices and parameters used in the code</span>
+0027 [m,n] = size(A);
+0028 <span class="comment">%maxrnk = min(m,n);</span>
+0029 Q = zeros(m,maxrnk);
+0030 R = zeros(maxrnk,n);
+0031 CGScoeff = zeros(maxrnk,1);
+0032 
+0033 <span class="comment">% Find the first pivot</span>
+0034 piv = 1:n;
+0035 c = sqrt(sum(A.^2,1));
+0036 [~,imax] = max(c);
+0037 imax = imax(1);
+0038 
+0039 <span class="comment">% Perform the first pivot</span>
+0040 tmp = piv(1);  piv(1) = piv(imax);  piv(imax) = tmp;
+0041 tmp = A(:,1);  A(:,1) = A(:,imax);  A(:,imax) = tmp;
+0042 tmp = c(1);    c(1) = c(imax);      c(imax) = tmp;
+0043 
+0044 <span class="comment">% MGS sweep for the first column of A</span>
+0045 R(1,1) = norm(A(:,1));
+0046 Q(:,1) = A(:,1) / R(1,1);
+0047 R(1,2:n) = Q(:,1)' * A(:,2:n);
+0048 <span class="keyword">for</span> j = 2:n
+0049     A(:,j) = A(:,j) - R(1,j) * Q(:,1);
+0050 <span class="keyword">end</span>
+0051 
+0052 <span class="comment">% If the matrix has max rank 1, return values</span>
+0053 <span class="keyword">if</span> maxrnk == 1
+0054     Q = Q(:,1);
+0055     R = R(1,:);
+0056     k = 1;
+0057     <span class="keyword">return</span> 
+0058 <span class="keyword">end</span>
+0059 
+0060 <span class="comment">% find second pivot</span>
+0061 c(2:n) = sqrt(sum(A(2:m,2:n).^2,1));
+0062 [~,imax] = max(c(2:n));
+0063 imax = imax(1);  imax = 1 + imax(1);
+0064 
+0065 <span class="comment">% check for convergence</span>
+0066 <span class="comment">% if abs(cmax) &lt; tol</span>
+0067 <span class="comment">% if norm(A(2:m,2:n)) &lt;= tol*nA % termination cond from Golub and VanLoan</span>
+0068 <span class="comment">%     Q = Q(:,1);</span>
+0069 <span class="comment">%     R = R(1,:);</span>
+0070 <span class="comment">%     k = 1;</span>
+0071 <span class="comment">%     return</span>
+0072 <span class="comment">% end</span>
+0073 
+0074 <span class="comment">% Double MGS iterations</span>
+0075 <span class="keyword">for</span> k = 2:maxrnk
+0076     
+0077     <span class="comment">% perform pivot</span>
+0078     tmp = piv(k);  piv(k) = piv(imax);  piv(imax) = tmp;
+0079     tmp = A(:,k);  A(:,k) = A(:,imax);  A(:,imax) = tmp;
+0080     tmp = R(:,k);  R(:,k) = R(:,imax);  R(:,imax) = tmp;
+0081     tmp = c(k);    c(k) = c(imax);      c(imax) = tmp;
+0082     
+0083     <span class="comment">% First we compute the CGS step and compute Q and diagonal value of R</span>
+0084     CGScoeff(1:k-1) = Q(:,1:k-1)'*A(:,k);
+0085     z = A(:,k)-Q(:,1:k-1)*CGScoeff(1:k-1);
+0086     R(k,k) = norm(z);
+0087     Q(:,k) = z/R(k,k);
+0088     
+0089     <span class="comment">% Now we do the orthogonalization from MGS</span>
+0090     R(k,(k+1):n) = Q(:,k)' * A(:,(k+1):n);
+0091     <span class="keyword">for</span> j = (k+1):n
+0092       A(:,j) = A(:,j) - R(k,j) * Q(:,k);
+0093     <span class="keyword">end</span>
+0094     
+0095     <span class="comment">% find next pivot</span>
+0096     <span class="keyword">if</span> k &lt; maxrnk
+0097         <span class="comment">% Truncate the vectors we look at each time as well...</span>
+0098         c((k+1):n) = sqrt(sum(A((k+1):m,(k+1):n).^2,1)); <span class="comment">% relating tol to actual norms?</span>
+0099         <span class="comment">%c((k+1):n) = sqrt(c((k+1):n) - R(k,(k+1):n).^2);</span>
+0100         [~,imax] = max(c((k+1):n));
+0101         imax = imax(1);  imax = k + imax(1);
+0102     <span class="keyword">end</span>
+0103     
+0104     <span class="comment">% check for convergence</span>
+0105     <span class="comment">%if abs(cmax) &lt; tol</span>
+0106 <span class="comment">%     if norm(A((k+1):m,(k+1):n)) &lt;=tol*nA % termination cond from Golub and VanLoan</span>
+0107 <span class="comment">%         Q = Q(:,1:k);</span>
+0108 <span class="comment">%         R = R(1:k,:);</span>
+0109 <span class="comment">%         return</span>
+0110 <span class="comment">%     end</span>
+0111 <span class="keyword">end</span>
+0112 
+0113 
+0114 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

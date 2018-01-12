@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of make_bc_sca</title>
+  <meta name="keywords" content="make_bc_sca">
+  <meta name="description" content="MAKE_BC_SCA creates scalings for the boundary condition and goal region">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>make_bc_sca
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKE_BC_SCA creates scalings for the boundary condition and goal region</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKE_BC_SCA creates scalings for the boundary condition and goal region
+ using estimations of unscaled matrices in <a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">ALS_SYS</a>. See also the paper.
+ Input:
+   op - the operator as ktensor.
+   bcon - boundary conditions specifications, see MAIN_PROGRAM for
+   details.
+   region - the dimension of the goal region.
+   als_options - cell withoptions for the <a href="als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">als</a> run, see MAIN_PROGRAM for
+   details.
+   fd1 - cell of first order differentiation matrices. fd1{i} is
+   differentiation in dimension i.
+   grid - the discretization grid.
+   x - the symbolic state space vector.
+   n - number of grid points in each dimension.
+ Outputs:
+   bsca - boundary scaling. bsca(i,1) and bsca(i,2) is how much lower and
+   upper boundary in dimension i should be scaled.
+   regsca - how much the goal region should be scaled.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als_mat_est.html" class="code" title="function [M_cell,Aprodsum_cell] = als_mat_est(A,F)">als_mat_est</a>	ALS_MAT_EST estimates the matrices M{1,1} and the produkt terms in</li><li><a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="incorpregion.html" class="code" title="function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca)">incorpregion</a>	INCORPREGION modifies operator and boundary conditions to incooporate</li><li><a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>	MAKEBC creates the boundary conditions with scaling.</li><li><a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)</a>
+0002 <span class="comment">% MAKE_BC_SCA creates scalings for the boundary condition and goal region</span>
+0003 <span class="comment">% using estimations of unscaled matrices in ALS_SYS. See also the paper.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   op - the operator as ktensor.</span>
+0006 <span class="comment">%   bcon - boundary conditions specifications, see MAIN_PROGRAM for</span>
+0007 <span class="comment">%   details.</span>
+0008 <span class="comment">%   region - the dimension of the goal region.</span>
+0009 <span class="comment">%   als_options - cell withoptions for the als run, see MAIN_PROGRAM for</span>
+0010 <span class="comment">%   details.</span>
+0011 <span class="comment">%   fd1 - cell of first order differentiation matrices. fd1{i} is</span>
+0012 <span class="comment">%   differentiation in dimension i.</span>
+0013 <span class="comment">%   grid - the discretization grid.</span>
+0014 <span class="comment">%   x - the symbolic state space vector.</span>
+0015 <span class="comment">%   n - number of grid points in each dimension.</span>
+0016 <span class="comment">% Outputs:</span>
+0017 <span class="comment">%   bsca - boundary scaling. bsca(i,1) and bsca(i,2) is how much lower and</span>
+0018 <span class="comment">%   upper boundary in dimension i should be scaled.</span>
+0019 <span class="comment">%   regsca - how much the goal region should be scaled.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% See also MAIN_RUN.</span>
+0022 
+0023 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0024 
+0025 d = length(n);
+0026 
+0027 <span class="comment">%% Step 1 - create unscaled op and bc</span>
+0028 
+0029 <span class="comment">% unscaled</span>
+0030 bsca = ones(d,2);
+0031 regsca = 1;
+0032 
+0033 <span class="comment">% bc</span>
+0034 [bc] = <a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>(bcon,bsca,grid,x,n);
+0035 
+0036 <span class="comment">% operator</span>
+0037 [op] = <a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>(op,bcon,bsca,n,fd1);
+0038 <span class="keyword">if</span> isempty(region) == 0
+0039     [op,bc] = <a href="incorpregion.html" class="code" title="function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca)">incorpregion</a>(op,bc,region,grid,regval,regsca);
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="comment">%% Step 2 - estimate rank 1 solution</span>
+0043 
+0044 <span class="keyword">if</span> isempty(als_options) == 1
+0045     als_options = {2000,1,<span class="string">'average'</span>,1e-3,1e-12,0.01,15};
+0046 <span class="keyword">else</span>
+0047     als_options{2} = 1;
+0048 <span class="keyword">end</span>
+0049 
+0050 fprintf(<span class="string">'Estimating rank 1 solution for boundary scaling. \n'</span>)
+0051 F_est = <a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>(op,bc,[],0,als_options,0);
+0052 fprintf(<span class="string">'Estimation complete. \n'</span>)
+0053 
+0054 <span class="comment">%% Step 3 - get scaling from estimated als matrices</span>
+0055 
+0056 <span class="comment">% scaling values</span>
+0057 bsca = ones(d,2);
+0058 regsca = 0;
+0059 
+0060 <span class="comment">% obtain relevant als matrices</span>
+0061 [M_cell,Aprodsum_cell] = <a href="als_mat_est.html" class="code" title="function [M_cell,Aprodsum_cell] = als_mat_est(A,F)">als_mat_est</a>(op,F_est);
+0062 
+0063 <span class="comment">% get scale factors for each dim</span>
+0064 <span class="keyword">for</span> i = 1:d
+0065     
+0066     bconi = bcon{i};
+0067     
+0068     <span class="comment">% get block matrix M{1,1} and its product sum</span>
+0069     M_11 = M_cell{i};
+0070     Aprodsum = Aprodsum_cell{i};
+0071     
+0072     <span class="comment">% get diagonals</span>
+0073     du = abs(diag(M_11,1));
+0074     dd = abs(diag(M_11,0));
+0075     dl = abs(diag(M_11,-1));
+0076     
+0077     <span class="comment">% for lower boundary</span>
+0078     sca_lo = sum( du(2:3)+dd(2:3)+dl(2:3) )/6; <span class="comment">%average magnitud</span>
+0079     sca_lo = sca_lo/Aprodsum; <span class="comment">%divide by how much matrices in M_11 has been scaled</span>
+0080     sca_lo = sqrt(sca_lo); <span class="comment">%since the summation of M_11 has two matrices multiplied</span>
+0081     
+0082     <span class="comment">% for upper boundary</span>
+0083     sca_up = sum( du(end-2:end-1)+dd(end-2:end-1)+dl(end-2:end-1) );
+0084     sca_up = sca_up/Aprodsum;
+0085     sca_up = sqrt(sca_up);
+0086     
+0087     <span class="keyword">if</span> strcmp(bconi{1},<span class="string">'p'</span>) == 1 <span class="comment">%then must have the same scalings</span>
+0088         bsca(i,1) = (sca_lo+sca_up)/2;
+0089         bsca(i,2) = (sca_lo+sca_up)/2;
+0090     <span class="keyword">else</span>
+0091         bsca(i,1) = sca_lo;
+0092         bsca(i,2) = sca_up;
+0093     <span class="keyword">end</span>
+0094     
+0095     <span class="comment">% for region</span>
+0096     <span class="keyword">if</span> isempty(region) == 0
+0097         gridi = grid{i};
+0098         
+0099         reg_idx = find(gridi&gt;=region(i,1) &amp; gridi&lt;=region(i,2));
+0100         reg_min = min(reg_idx);
+0101         reg_max = max(reg_idx);
+0102         
+0103         s1 = sum( du(reg_min-2:reg_min-1)+dd(reg_min-2:reg_min-1)+dl(reg_min-2:reg_min-1) );
+0104         s2 = sum( du(reg_max+1:reg_max+2)+dd(reg_max+1:reg_max+2)+dl(reg_max+1:reg_max+2) );
+0105         
+0106         sca_reg = (s1+s2)/12; <span class="comment">%take mean</span>
+0107         sca_reg = sca_reg/Aprodsum;
+0108         sca_reg = sqrt(sca_reg);
+0109         
+0110         regsca = regsca+sca_reg;
+0111     <span class="keyword">end</span>
+0112     
+0113 <span class="keyword">end</span>
+0114 
+0115 <span class="keyword">if</span> isempty(region) == 0
+0116     regsca = regsca/d;
+0117 <span class="keyword">end</span>
+0118 
+0119 
+0120 
+0121 
+0122 
+0123 
+0124 
+0125</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of run_tests</title>
+  <meta name="keywords" content="run_tests">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>run_tests
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="test_getterms.html" class="code" title="">test_getterms</a>	</li><li><a href="test_gram.html" class="code" title="">test_gram</a>	</li><li><a href="test_k.html" class="code" title="">test_k</a>	</li><li><a href="test_krand.html" class="code" title="">test_krand</a>	</li><li><a href="test_mvm.html" class="code" title="">test_mvm</a>	</li><li><a href="test_norms.html" class="code" title="">test_norms</a>	</li><li><a href="test_paths.html" class="code" title="">test_paths</a>	</li><li><a href="test_poswts.html" class="code" title="">test_poswts</a>	</li><li><a href="test_tenid.html" class="code" title="">test_tenid</a>	</li><li><a href="test_trncel.html" class="code" title="">test_trncel</a>	</li><li><a href="test_trncspmat.html" class="code" title="">test_trncspmat</a>	</li><li><a href="test_trncsval.html" class="code" title="">test_trncsval</a>	</li><li><a href="test_vvpwm.html" class="code" title="">test_vvpwm</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;  close all;  clc;
+0002 
+0003 addpath ~/myCode/src/tensor_toolbox_2.5/   <span class="comment">% sandia tensor toolbox</span>
+0004 addpath ~/myCode/repos/ctd/                <span class="comment">% my library</span>
+0005 
+0006 <a href="test_paths.html" class="code" title="">test_paths</a>;   <span class="keyword">if</span> ~ok; <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0007 <a href="test_norms.html" class="code" title="">test_norms</a>;   <span class="keyword">if</span> ~ok; <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0008 <a href="test_getterms.html" class="code" title="">test_getterms</a>;  <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0009 <a href="test_trncsval.html" class="code" title="">test_trncsval</a>; <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0010 <a href="test_trncspmat.html" class="code" title="">test_trncspmat</a>;  <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0011 <a href="test_poswts.html" class="code" title="">test_poswts</a>;  <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0012 <a href="test_trncel.html" class="code" title="">test_trncel</a>;  <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0013 <a href="test_gram.html" class="code" title="">test_gram</a>;    <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0014 <a href="test_k.html" class="code" title="">test_k</a>;    <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0015 <a href="test_krand.html" class="code" title="">test_krand</a>;    <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0016 <a href="test_vvpwm.html" class="code" title="">test_vvpwm</a>;    <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0017 <a href="test_mvm.html" class="code" title="">test_mvm</a>;   <span class="keyword">if</span> ~ok; <span class="keyword">return</span>;  <span class="keyword">end</span>;
+0018 <span class="comment">%test_mmm;   if ~ok;  return; end;</span>
+0019 <span class="comment">%test_als;   if ~ok;  return; end;</span>
+0020 <a href="test_tenid.html" class="code" title="">test_tenid</a>;  <span class="keyword">if</span> ~ok;  <span class="keyword">return</span>;  <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

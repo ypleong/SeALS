@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SRMultV</title>
+  <meta name="keywords" content="SRMultV">
+  <meta name="description" content="SRMULTV multiplies a ktensor operators A with a ktensor function F. The">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>SRMultV
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SRMULTV multiplies a ktensor operators A with a ktensor function F. The</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function res = SRMultV(A,F) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> SRMULTV multiplies a ktensor operators A with a ktensor function F. The 
+ result is a new ktensor function AF.
+ Input:
+   A - ktensor operator.
+   F - ktensor function.
+ Output:
+   AB - the product of A and B.
+
+ Note:
+ The ktensor operator A stores it corresponding matrices as vectors. For
+ example, a matrix of size mxm is stored as a vector with m^2 entries.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>	</li><li><a href="blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>	ALS_SYS_VAR is a modified version of the original ALS algorithm found</li><li><a href="artdiff_ver2.html" class="code" title="function [opArtdiff] =  artdiff_ver2(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver2</a>	ARTDIFF_VER1 is the second version for adding artificial diffusion.</li><li><a href="artdiff_ver3.html" class="code" title="function [opArtdiff] = artdiff_ver3(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver3</a>	ARTDIFF_VER1 is the third version for adding artificial diffusion.</li><li><a href="sim_finite_run.html" class="code" title="function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_finite_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li><li><a href="sim_run.html" class="code" title="function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li><li><a href="../test/als_test_code.html" class="code" title="function [] = als_test_code()">als_test_code</a>	load('./test/test_data_smooth2D.mat')</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function res = SRMultV(A,F)</a>
+0002 <span class="comment">% SRMULTV multiplies a ktensor operators A with a ktensor function F. The</span>
+0003 <span class="comment">% result is a new ktensor function AF.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   A - ktensor operator.</span>
+0006 <span class="comment">%   F - ktensor function.</span>
+0007 <span class="comment">% Output:</span>
+0008 <span class="comment">%   AB - the product of A and B.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Note:</span>
+0011 <span class="comment">% The ktensor operator A stores it corresponding matrices as vectors. For</span>
+0012 <span class="comment">% example, a matrix of size mxm is stored as a vector with m^2 entries.</span>
+0013 
+0014 rA = ncomponents(A);
+0015 nd = ndims(F);
+0016 
+0017 LL = F.lambda*A.lambda';
+0018 AU = cell(nd,1);
+0019 <span class="keyword">for</span> nn = 1:nd
+0020     N = size(F,nn);
+0021     AU{nn} = <a href="blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>(<a href="blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>(reshape(A.U{nn},N,N*rA),N)*F.U{nn},N);
+0022 <span class="keyword">end</span>
+0023 res = ktensor(LL(:),AU);
+0024 res = fixsigns(arrange(res));</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

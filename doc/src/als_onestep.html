@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als_onestep</title>
+  <meta name="keywords" content="als_onestep">
+  <meta name="description" content="ALS_ONESTEP performs one step of the ALS algorithm. Based on the version">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als_onestep
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS_ONESTEP performs one step of the ALS algorithm. Based on the version</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Flambda, FU, status] = als_onestep(Glambda,GU,Flambda,FU,alpha) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS_ONESTEP performs one step of the ALS algorithm. Based on the version
+ in Baylkin and Mohlenkamp 2005.
+ Inputs:
+   F is the current iterate where:
+      Flambda - normailization constants for F.
+      FU - vectors (basis functions) for F.
+   G is the tensor begin approximated where:
+      Glambda - normailization constants for G.
+      GU - vectors (basis functions) for G.
+   alpha - the regularization constant.
+ Outputs:
+   Updated F in form of:
+      Flambda (as before).
+      FU (as before).
+   status - 0 if ill-conditioned matrices. Otherwise 1.
+
+ See also <a href="als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">ALS</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">als</a>	ALS code to perform the ALS algorithm as described in Beylkin</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Flambda, FU, status] = als_onestep(Glambda,GU,Flambda,FU,alpha)</a>
+0002 <span class="comment">% ALS_ONESTEP performs one step of the ALS algorithm. Based on the version</span>
+0003 <span class="comment">% in Baylkin and Mohlenkamp 2005.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   F is the current iterate where:</span>
+0006 <span class="comment">%      Flambda - normailization constants for F.</span>
+0007 <span class="comment">%      FU - vectors (basis functions) for F.</span>
+0008 <span class="comment">%   G is the tensor begin approximated where:</span>
+0009 <span class="comment">%      Glambda - normailization constants for G.</span>
+0010 <span class="comment">%      GU - vectors (basis functions) for G.</span>
+0011 <span class="comment">%   alpha - the regularization constant.</span>
+0012 <span class="comment">% Outputs:</span>
+0013 <span class="comment">%   Updated F in form of:</span>
+0014 <span class="comment">%      Flambda (as before).</span>
+0015 <span class="comment">%      FU (as before).</span>
+0016 <span class="comment">%   status - 0 if ill-conditioned matrices. Otherwise 1.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% See also ALS.</span>
+0019 
+0020 <span class="comment">%%% Old comments %%%</span>
+0021 <span class="comment">% merged to match als_onestep_a.m to avoid any confusion.</span>
+0022 <span class="comment">% this is now the primary branch.</span>
+0023 
+0024 <span class="comment">% based on the version in Beylkin and Mohlenkamp 2005</span>
+0025 <span class="comment">% performs one step of the ALS algorithm</span>
+0026 
+0027 
+0028 <span class="comment">% F is the current iterate</span>
+0029 <span class="comment">% Glambda and GU represent the tensor being approximated</span>
+0030 <span class="comment">% alpha is the regularization</span>
+0031 <span class="comment">%%% Old comments %%%</span>
+0032 
+0033 status = 1;
+0034 
+0035 nd = length(FU);
+0036 rG = length(Glambda);
+0037 rF = length(Flambda);
+0038 
+0039 
+0040 <span class="comment">% tensor access is slow so this function now takes the inputs and outputs</span>
+0041 <span class="comment">% as lambda and U.</span>
+0042 
+0043  <span class="comment">% compute inner products needed for 3.3, really only need half of these</span>
+0044  <span class="comment">% because the matrix is symmetric (in the real case)</span>
+0045  Fdot = zeros(rF,rF,nd);
+0046  <span class="keyword">for</span> n = 1:nd
+0047      Fdot(:,:,n) = FU{n}' * FU{n};
+0048  <span class="keyword">end</span>
+0049  
+0050  <span class="comment">% compute inner products needed for 3.4</span>
+0051  GFdot = zeros(rG,rF,nd);
+0052  <span class="keyword">for</span> n = 1:nd
+0053      GFdot(:,:,n) = GU{n}' * FU{n};
+0054  <span class="keyword">end</span>
+0055 
+0056 <span class="keyword">for</span> k = 1:nd
+0057     
+0058     <span class="comment">% update inner products needed for 3.3 and 3.4</span>
+0059     <span class="keyword">if</span> k &gt; 1
+0060         Fdot(:,:,k-1) = FU{k-1}' * FU{k-1};
+0061         GFdot(:,:,k-1) = GU{k-1}' * FU{k-1};
+0062     <span class="keyword">end</span>
+0063 
+0064     <span class="comment">% construct the matrix B in (3.3)</span>
+0065     <span class="comment">% the .' is to deal with the complex case, this has not been tested and</span>
+0066     <span class="comment">% could be wrong. In the real case the matrix is symmetric and this will not</span>
+0067     <span class="comment">% be an issue.</span>
+0068     idx = [1:(k-1) (k+1):nd];
+0069     B = prod(Fdot(:,:,idx),3).';
+0070     B = B + alpha*eye(size(B));
+0071     
+0072     <span class="comment">% form product of G and F inner products</span>
+0073     GF = prod(GFdot(:,:,idx),3);
+0074     
+0075     b = (GU{k}*diag(Glambda)*GF).';
+0076     
+0077     <span class="keyword">if</span> cond(B) &gt; 1e13
+0078         status = 0;
+0079     <span class="keyword">end</span>
+0080     
+0081     c = B\b;
+0082 
+0083     sF = sqrt(sum(c.^2,2));
+0084     Flambda = sF;
+0085     FU{k} = c.'*(diag(1./sF));
+0086     
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">%%%%%%%%%%%%</span>
+0090 <span class="comment">% OLD CODE %</span>
+0091 <span class="comment">%%%%%%%%%%%%</span>
+0092 
+0093 
+0094 <span class="comment">% % based on the version in Beylkin and Mohlenkamp 2005</span>
+0095 <span class="comment">% % performs one step of the ALS algorithm</span>
+0096 <span class="comment">% % something may be wrong when the tensor F is of rank &gt; 1 because in this case</span>
+0097 <span class="comment">% % the error can grow, which should not be possible. (This definitely seems to be</span>
+0098 <span class="comment">% % the problem...</span>
+0099 <span class="comment">%</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">% % F is the current iterate</span>
+0102 <span class="comment">% % G is the tensor being approximated</span>
+0103 <span class="comment">% % alpha is the regularization</span>
+0104 <span class="comment">% G = arrange(G);</span>
+0105 <span class="comment">% nd = ndims(G);</span>
+0106 <span class="comment">% sizeG = size(G);</span>
+0107 <span class="comment">% rG = ncomponents(G);</span>
+0108 <span class="comment">% rF = ncomponents(F);</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">% for k = 1:nd</span>
+0111 <span class="comment">%</span>
+0112 <span class="comment">%     % compute inner products needed for 3.3, really only need half of these</span>
+0113 <span class="comment">%     % because the matrix is symmetric (in the real case)</span>
+0114 <span class="comment">%     for n = 1:nd</span>
+0115 <span class="comment">%         Fdot(:,:,n) = F.U{n}' * F.U{n};</span>
+0116 <span class="comment">%     end</span>
+0117 <span class="comment">%</span>
+0118 <span class="comment">%     % compute inner products needed for 3.4</span>
+0119 <span class="comment">%     for n = 1:nd</span>
+0120 <span class="comment">%         GFdot(:,:,n) = G.U{n}' * F.U{n};</span>
+0121 <span class="comment">%     end</span>
+0122 <span class="comment">%</span>
+0123 <span class="comment">%     % construct the matrix B in (3.3)</span>
+0124 <span class="comment">%     % the .' is to deal with the complex case, this has not been tested and</span>
+0125 <span class="comment">%     % could be wrong. In the real case the matrix is symmetric and this will not</span>
+0126 <span class="comment">%     % be an issue.</span>
+0127 <span class="comment">%     B = prod(Fdot(:,:,setdiff(1:nd,k)),3).';</span>
+0128 <span class="comment">%     B = B + alpha*eye(size(B));</span>
+0129 <span class="comment">%</span>
+0130 <span class="comment">%     % form product of G and F inner products</span>
+0131 <span class="comment">%     GF = prod(GFdot(:,:,setdiff(1:nd,k)),3);</span>
+0132 <span class="comment">%</span>
+0133 <span class="comment">%     % form vectors for 3.4 and solve the linear system in 3.5</span>
+0134 <span class="comment">%     % this, or the update to F is probably where there is an issue</span>
+0135 <span class="comment">%</span>
+0136 <span class="comment">%     for jk = 1:sizeG(k)</span>
+0137 <span class="comment">%         b(:,jk) = zeros(rF,1);</span>
+0138 <span class="comment">%         for lp = 1:rF</span>
+0139 <span class="comment">%             for l = 1:rG</span>
+0140 <span class="comment">%                 b(lp,jk) = b(lp,jk) + G.lambda(l)*G.U{k}(jk,l)*GF(l,lp);</span>
+0141 <span class="comment">%             end</span>
+0142 <span class="comment">%         end</span>
+0143 <span class="comment">%         c(:,jk) = B\b(:,jk);</span>
+0144 <span class="comment">%     end</span>
+0145 <span class="comment">%</span>
+0146 <span class="comment">%     for l = 1:rF</span>
+0147 <span class="comment">%         sF = norm(c(l,:));</span>
+0148 <span class="comment">%         F.lambda(l) = sF;</span>
+0149 <span class="comment">%         for jk = 1:sizeG(k)</span>
+0150 <span class="comment">%             F.U{k}(jk,l) = c(l,jk)/sF;</span>
+0151 <span class="comment">%         end</span>
+0152 <span class="comment">%     end</span>
+0153 <span class="comment">%</span>
+0154 <span class="comment">%     F = arrange(F);</span>
+0155 <span class="comment">% end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

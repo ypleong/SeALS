@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_VTOL</title>
+  <meta name="keywords" content="test_VTOL">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_VTOL
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>	x:[6,1] state ( x, xdot, y, ydot, theta, thetadot)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 close all
+0003 
+0004 
+0005 <span class="comment">% Parameters</span>
+0006 g = 9.81;
+0007 epsilon = 0.01;
+0008 
+0009 
+0010 <span class="comment">% Simulation Parameters</span>
+0011 dt = 0.01;
+0012 t = 0:dt:15;
+0013 x = zeros(6,length(t)); <span class="comment">% State: x,vx,y,vy,theta,vtheta</span>
+0014 <span class="comment">%x(:,1) = [1, 0.1, 5, 0.2, 0.1, -0.01]'; % some movement</span>
+0015 x(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; <span class="comment">% static</span>
+0016 
+0017 
+0018 <span class="comment">% Kalman Estimation</span>
+0019 xhat = zeros(6,length(t));
+0020 xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
+0021 Phat = zeros(6,6,length(t));
+0022 Phat(:,:,1) = diag([3^2,0.2^2,3^2,0.2^2,0.1^2,0.01^2]);
+0023 
+0024 G = [0 0 0
+0025  1 0 0
+0026  0 0 0
+0027  0 1 0
+0028  0 0 0
+0029  0 0 1];
+0030 
+0031 Q = 0.01*diag([0.1^2, 0.1^2, 0.01^2]);
+0032 
+0033 GQGp = G*Q*G';
+0034 sigmaX2 = 0.01^2;
+0035 sigmaY2 = 0.01^2;
+0036 R = diag([sigmaX2,sigmaY2]);
+0037 zmes = zeros(2,length(t));
+0038 HK = [1 0 0 0 0 0
+0039       0 0 1 0 0 0];
+0040 
+0041 xref = 2; <span class="comment">%+ cos(t(i)*2*pi/20);</span>
+0042 yref = 6; <span class="comment">%+ sin(t(i)*2*pi/20);</span>
+0043   
+0044 <span class="comment">%% Time Evolution</span>
+0045 <span class="keyword">for</span> i = 2:length(t)
+0046    
+0047     uControl(i) =  g - 0.3*(xhat(3,i-1)-yref)  - 0.9*xhat(4,i-1);
+0048     tauControl(i) = -6*xhat(5,i-1) - 6*xhat(6,i-1) + 0.2*(xhat(1,i-1)-xref) + 1.0*xhat(2,i-1);
+0049     <span class="comment">% Propagate</span>
+0050     x(:,i) =  x(:,i-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( x(:,i-1), uControl(i), tauControl(i), epsilon, g );
+0051     <span class="comment">% Kalman</span>
+0052     F = [0 1 0 0 0 0
+0053          0 0 0 0 (-tauControl(i)*cos(xhat(5,i-1))-epsilon*tauControl(i)*sin(xhat(5,i-1))) 0
+0054          0 0 0 1 0 0
+0055          0 0 0 0 (-tauControl(i)*sin(xhat(5,i-1))+epsilon*tauControl(i)*cos(xhat(5,i-1))) 0
+0056          0 0 0 0 0 1
+0057          0 0 0 0 0 0];
+0058     xhat(:,i) =  xhat(:,i-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( xhat(:,i-1), uControl(i), tauControl(i), epsilon, g );
+0059     Phat(:,:,i) = F*Phat(:,:,i-1)*F' + dt*GQGp;
+0060     
+0061     <span class="comment">% assume measure with noise R</span>
+0062     z = [x(1,i) + randn(1)*sqrt(sigmaX2) 
+0063          x(3,i) + randn(1)*sqrt(sigmaY2)];
+0064     zmes(:,i) = z;
+0065     SG = HK*Phat(:,:,i)*HK' + R;
+0066     KG = Phat(:,:,i)*HK'/(SG);
+0067     xhat(:,i) = xhat(:,i) + KG*(z - HK*xhat(:,i));
+0068     Phat(:,:,i) = (eye(6) - KG*HK)*Phat(:,:,i);
+0069     
+0070     <span class="comment">% Propagate</span>
+0071     
+0072 <span class="keyword">end</span>
+0073 
+0074 
+0075 <span class="comment">%% Plot</span>
+0076 <span class="comment">%afigure;</span>
+0077 
+0078 afigure
+0079 subplot(2,4,1)
+0080 plot(t,x(1,:))
+0081 grid on
+0082 xlabel(<span class="string">'Time(s)'</span>)
+0083 ylabel(<span class="string">'X'</span>)
+0084 subplot(2,4,2)
+0085 plot(t,x(2,:))
+0086 grid on
+0087 xlabel(<span class="string">'Time(s)'</span>)
+0088 ylabel(<span class="string">'VX'</span>)
+0089 subplot(2,4,3)
+0090 plot(t,x(3,:))
+0091 grid on
+0092 xlabel(<span class="string">'Time(s)'</span>)
+0093 ylabel(<span class="string">'Y'</span>)
+0094 subplot(2,4,4)
+0095 plot(t,x(4,:))
+0096 grid on
+0097 xlabel(<span class="string">'Time(s)'</span>)
+0098 ylabel(<span class="string">'VY'</span>)
+0099 subplot(2,4,5)
+0100 plot(t,x(5,:))
+0101 grid on
+0102 xlabel(<span class="string">'Time(s)'</span>)
+0103 ylabel(<span class="string">'\theta'</span>)
+0104 subplot(2,4,6)
+0105 plot(t,x(6,:))
+0106 grid on
+0107 xlabel(<span class="string">'Time(s)'</span>)
+0108 ylabel(<span class="string">'Theta Dot'</span>)
+0109 subplot(2,4,7)
+0110 plot(t,uControl)
+0111 grid on
+0112 xlabel(<span class="string">'Time(s)'</span>)
+0113 ylabel(<span class="string">'u input'</span>)
+0114 subplot(2,4,8)
+0115 plot(t,tauControl)
+0116 grid on
+0117 xlabel(<span class="string">'Time(s)'</span>)
+0118 ylabel(<span class="string">'\tau input'</span>)
+0119 
+0120 afigure
+0121 hold on
+0122 plot( x(1,:), x(3,:) ,xhat(1,:), xhat(3,:) )
+0123 scatter ( zmes(1,:), zmes(2,:))
+0124 legend(<span class="string">'truth'</span>,<span class="string">'kalman'</span>)
+0125 
+0126 afigure
+0127 plot( t, sqrt( (x(1,:)-xhat(1,:)).^2 + (x(3,:)- xhat(3,:)).^2) )
+0128 grid on
+0129 xlabel(<span class="string">'Time(s)'</span>)
+0130 ylabel(<span class="string">'Estimation Error(m)'</span>)
+0131 
+0132 hf = figure
+0133 hold on
+0134 axis ([0,4,3,8])
+0135 scatter(xref,yref)
+0136 xlabel(<span class="string">'X'</span>)
+0137 ylabel(<span class="string">'Y'</span>)
+0138 title(<span class="string">'VTOL Simulation'</span>)
+0139 ht_pdf = quiver(x(1,1),x(3,1),-sin(x(5,1)),cos(x(5,1)));
+0140 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf,<span class="string">'linewidth'</span>,2);
+0141 ht_scatter = plot(x(1,1),x(3,1));
+0142 <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_scatter,<span class="string">'linewidth'</span>,2);
+0143 grid on
+0144 
+0145 
+0146 save_to_file = 0;
+0147 <span class="keyword">if</span> (save_to_file  )
+0148     FPS = 25;  
+0149     writerObj = VideoWriter(<span class="string">'pdf_gaussian_.avi'</span>);
+0150     writerObj.FrameRate = FPS;
+0151     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hf,<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0152     open(writerObj);
+0153     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gcf,<span class="string">'Renderer'</span>,<span class="string">'OpenGL'</span>); <span class="comment">%to save to file</span>
+0154     pause(5)
+0155 <span class="keyword">end</span>
+0156 <span class="keyword">for</span> i = 2:5:length(t)
+0157      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_pdf, <span class="string">'XData'</span>, x(1,i), <span class="keyword">...</span>
+0158                    <span class="string">'YData'</span>, x(3,i), <span class="keyword">...</span>
+0159                    <span class="string">'UData'</span>, -sin(x(5,i)), <span class="keyword">...</span><span class="comment"> </span>
+0160                    <span class="string">'VData'</span>, cos(x(5,i)) );
+0161      <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a> ( ht_scatter, <span class="string">'XData'</span>, x(1,1:i), <span class="keyword">...</span>
+0162                    <span class="string">'YData'</span>, x(3,1:i)  );
+0163      drawnow
+0164      pause(1.0/100.0);
+0165     <span class="keyword">if</span> (save_to_file )
+0166         M = getframe(gcf); 
+0167         writeVideo(writerObj, M);
+0168     <span class="keyword">end</span>  
+0169 <span class="keyword">end</span>
+0170 <span class="keyword">if</span> (save_to_file  )
+0171     close(writerObj);
+0172 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of rank_k_gsqr</title>
+  <meta name="keywords" content="rank_k_gsqr">
+  <meta name="description" content="Authors:">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>rank_k_gsqr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Authors:</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Q,R,piv,k] = rank_k_gsqr(A,maxrnk) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Authors:
+ Matthew Reynolds
+ David Biagioni
+
+ This version of doubly modified GS uses the number of pivots 
+ instead of tol as an input. Note that I left the outputs the same to
+ avoid compatability problems with older versions of this code.
+
+ inputs:
+ A - input matrix
+ tol - tolerance for pivoting, exiting program
+ maxrnk - number of pivots to make
+
+ outputs:
+ Q - orthogonal matrix
+ R - Upper Triangular matrix, A = QR
+ piv - vector keeping track of the pivots
+ k - number of pivots made (probably not needed)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="testGS.html" class="code" title="">testGS</a>	testGS.m</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Q,R,piv,k] = rank_k_gsqr(A,maxrnk)</a>
+0002 <span class="comment">% Authors:</span>
+0003 <span class="comment">% Matthew Reynolds</span>
+0004 <span class="comment">% David Biagioni</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% This version of doubly modified GS uses the number of pivots</span>
+0007 <span class="comment">% instead of tol as an input. Note that I left the outputs the same to</span>
+0008 <span class="comment">% avoid compatability problems with older versions of this code.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% inputs:</span>
+0011 <span class="comment">% A - input matrix</span>
+0012 <span class="comment">% tol - tolerance for pivoting, exiting program</span>
+0013 <span class="comment">% maxrnk - number of pivots to make</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% outputs:</span>
+0016 <span class="comment">% Q - orthogonal matrix</span>
+0017 <span class="comment">% R - Upper Triangular matrix, A = QR</span>
+0018 <span class="comment">% piv - vector keeping track of the pivots</span>
+0019 <span class="comment">% k - number of pivots made (probably not needed)</span>
+0020 
+0021 <span class="comment">% Initialize matrices and parameters used in the code</span>
+0022 [m,n] = size(A);
+0023 Q = zeros(m,maxrnk);
+0024 R = zeros(maxrnk,n);
+0025 CGScoeff = zeros(maxrnk,1);
+0026 
+0027 <span class="comment">% Find the first pivot</span>
+0028 piv = 1:n;
+0029 c = sqrt(sum(A.^2,1));
+0030 [~,imax] = max(c);
+0031 imax = imax(1);
+0032 
+0033 <span class="comment">% Perform the first pivot</span>
+0034 tmp = piv(1);  piv(1) = piv(imax);  piv(imax) = tmp;
+0035 tmp = A(:,1);  A(:,1) = A(:,imax);  A(:,imax) = tmp;
+0036 tmp = c(1);    c(1) = c(imax);      c(imax) = tmp;
+0037 
+0038 <span class="comment">% MGS sweep for the first column of A</span>
+0039 R(1,1) = norm(A(:,1));
+0040 Q(:,1) = A(:,1) / R(1,1);
+0041 R(1,2:n) = Q(:,1)' * A(:,2:n);
+0042 <span class="keyword">for</span> j = 2:n
+0043     A(:,j) = A(:,j) - R(1,j) * Q(:,1);
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="comment">% If the matrix has max rank 1, return values</span>
+0047 <span class="keyword">if</span> maxrnk == 1
+0048     Q = Q(:,1);
+0049     R = R(1,:);
+0050     k = 1;
+0051     <span class="keyword">return</span> 
+0052 <span class="keyword">end</span>
+0053 
+0054 <span class="comment">% find second pivot</span>
+0055 c(2:n) = sqrt(sum(A(2:m,2:n).^2,1));
+0056 [~,imax] = max(c(2:n));
+0057 imax = imax(1);  imax = 1 + imax(1);
+0058 
+0059 
+0060 <span class="comment">% Double MGS iterations</span>
+0061 <span class="keyword">for</span> k = 2:maxrnk
+0062     
+0063     <span class="comment">% perform pivot</span>
+0064     tmp = piv(k);  piv(k) = piv(imax);  piv(imax) = tmp;
+0065     tmp = A(:,k);  A(:,k) = A(:,imax);  A(:,imax) = tmp;
+0066     tmp = R(:,k);  R(:,k) = R(:,imax);  R(:,imax) = tmp;
+0067     tmp = c(k);    c(k) = c(imax);      c(imax) = tmp;
+0068     
+0069     <span class="comment">% First we compute the CGS step and compute Q and diagonal value of R</span>
+0070     CGScoeff(1:k-1) = Q(:,1:k-1)'*A(:,k);
+0071     z = A(:,k)-Q(:,1:k-1)*CGScoeff(1:k-1);
+0072     R(k,k) = norm(z);
+0073     Q(:,k) = z/R(k,k);
+0074     
+0075     <span class="comment">% Now we do the orthogonalization from MGS</span>
+0076     R(k,(k+1):n) = Q(:,k)' * A(:,(k+1):n);
+0077     <span class="keyword">for</span> j = (k+1):n
+0078       A(:,j) = A(:,j) - R(k,j) * Q(:,k);
+0079     <span class="keyword">end</span>
+0080     
+0081     <span class="comment">% find next pivot</span>
+0082     <span class="keyword">if</span> k &lt; maxrnk
+0083         <span class="comment">% Truncate the vectors we look at each time as well...</span>
+0084         c((k+1):n) = sqrt(sum(A((k+1):m,(k+1):n).^2,1)); 
+0085         
+0086         <span class="comment">% note: we can use this</span>
+0087         <span class="comment">% now since we fixed the orthogonality. It should be faster</span>
+0088         <span class="comment">%c((k+1):n) = sqrt(c((k+1):n) - R(k,(k+1):n).^2);</span>
+0089         
+0090         [~,imax] = max(c((k+1):n));
+0091         imax = imax(1);  imax = k + imax(1);
+0092     <span class="keyword">end</span>
+0093 <span class="keyword">end</span>
+0094 
+0095 
+0096 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

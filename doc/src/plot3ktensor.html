@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot3ktensor</title>
+  <meta name="keywords" content="plot3ktensor">
+  <meta name="description" content="Display a 3Way tensor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>plot3ktensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Display a 3Way tensor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [  ] = plot3ktensor (xvector, inputTensor, printOption, nOut  ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Display a 3Way tensor
+
+ xvector: {nx1, mx1} 2cell of vectors for x and y
+ inputTensor size=(n,m,p)  3 variables
+ printOption: string to determine how to print the slices
+              'static': print all the slices
+              'points': scatter3
+              'slider': change the slice with a ui slider
+              'time': change the slices in a video 
+ nOut: number of slices. recomended: 10 for static and 100 for dynamic</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function callbackSlider(source,event,h_t,ndim)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [  ] = plot3ktensor (xvector, inputTensor, printOption, nOut  )</a>
+0002 <span class="comment">% Display a 3Way tensor</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% xvector: {nx1, mx1} 2cell of vectors for x and y</span>
+0005 <span class="comment">% inputTensor size=(n,m,p)  3 variables</span>
+0006 <span class="comment">% printOption: string to determine how to print the slices</span>
+0007 <span class="comment">%              'static': print all the slices</span>
+0008 <span class="comment">%              'points': scatter3</span>
+0009 <span class="comment">%              'slider': change the slice with a ui slider</span>
+0010 <span class="comment">%              'time': change the slices in a video</span>
+0011 <span class="comment">% nOut: number of slices. recomended: 10 for static and 100 for dynamic</span>
+0012     
+0013     <span class="keyword">if</span> ndims(inputTensor) ~= 3 
+0014         disp([<span class="string">'InputTensor is not a 3way tensor but a '</span>,num2str(ndims(inputTensor)),<span class="string">'way tensor'</span>])
+0015         <span class="keyword">return</span>
+0016     <span class="keyword">end</span>
+0017     
+0018     <span class="keyword">if</span> nargin &lt; 3 || isempty(printOption)
+0019        printOption = <span class="string">'slider'</span> 
+0020     <span class="keyword">end</span>
+0021 
+0022     <span class="keyword">if</span> nargin &lt; 4 || isempty(nOut)
+0023         <span class="keyword">switch</span> printOption
+0024             <span class="keyword">case</span> <span class="string">'static'</span>
+0025                 nOut = 10;
+0026             <span class="keyword">case</span> <span class="string">'slider'</span>
+0027                 nOut = 100;
+0028             <span class="keyword">case</span> <span class="string">'time'</span>
+0029                 nOut = 100;
+0030         <span class="keyword">end</span>
+0031     <span class="keyword">end</span>
+0032 
+0033     ndim = size(inputTensor);
+0034     f = figure;
+0035     hold on
+0036     <span class="keyword">switch</span> printOption
+0037         <span class="keyword">case</span> <span class="string">'static'</span>
+0038 
+0039             <span class="keyword">for</span> i=1:nOut
+0040                iOut = floor( i/nOut*ndim(3) );
+0041                h_t(i) = pcolor (xvector{1},xvector{2}, inputTensor(:,:,iOut)');
+0042                <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t(i), <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0043                <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t(i), <span class="string">'ZData'</span>,i*ones(ndim(2),ndim(1)))
+0044                <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t(i), <span class="string">'FaceAlpha'</span>,0.1)
+0045             <span class="keyword">end</span>
+0046             view([-37.5 30])
+0047             axis ([xvector{1}(1),xvector{1}(end),xvector{2}(1),xvector{2}(end),xvector{1}(1),xvector{3}(end)])
+0048             caxis([0 max(max(max(inputTensor)))])
+0049             colorbar
+0050 
+0051         <span class="keyword">case</span> <span class="string">'slider'</span>
+0052             h_t = pcolor (xvector{1},xvector{2}, inputTensor(:,:,1)');
+0053             <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0054             axis ([xvector{1}(1),xvector{1}(end),xvector{2}(1),xvector{2}(end),xvector{1}(1),xvector{3}(end)])
+0055             view([-37.5 +30])
+0056             caxis([0 max(max(max(inputTensor)))])
+0057             colorbar
+0058 
+0059             callbackSliderAA = @(source,event) <a href="#_sub1" class="code" title="subfunction callbackSlider(source,event,h_t,ndim)">callbackSlider</a>(source,event,h_t,ndim);
+0060 
+0061             b = uicontrol(<span class="string">'Parent'</span>,f,<span class="string">'Style'</span>,<span class="string">'slider'</span>,<span class="string">'Position'</span>,[81,54,419,23],<span class="keyword">...</span>
+0062                   <span class="string">'value'</span>,ndim(3)/2, <span class="string">'min'</span>,0, <span class="string">'max'</span>,nOut, <span class="string">'Callback'</span>, callbackSliderAA);
+0063         <span class="keyword">case</span> <span class="string">'time'</span>    
+0064             h_t = pcolor (xvector{1},xvector{2}, inputTensor(:,:,1)');
+0065             <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0066             axis ([xvector{1}(1),xvector{1}(end),xvector{2}(1),xvector{2}(end),xvector{1}(1),xvector{3}(end)])
+0067            
+0068             view([-37.5 +30])
+0069             caxis([0 max(max(max(inputTensor)))])
+0070             colorbar
+0071             <span class="keyword">for</span> i=1:nOut
+0072                iOut = floor( i/nOut*ndim(3) );
+0073                <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'CData'</span> ,  inputTensor(:,:,iOut)' );
+0074                <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'ZData'</span>,i*ones(ndim(2),ndim(1)))
+0075                drawnow;
+0076                pause(1.0/30.0);
+0077             <span class="keyword">end</span>
+0078         <span class="keyword">case</span> <span class="string">'points'</span>
+0079             maxValue = max(max(max(inputTensor)));
+0080             counter = 0;
+0081             <span class="keyword">for</span> i=1:length(xvector{1})
+0082                 <span class="keyword">for</span> j=1:length(xvector{2})
+0083                     <span class="keyword">for</span> k=1:length(xvector{3})
+0084                         <span class="keyword">if</span> (inputTensor(i,j,k)&gt;maxValue/10)
+0085                            counter = counter + 1;
+0086                            xyzC(counter,:) = [xvector{1}(i),xvector{2}(j),xvector{3}(k),inputTensor(i,j,k)];                           
+0087                         <span class="keyword">end</span>
+0088                     <span class="keyword">end</span>
+0089                 <span class="keyword">end</span>
+0090             <span class="keyword">end</span>
+0091             h_t = scatter3(xyzC(:,1),xyzC(:,2),xyzC(:,3),0.2,xyzC(:,4));
+0092             axis ([xvector{1}(1),xvector{1}(end),xvector{2}(1),xvector{2}(end),xvector{1}(1),xvector{3}(end)])
+0093            
+0094             view([-37.5 +30])
+0095             grid on
+0096             axis equal
+0097     <span class="keyword">end</span>
+0098      
+0099     <a name="_sub1" href="#_subfunctions" class="code">function callbackSlider(source,event,h_t,ndim)</a>
+0100         val = source.Value;
+0101         iOut = floor( val/nOut*ndim(3) );
+0102         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'CData'</span> ,  inputTensor(:,:,iOut)' );
+0103         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(h_t, <span class="string">'ZData'</span>,xvector{3}(iOut)*ones(ndim(2),ndim(1)))
+0104     <span class="keyword">end</span>
+0105         
+0106         
+0107     
+0108 
+0109 <span class="keyword">end</span>
+0110</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

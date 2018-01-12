@@ -1,0 +1,361 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_finite_horizon_hjb_euler</title>
+  <meta name="keywords" content="test_finite_horizon_hjb_euler">
+  <meta name="description" content="Test finite horizon hjb, forward euler">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_finite_horizon_hjb_euler
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Test finite horizon hjb, forward euler</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Test finite horizon hjb, forward euler
+ June 20, 2017</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li><li><a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>	MAKE_BC_SCA_VAR creates scalings for the boundary condition and goal</li><li><a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li><li><a href="../src/makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li><li><a href="../src/maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>	MAKETENSDYN creates ktensor representation of symbolic functions, given below.</li><li><a href="../src/oneTens.html" class="code" title="function idTens = oneTens(d, n)">oneTens</a>	Create a d dimensional all ones tensor of size n</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Test finite horizon hjb, forward euler</span>
+0002 <span class="comment">% June 20, 2017</span>
+0003 
+0004 <span class="comment">% Note:</span>
+0005 <span class="comment">% - Spectral does not work</span>
+0006 <span class="comment">% - Domain needs to be large enough to void blowing up at the boundary</span>
+0007 
+0008 addpath(genpath(<span class="string">'../src'</span>));
+0009 clear all
+0010 
+0011 <span class="comment">%%</span>
+0012 run = 3;
+0013 dirpath = [<span class="string">'./test_run/test_finite_horizon_hjb_euler/run_'</span>,num2str(run),<span class="string">'/'</span>];
+0014 <span class="keyword">if</span> 7~=exist(dirpath,<span class="string">'dir'</span>) 
+0015     mkdir(dirpath); 
+0016 <span class="keyword">end</span>
+0017 diary([dirpath,<span class="string">'run_'</span>,num2str(run),<span class="string">'output'</span>])
+0018 fprintf(<span class="string">'--------------------- New Run --------------------- \n\n'</span>)
+0019 disp(datetime)
+0020 
+0021 start_whole = tic;
+0022 
+0023 <span class="comment">%% Initialization</span>
+0024 
+0025 d = 1;
+0026 x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0027 n = [201;]; 
+0028 
+0029 h = 0.001;<span class="comment">%pi/(2*n); % time step size</span>
+0030 tend = 3;
+0031 tt = 0:h:tend;
+0032 
+0033 bdim = [-5 5;-5 5];
+0034 bcon = { {<span class="string">'d'</span>, exp(-6*25), exp(-6*25)},{<span class="string">'d'</span>, 0, 0}};
+0035 bsca = []; <span class="comment">%no manual scaling</span>
+0036 region = [];
+0037 regval = 1;
+0038 regsca = [];
+0039 sca_ver = 1;
+0040 
+0041 tol_err_op = 1e-6;
+0042 tol_err = 1e-9;
+0043 als_options = [];
+0044 als_variant = []; <span class="comment">%{10,50};</span>
+0045 debugging = 0;
+0046 
+0047 fprintf([<span class="string">'Starting run '</span>,num2str(run),<span class="string">' with main_run \n'</span>])
+0048 
+0049 <span class="comment">%% Define dynamics</span>
+0050 
+0051 <span class="comment">% f = 2*[x(1)^5-x(1)^3-x(1)+x(1)*x(2)^4; x(2)^5-x(2)^3-x(2)+x(2)*x(1)^4]; % dynamics</span>
+0052 <span class="comment">% linearized dynamics</span>
+0053 AA = randn(d,d);<span class="comment">%</span>
+0054 BB = eye(d);<span class="comment">%ones(d,1);</span>
+0055 QQ = eye(d);
+0056 PP = 6;<span class="comment">%care(AA,BB,QQ);</span>
+0057 
+0058 <span class="comment">% full dynamics</span>
+0059 f = x.^3 + 5*x.^2 + x; 
+0060 <span class="comment">% f = AA*x;</span>
+0061 G = BB;
+0062 B = BB;
+0063 
+0064 noise_cov = 1;<span class="comment">%diag([2 2]);</span>
+0065 q = x'*QQ*x;
+0066 R = 1;<span class="comment">%diag([1 1]);</span>
+0067 lambda = 1;<span class="comment">%noise_cov*R;</span>
+0068 
+0069 <span class="comment">%% Calculate differentiation operators and finite difference matrices</span>
+0070 
+0071 fprintf(<span class="string">'Creating differential operators ...\n'</span>);
+0072 start_diff = tic;
+0073 
+0074 <span class="keyword">for</span> i=1:d
+0075     gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+0076     nd(i) = n(i);
+0077     dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+0078     acc(:,i) = [2,2]';
+0079 <span class="keyword">end</span>
+0080 
+0081 [D,D2,fd1,fd2] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,nd,dxd,acc,bcon,region);
+0082 
+0083 <span class="comment">% [n,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[]);</span>
+0084 toc(start_diff)
+0085 end_diff = toc(start_diff);
+0086 
+0087 <span class="comment">%% Calculate dynamics</span>
+0088 fprintf(<span class="string">'Creating dynamics operator ...\n'</span>);
+0089 start_dynamics = tic;
+0090 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = <a href="../src/maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>(f,G,B,noise_cov,q,R,x,gridT);
+0091 toc(start_dynamics)
+0092 end_dynamics = toc(start_dynamics);
+0093 
+0094 <span class="comment">%% Calculate operator</span>
+0095 fprintf(<span class="string">'Creating PDE operator ...\n'</span>);
+0096 start_PDEop = tic;
+0097 [op,conv,diff] = <a href="../src/makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
+0098 op = op*h + <a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(<a href="../src/oneTens.html" class="code" title="function idTens = oneTens(d, n)">oneTens</a>(d, n));
+0099 toc(start_PDEop)
+0100 end_PDEop = toc(start_PDEop);
+0101 
+0102 <span class="comment">%% Create boundary conditions</span>
+0103 
+0104 <span class="comment">% create scaling for bc</span>
+0105 <span class="keyword">if</span> isempty(bsca) == 1 || isempty(regsca) == 1
+0106     
+0107     <span class="keyword">if</span> sca_ver == 1
+0108         [bscat, ~] = <a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>(op,gridT,region,bcon);    
+0109     <span class="keyword">elseif</span> sca_ver == 2
+0110         [bscat, ~] = <a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>(op,bcon,region,regval,als_options,fd1,gridT,x,n);
+0111     <span class="keyword">else</span>
+0112         error(<span class="string">'wrong specification on boundary scaling'</span>);
+0113     <span class="keyword">end</span>
+0114 <span class="keyword">end</span>
+0115 
+0116 <span class="keyword">if</span> isempty(bsca)
+0117     bsca = bscat;
+0118 <span class="keyword">end</span>
+0119 
+0120 <span class="comment">% make bc</span>
+0121 <span class="comment">% [op] = makebcop(op,bcon,bsca,n,fd1);</span>
+0122 <span class="comment">% [op] = makebcopspectral(op,bcon,bsca,n,fd1);</span>
+0123 
+0124 <span class="comment">%% Create initial conditions</span>
+0125 fprintf(<span class="string">'Creating initial conditions ...\n'</span>);
+0126 start_PDEinit = tic;
+0127 <span class="keyword">if</span> d == 2
+0128     init = exp(-x(1)'*PP(1,1)*x(1)/lambda)*exp(-x(2)'*PP(2,2)*x(2)/lambda);
+0129 <span class="keyword">elseif</span> d == 1
+0130     init = exp(-x(1)'*PP(1,1)*x(1)/lambda);
+0131 <span class="keyword">end</span>
+0132 initTens  = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(init) ,x), gridT);
+0133 toc(start_PDEinit)
+0134 end_PDEinit = toc(start_PDEinit);
+0135 
+0136 <span class="comment">%% Compress operator</span>
+0137 
+0138 op_uncomp = op; <span class="comment">%save uncompressed op</span>
+0139 
+0140 fprintf(<span class="string">'Attempt to compress operator, rank(op)=%d\n'</span>, ncomponents(op));
+0141 rank_op_uncomp = ncomponents(op);
+0142 
+0143 start_compress_id = tic;
+0144 fprintf(<span class="string">'Target CTD: %d terms above tol\n'</span>, length(find(op.lambda&gt;tol_err_op)));
+0145 fprintf(<span class="string">'Running TENID with frobenius norm:\n'</span>)
+0146 [op,~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(op,tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(op),0);
+0147 op = fixsigns(arrange(op));
+0148 compress_time_id = toc(start_compress_id);
+0149 fprintf(<span class="string">'Number of components after TENID compression, %d\n'</span>, ncomponents(op));
+0150 toc(start_compress_id)
+0151 
+0152 start_compress = tic;
+0153 fprintf(<span class="string">'Running ALS:\n'</span>)
+0154 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(op,tol_err_op);
+0155 rank_op_comp = ncomponents(op);
+0156 fprintf(<span class="string">'Number of components after ALS compression, %d\n'</span>, ncomponents(op));
+0157 compress_time = toc(start_compress);
+0158 toc(start_compress)
+0159 
+0160 <span class="comment">%% Solve system</span>
+0161 
+0162 disp(<span class="string">'Beginning Solving'</span>);
+0163 tic;
+0164 start_solve = tic;
+0165 
+0166 F_all = cell(1,tend+1);
+0167 F_all{1} = initTens{1};
+0168 
+0169 tdata = 0;
+0170 data = double(initTens{1})';
+0171 t = 0;
+0172 
+0173 iter_time = zeros(length(tt),1);
+0174 <span class="keyword">for</span> ind = 2:length(tt)
+0175     start_iter = tic;
+0176 <span class="comment">%         if isempty(als_variant) %original</span>
+0177 <span class="comment">%             [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell] = ...</span>
+0178 <span class="comment">%                 als_sys(op,bc,F_all{ind-1},tol_err,als_options,debugging, 0);</span>
+0179 <span class="comment">%             restart = []; %no restarts for original</span>
+0180 <span class="comment">%         else %variant</span>
+0181 <span class="comment">%             [F, err, iter, Fcond, enrich, t_step, illcondmat, maxit, maxrank, F_cell, B_cell, b_cell, restart] = ...</span>
+0182 <span class="comment">%                 als_sys_var(op,bc,F_all{ind-1},tol_err,als_options,als_variant,debugging, 0);</span>
+0183 <span class="comment">%         end</span>
+0184     F = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(op,F_all{ind-1});
+0185     <span class="keyword">if</span> ncomponents(F) &gt; ncomponents(F_all{ind-1})
+0186         [F_all{ind}, ~] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(F,tol_err_op);
+0187     <span class="keyword">else</span>
+0188         F_all{ind} = F;
+0189     <span class="keyword">end</span>
+0190     <span class="keyword">if</span> mod(ind,10) == 0
+0191         fprintf(<span class="string">'Time: %.4fs  Current tensor rank: %d \n'</span>, tt(ind), ncomponents(F_all{ind}))
+0192     <span class="keyword">end</span>
+0193     iter_time(ind-1) = toc(start_iter);
+0194 <span class="keyword">end</span>
+0195 
+0196 time_solve = toc(start_solve);
+0197 toc;
+0198 disp(<span class="string">'Solution complete'</span>);
+0199 
+0200 time_whole = toc(start_whole);
+0201 
+0202 fprintf([<span class="string">'Run '</span>,num2str(run),<span class="string">' with main_run is complete \n'</span>])
+0203 
+0204 diary off
+0205 
+0206 save([dirpath,<span class="string">'run_'</span>,num2str(run),<span class="string">'data'</span>])
+0207     
+0208 <span class="comment">%% Visualize results</span>
+0209 
+0210 <span class="comment">%% Dimension = 1</span>
+0211 
+0212 <span class="keyword">if</span> d == 1
+0213 <span class="comment">%% True solution</span>
+0214 
+0215 <span class="comment">% AA = -1;</span>
+0216 <span class="comment">% BB = 1;</span>
+0217 <span class="comment">% QQ = 1;</span>
+0218 <span class="comment">% PP = 0.4142;</span>
+0219 <span class="comment">% noise = 1;</span>
+0220 <span class="comment">% lambda = 1;</span>
+0221 
+0222     ts_grid = csvread([dirpath,<span class="string">'grid.csv'</span>]);
+0223     ts_value = csvread([dirpath,<span class="string">'value.csv'</span>]);
+0224 
+0225 <span class="comment">%% Plot result</span>
+0226 
+0227     px = zeros(n,length(tt));
+0228     <span class="keyword">for</span> k=1:length(tt)
+0229        px(:,k) = double(F_all{k}); 
+0230     <span class="keyword">end</span>
+0231 
+0232     plottend = length(tt);<span class="comment">%-length(tt)+20;</span>
+0233     figure
+0234     hold on
+0235     surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)',<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0236 <span class="comment">%     scatter3(ts_grid(:,1),ts_grid(:,2),ts_value,10,'filled');</span>
+0237     zlim([-0.2 1.2])
+0238     <span class="comment">% ylim([7.8 8])</span>
+0239     xlabel(<span class="string">'X(m)'</span>)
+0240     ylabel(<span class="string">'Time(s)'</span>)
+0241     zlabel(<span class="string">'Desirability(x,t)'</span>)
+0242     title(<span class="string">'Desirability function evolution'</span>)
+0243     colorbar
+0244 <span class="keyword">end</span>
+0245 
+0246 <span class="comment">%% Dimension = 2</span>
+0247 
+0248 <span class="keyword">if</span> d == 2
+0249 <span class="comment">%% True solutions for linear system</span>
+0250     
+0251 <span class="comment">% AA = eye(d);</span>
+0252 <span class="comment">% BB = eye(d);</span>
+0253 <span class="comment">% QQ = eye(d);</span>
+0254 <span class="comment">% PP = diag([6 6]);</span>
+0255 <span class="comment">% noise = diag([1 1]);</span>
+0256 <span class="comment">% lambda = 1;</span>
+0257 
+0258     ts_grid = csvread([dirpath,<span class="string">'grid 2.csv'</span>]);
+0259     ts_value = csvread([dirpath,<span class="string">'value 2.csv'</span>]);
+0260 
+0261 <span class="comment">%% Plot result</span>
+0262     figure
+0263     ht_pdf = pcolor(gridT{1},gridT{2},double(F_all{1})');
+0264     h = colorbar;
+0265     <span class="comment">%set(h, 'ylim', [0 0.25])</span>
+0266     caxis([0 1])
+0267     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0268     xlabel(<span class="string">'x'</span>)
+0269     ylabel(<span class="string">'y'</span>)
+0270     title([<span class="string">'Time = '</span>,num2str(tt(1))]);
+0271     grid on
+0272     axis ([bdim(1,:),bdim(2,:)])
+0273     grid on
+0274     <span class="keyword">for</span> k = 2:10:length(tt)
+0275          <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'CData'</span>, double(F_all{k})' );
+0276          title([<span class="string">'Time = '</span>,num2str(tt(k))]);
+0277          drawnow
+0278          pause(1.0/1000);
+0279     <span class="keyword">end</span>
+0280     
+0281 <span class="comment">%%</span>
+0282     timenn = 115;
+0283     k = 1;
+0284     figure
+0285     hold on
+0286     surf(gridT{1},gridT{2},double(F_all{end})',<span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0287     scatter3(ts_grid(1:timenn:<span class="keyword">end</span>,1),ts_grid(1:timenn:<span class="keyword">end</span>,2),ts_value(k-1+(1:timenn:end)),10,<span class="string">'filled'</span>);
+0288     colorbar;
+0289     xlabel(<span class="string">'x'</span>)
+0290     ylabel(<span class="string">'y'</span>)
+0291     xlim([-5 5])
+0292     ylim([-5 5])
+0293 
+0294 <span class="comment">%%</span>
+0295     timenn = 115;
+0296     figure
+0297     ht_true = scatter3(ts_grid(1:timenn:<span class="keyword">end</span>,1),ts_grid(1:timenn:<span class="keyword">end</span>,2),ts_value(1:timenn:end),10,<span class="string">'filled'</span>);
+0298     h = colorbar;
+0299     <span class="comment">%set(h, 'ylim', [0 0.25])</span>
+0300     caxis([0 1])
+0301     xlabel(<span class="string">'x'</span>)
+0302     ylabel(<span class="string">'y'</span>)
+0303     title([<span class="string">'Time = '</span>,num2str(tt(1))]);
+0304     grid on
+0305     axis ([bdim(1,:),bdim(2,:)])
+0306     grid on
+0307     <span class="keyword">for</span> k = 2:1:timenn
+0308          <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_true,<span class="string">'ZData'</span>, ts_value(k-1+(1:timenn:end)));
+0309          title([<span class="string">'Time = '</span>,num2str(ts_grid(k,3))]);
+0310          drawnow
+0311          pause(1.0/10);
+0312     <span class="keyword">end</span>
+0313 
+0314 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mgsqr</title>
+  <meta name="keywords" content="mgsqr">
+  <meta name="description" content="Pivoted QR factorization via modified Gram-Schmidt.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>mgsqr
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Pivoted QR factorization via modified Gram-Schmidt.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Q,R,piv,k] = mgsqr(A,tol) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Pivoted QR factorization via modified Gram-Schmidt.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="testGS.html" class="code" title="">testGS</a>	testGS.m</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Q,R,piv,k] = mgsqr(A,tol)</a>
+0002 <span class="comment">% Pivoted QR factorization via modified Gram-Schmidt.</span>
+0003 
+0004   [m,n] = size(A);
+0005   maxrnk = min(m,n);
+0006   Q = zeros(m,maxrnk);
+0007   R = zeros(maxrnk,n);
+0008   
+0009   piv = 1:n;
+0010   c = sum(A.^2,1);
+0011   [cmax,imax] = max(c);
+0012   cmax = cmax(1);  imax = imax(1); <span class="comment">% In case two equal col norms</span>
+0013 
+0014   <span class="keyword">for</span> k = 1:maxrnk
+0015     
+0016     <span class="comment">% perform pivot</span>
+0017     tmp = piv(k);  piv(k) = piv(imax);  piv(imax) = tmp;
+0018     tmp = A(:,k);  A(:,k) = A(:,imax);  A(:,imax) = tmp;
+0019     tmp = R(:,k);  R(:,k) = R(:,imax);  R(:,imax) = tmp;
+0020     tmp = c(k);    c(k) = c(imax);      c(imax) = tmp;
+0021     
+0022     <span class="comment">% gram-schmidt sweep</span>
+0023     R(k,k) = norm(A(:,k));
+0024     Q(:,k) = A(:,k) / R(k,k);
+0025     R(k,(k+1):n) = Q(:,k)' * A(:,(k+1):n);
+0026     
+0027     <span class="keyword">for</span> j = (k+1):n
+0028       A(:,j) = A(:,j) - R(k,j) * Q(:,k);
+0029     <span class="keyword">end</span>
+0030     
+0031     <span class="comment">% find next pivot</span>
+0032     <span class="keyword">if</span> k &lt; maxrnk
+0033       <span class="comment">%c((k+1):n) = c((k+1):n) - R(k,(k+1):n).^2; % I had problems getting</span>
+0034       <span class="comment">%this to work right. As it is written now, you lose 1/2 of the digits</span>
+0035       
+0036       <span class="comment">% Slower, but it works</span>
+0037       c((k+1):n) = sqrt(sum(A((k+1):m,(k+1):n).^2,1));
+0038       
+0039       <span class="comment">% Find the max column norm</span>
+0040       [cmax,imax] = max(c((k+1):n)); 
+0041       cmax = cmax(1);  imax = imax(1);  imax = k + imax(1);
+0042       
+0043     <span class="keyword">end</span>
+0044     
+0045     <span class="comment">% check for convergence</span>
+0046     <span class="keyword">if</span> abs(cmax) &lt; tol
+0047       Q = Q(:,1:k);
+0048       R = R(1:k,:);
+0049       <span class="keyword">return</span>
+0050     <span class="keyword">end</span>
+0051     
+0052     
+0053   <span class="keyword">end</span>
+0054 
+0055 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of testGS</title>
+  <meta name="keywords" content="testGS">
+  <meta name="description" content="testGS.m">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>testGS
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>testGS.m</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> testGS.m
+ This script tests the orthogonality of the outputs of modified Gram-
+ Schmidt, doubly modified Gram-schmidt, and Matlab's qr algorithm
+ Authors
+ Matthew Reynolds</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="dgsqr.html" class="code" title="function [Q,R,piv,k] = dgsqr(A,tol)">dgsqr</a>	Authors:</li><li><a href="mgsqr.html" class="code" title="function [Q,R,piv,k] = mgsqr(A,tol)">mgsqr</a>	Pivoted QR factorization via modified Gram-Schmidt.</li><li><a href="rank_k_gsqr.html" class="code" title="function [Q,R,piv,k] = rank_k_gsqr(A,maxrnk)">rank_k_gsqr</a>	Authors:</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% testGS.m</span>
+0002 <span class="comment">% This script tests the orthogonality of the outputs of modified Gram-</span>
+0003 <span class="comment">% Schmidt, doubly modified Gram-schmidt, and Matlab's qr algorithm</span>
+0004 <span class="comment">% Authors</span>
+0005 <span class="comment">% Matthew Reynolds</span>
+0006 
+0007 <span class="comment">% Create a matrix</span>
+0008 sz = 15;
+0009 A = randn(sz);
+0010 [U,~,V] = svd(A);
+0011 S = diag(pi*exp(sqrt(3))*10.^-(0:sz-1));
+0012 
+0013 <span class="comment">% norm</span>
+0014 nA = S(1,1);
+0015 
+0016 <span class="comment">% Set tolerance (relative), for methods that use tolerance</span>
+0017 tol = 1e-14;
+0018 
+0019 <span class="comment">% print the header</span>
+0020 fprintf(<span class="string">'\n'</span>)
+0021 fprintf(<span class="string">'Test orthogonality\n'</span>)
+0022 fprintf(<span class="string">'   k(A)        MGS||1-Q^t*Q||   DGS||1-Q^t*Q||  rkGS||1-Q^t*Q||   MAT||1-Q^t*Q||\n'</span>)
+0023 
+0024 <span class="keyword">for</span> i = 1:sz
+0025     <span class="comment">% Form the matrix with the condition number 10^(i-1)</span>
+0026     A = U(:,1:i)*S(1:i,1:i)*V(:,1:i)';
+0027     
+0028     <span class="comment">% Compute QR factorizations</span>
+0029     [Q,R,piv,k] = <a href="dgsqr.html" class="code" title="function [Q,R,piv,k] = dgsqr(A,tol)">dgsqr</a>(A,tol*nA);
+0030     [Qm,Rm,pivm,km] = <a href="mgsqr.html" class="code" title="function [Q,R,piv,k] = mgsqr(A,tol)">mgsqr</a>(A,tol*nA);
+0031     [Qrk,Rrk,pivrk,krk] = <a href="rank_k_gsqr.html" class="code" title="function [Q,R,piv,k] = rank_k_gsqr(A,maxrnk)">rank_k_gsqr</a>(A,i); <span class="comment">% note: play with your target rank to see how this behaves with an unknown rank.</span>
+0032     [Qmat,Rmat] = qr(A);
+0033     
+0034     <span class="comment">% print the results</span>
+0035     fprintf(<span class="string">'%4.4e %16.4e %16.4e %16.4e %16.4e\n'</span>, S(1,1)/S(i,i), norm(eye(size(Qm,2))-Qm'*Qm),<span class="keyword">...</span>
+0036         norm(eye(size(Q,2))-Q'*Q), norm(eye(size(Qrk,2))-Qrk'*Qrk), norm(eye(size(Qmat,2))-Qmat'*Qmat))
+0037     
+0038 <span class="keyword">end</span>
+0039 
+0040 <span class="comment">% Test the reconstructions</span>
+0041 fprintf(<span class="string">'\n'</span>)
+0042 fprintf(<span class="string">' Reconstruction errors, relative \n'</span>)
+0043 fprintf(<span class="string">'   k(A)        MGS||A(:,p)-Q*R||   DGS||A(:,p)-Q*R||  rkGS||A(:,p)-Q*R||   MAT||A-Q*R||\n'</span>)
+0044 <span class="comment">% print the results</span>
+0045     fprintf(<span class="string">'%4.4e %16.4e %20.4e %20.4e %16.4e\n'</span>, S(1,1)/S(i,i), norm(A(:,pivm)-Qm*Rm)/norm(A(:,pivm)),<span class="keyword">...</span>
+0046         norm(A(:,piv)-Q*R)/norm(A(:,piv)), norm(A(:,pivrk)-Qrk*Rrk)/norm(A(:,pivrk)), norm(A-Qmat*Rmat)/norm(A))</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

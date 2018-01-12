@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of intTens</title>
+  <meta name="keywords" content="intTens">
+  <meta name="description" content="F - ktensor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>intTens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>F - ktensor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [Fint] = intTens(F, dim, gridT, w) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> F - ktensor
+ grid - grid in each dimension in cell
+ w - integration weight in each dimension in cell
+ dim - dimensions to integrate over</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>	Compute the mean and covariance of a tensor</li><li><a href="plot2DsliceM.html" class="code" title="function [handleOutput] = plot2DsliceM(itens,slices_dim,gridT, handleInput,lambda)">plot2DsliceM</a>	</li><li><a href="plot2DtimeMFibers.html" class="code" title="function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )">plot2DtimeMFibers</a>	Plot the time evolution of the tensor marginalized for each dimension</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_convergence_radar.html" class="code" title="">test_convergence_radar</a>	% Load data</li><li><a href="../test/test_intTens.html" class="code" title="function [] = test_intTens()">test_intTens</a>	</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Fint] = intTens(F, dim, gridT, w)</a>
+0002 
+0003 <span class="comment">% F - ktensor</span>
+0004 <span class="comment">% grid - grid in each dimension in cell</span>
+0005 <span class="comment">% w - integration weight in each dimension in cell</span>
+0006 <span class="comment">% dim - dimensions to integrate over</span>
+0007 
+0008 nd = ndims(F);
+0009 
+0010 <span class="keyword">if</span> nargin &lt; 4 || isempty(w)
+0011     <span class="keyword">for</span> ii = 1:nd
+0012         w{ii} = ones(size(F.U{ii},1),1);
+0013     <span class="keyword">end</span>
+0014 <span class="keyword">end</span>
+0015 
+0016 <span class="keyword">if</span> nargin &lt; 3 || isempty(gridT)
+0017     <span class="keyword">for</span> ii = 1:nd
+0018         gridT{ii} = (1:size(F.U{ii},1))';
+0019     <span class="keyword">end</span>
+0020 <span class="keyword">end</span>
+0021 
+0022 <span class="keyword">if</span> nargin &lt; 2 || isempty(dim)
+0023     dim = 1:nd;
+0024 <span class="keyword">end</span>
+0025 
+0026 
+0027 <span class="keyword">if</span> length(dim) ~= nd
+0028     Fintc = cell(1, nd - length(dim));
+0029 <span class="keyword">else</span>
+0030     Fintc = cell(1, 1);
+0031 <span class="keyword">end</span>
+0032 
+0033 Fint_lambda = F.lambda';
+0034 int_all = 0;
+0035 
+0036 <span class="keyword">for</span> ii = 1:nd
+0037     <span class="keyword">if</span> any(ii == dim)
+0038         Fintc{ii} = trapz(gridT{ii},bsxfun(@times,F.U{ii},w{ii}));<span class="comment">%w{ii}'*F.U{ii};</span>
+0039         Fint_lambda = Fint_lambda.*Fintc{ii};
+0040     <span class="keyword">else</span>
+0041         Fintc{ii} = F.U{ii}; 
+0042     <span class="keyword">end</span>
+0043     int_all = int_all + size(Fintc{ii},1);
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="keyword">if</span> int_all == nd
+0047     Fint = sum(Fint_lambda);
+0048 <span class="keyword">else</span>
+0049     Fint = ktensor(F.lambda, Fintc);
+0050 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

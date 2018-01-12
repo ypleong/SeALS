@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mvm</title>
+  <meta name="keywords" content="mvm">
+  <meta name="description" content="Matrix-vector multiplication">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>mvm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Matrix-vector multiplication</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function b = mvm(A,x) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Matrix-vector multiplication</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/ctdlab/tests/test_mvm.html" class="code" title="">test_mvm</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function b = mvm(A,x)</a>
+0002 <span class="comment">% Matrix-vector multiplication</span>
+0003 
+0004     D = ndims(A);
+0005     N2 = size(A);
+0006     N = sqrt(N2);
+0007     rA = length(A.lambda);
+0008     rx = length(x.lambda);
+0009     
+0010     b.U = cell(1,D);
+0011     b.lambda = zeros(rA*rx,1);
+0012     
+0013     <span class="keyword">for</span> d = 1:D
+0014         <span class="comment">% i need to change this to use sparse indexing....</span>
+0015         b.U{d} = spalloc(N(d),rA*rx,N(d)*(rA*rx));
+0016         ii = 1;
+0017         <span class="keyword">for</span> r = 1:rA
+0018             Atmp = reshape(A.U{d}(:,r),[N(d),N(d)]);
+0019             <span class="keyword">for</span> s = 1:rx
+0020                 b.U{d}(:,ii) = Atmp * x.U{d}(:,s);
+0021                 b.lambda(ii) = A.lambda(r)*x.lambda(s);
+0022                 ii = ii+1;
+0023             <span class="keyword">end</span>
+0024         <span class="keyword">end</span>
+0025     <span class="keyword">end</span>
+0026     
+0027     b = ktensor(b.lambda,b.U);
+0028     b = arrange(b);
+0029 
+0030 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

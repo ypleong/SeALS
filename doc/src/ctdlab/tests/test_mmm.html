@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_mmm</title>
+  <meta name="keywords" content="test_mmm">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_mmm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../../../src/ctdlab/keye.html" class="code" title="function I=keye(D,N)">keye</a>	Identity operator.</li><li><a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>	Create random sparse ctd with normally distributed elements.</li><li><a href="../../../src/ctdlab/madj.html" class="code" title="function A = madj(A)">madj</a>	Returns the adjoint of an operator.  If the operator is sparse, this is</li><li><a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>	Multiply two operators in canonical format, performing multiplication for</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;
+0002 
+0003 fprintf(<span class="string">'\n***test_mmm***\n'</span>)
+0004 
+0005 fprintf(<span class="string">'which -all mmm\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>
+0007 fprintf(<span class="string">'which -all madj\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/madj.html" class="code" title="function A = madj(A)">madj</a>
+0009 
+0010 ok = 1;
+0011 
+0012 d = 10;
+0013 n = 32;
+0014 n2 = n^2;
+0015 r = 10;
+0016 
+0017 <span class="comment">% test multiplication from both sides by identity</span>
+0018 A = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n2,r,1);
+0019 II = <a href="../../../src/ctdlab/keye.html" class="code" title="function I=keye(D,N)">keye</a>(d,n);
+0020 
+0021 B1 = <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>(II,A);
+0022 B2 = <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>(A,II);
+0023 
+0024 err1 = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A-B1)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0025 fprintf(<span class="string">'err1 = %e\n'</span>, err1)
+0026 err2 = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A-B2)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0027 fprintf(<span class="string">'err2 = %e\n'</span>, err2)
+0028 err3 = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B1-B2)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B1);
+0029 fprintf(<span class="string">'err3 = %e\n'</span>, err3);
+0030 
+0031 <span class="comment">% test multiplication by both sides of a symmetric operator</span>
+0032 Asym = <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>(<a href="../../../src/ctdlab/madj.html" class="code" title="function A = madj(A)">madj</a>(A),A);
+0033 Asym2 = <a href="../../../src/ctdlab/madj.html" class="code" title="function A = madj(A)">madj</a>(Asym);
+0034 err4 = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(Asym-Asym2)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(Asym);
+0035 fprintf(<span class="string">'err4 = %e\n'</span>, err4);
+0036 
+0037 <span class="comment">% test multiplication with truncation</span>
+0038 A = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n2,r,1);
+0039 A = normalize(A);
+0040 A.lambda = A.lambda .* exp(-50*linspace(0,1,r).^2)';
+0041 B = <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>(A,A);
+0042 B2 = <a href="../../../src/ctdlab/mmm.html" class="code" title="function C = mmm(A,B,del)">mmm</a>(A,A,1e-8);
+0043 err5 = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B-B2) / <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(B);
+0044 fprintf(<span class="string">'err5 = %e, rank(B) = %d, rank(B2) = %d\n'</span>, err5,length(B.lambda),length(B2.lambda))
+0045 
+0046 <span class="keyword">if</span> max([err1,err2,err3,err4,err5]) &gt; 1e-7
+0047   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0048 <span class="keyword">else</span>
+0049   fprintf(<span class="string">'PASSED\n'</span>)
+0050 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

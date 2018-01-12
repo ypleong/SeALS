@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of create_FP_op</title>
+  <meta name="keywords" content="create_FP_op">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>create_FP_op
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> 
+ fTens, vector ktensor 
+ qTens, matrix ktensor
+ D, from makediffop
+ D2, from makediffop
+ dt, time difference (scalar) ktensor
+
+ Write the operator H = Idendity + dt=(f*d/dx_i + q/2*d^2/dx_i/dx_j)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>	MATKTENS converts a cell array of ktensor functions to corresponding cell</li><li><a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>	SRMULTM multiplies two ktensor operators A and B. The result is a new</li><li><a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li><li><a href="hessian.html" class="code" title="function [hess] = hessian(D, D2)">hessian</a>	HESSIAN generates the Hessian operator as a cell array with ktensor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="createOP_VTOL.html" class="code" title="function [ op ] = createOP_VTOL(D, D2, gridT, tol_err_op, u, tau, g, epsilon, x, dt, q )">createOP_VTOL</a>	UNTITLED Summary of this function goes here</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)</a>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% fTens, vector ktensor</span>
+0004 <span class="comment">% qTens, matrix ktensor</span>
+0005 <span class="comment">% D, from makediffop</span>
+0006 <span class="comment">% D2, from makediffop</span>
+0007 <span class="comment">% dt, time difference (scalar) ktensor</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Write the operator H = Idendity + dt=(f*d/dx_i + q/2*d^2/dx_i/dx_j)</span>
+0010 
+0011 <span class="comment">%%</span>
+0012     
+0013     fFPEdiff = jacobian(fFPE,x);
+0014     
+0015 
+0016     fTens  = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(fFPE) ,x), gridT);
+0017     f_pTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(diag(fFPEdiff) ,x), gridT);
+0018     <span class="keyword">if</span> ( explicit == 1)
+0019         dtTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(dt)     ,x), gridT);
+0020     <span class="keyword">else</span> 
+0021         dtTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(-dt)     ,x), gridT);
+0022     <span class="keyword">end</span>
+0023     qTens  = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(q)      ,x), gridT);
+0024     dtTen = <a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(dtTens{1}); 
+0025     
+0026     sizef = size(fTens);
+0027     dim = sizef(1);
+0028     
+0029     <span class="comment">%% create (fi*p),i ::it assumes f_i constant so it is equivalennt to f_i*p,i. If f_i is not constant add f_i,i*p at the end</span>
+0030     <span class="comment">%% TODO: add f_i,i for the general case.</span>
+0031     
+0032     conv = ones(1,dim); <span class="comment">%start with ones.</span>
+0033     fipi = [];
+0034     <span class="keyword">for</span> i=1:dim
+0035         <span class="keyword">if</span> norm(fTens{i}) == 0
+0036             conv(i) = 0; <span class="comment">%no convenction term in dimension i.</span>
+0037         <span class="keyword">else</span>
+0038             <span class="keyword">if</span> isempty(fipi) == 1
+0039                 fipi = <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(<a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(fTens{i}),D{i});
+0040             <span class="keyword">else</span>
+0041                 fipi = fipi+<a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(<a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(fTens{i}),D{i});
+0042             <span class="keyword">end</span>
+0043         <span class="keyword">end</span>
+0044     <span class="keyword">end</span>
+0045     
+0046     <span class="comment">%% Create f_i,i*p</span>
+0047     fiip = [];
+0048     <span class="keyword">for</span> i=1:dim
+0049         <span class="keyword">if</span> norm(f_pTens{i}) == 0
+0050             conv(i) = 0; <span class="comment">%no convenction term in dimension i.</span>
+0051         <span class="keyword">else</span>
+0052             <span class="keyword">if</span> isempty(fiip) == 1
+0053                 fiip = <a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(f_pTens{i});
+0054             <span class="keyword">else</span>
+0055                 fiip = fiip + <a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(f_pTens{i});
+0056             <span class="keyword">end</span>
+0057         <span class="keyword">end</span>
+0058     <span class="keyword">end</span>
+0059     <span class="comment">%% create (q_ij*p),ij ::it assumes q_ij constant so it is equivalennt to q_ij*p,ij</span>
+0060     diff = ones(1,dim);
+0061 
+0062     <span class="comment">% create Hessian matrix</span>
+0063     Hess = <a href="hessian.html" class="code" title="function [hess] = hessian(D, D2)">hessian</a>(D,D2);
+0064 
+0065     noise_covTensOp = <a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>(qTens);
+0066 
+0067     qijpij = [];
+0068     <span class="keyword">for</span> i=1:dim
+0069         <span class="keyword">for</span> j=1:dim
+0070 
+0071 
+0072             <span class="comment">% create term to right operator</span>
+0073             <span class="keyword">if</span> norm(noise_covTensOp{j,i}) ~= 0
+0074                 <span class="keyword">if</span> isempty(qijpij) == 1
+0075                     qijpij = <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(noise_covTensOp{j,i},Hess{i,j});
+0076                 <span class="keyword">else</span>
+0077                     qijpij = qijpij+<a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(noise_covTensOp{j,i},Hess{i,j});
+0078                 <span class="keyword">end</span>
+0079             <span class="keyword">end</span>
+0080 
+0081         <span class="keyword">end</span>
+0082     <span class="keyword">end</span>
+0083     <span class="keyword">if</span> isempty(qijpij) == 0
+0084         qijpij = 0.5*qijpij;
+0085     <span class="keyword">end</span>
+0086 
+0087     <span class="comment">%% combine operator terms</span>
+0088     aop =  -fipi;
+0089     <span class="keyword">if</span> isempty(fiip) == 0
+0090        aop = aop -fiip; 
+0091     <span class="keyword">end</span>
+0092     <span class="keyword">if</span> isempty(qijpij) == 0
+0093        aop = aop + qijpij; 
+0094     <span class="keyword">end</span>
+0095     icell = {{{@(x1)ones(size(x1)),1}}};
+0096     iTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(icell,gridT);
+0097     iTen = <a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(iTens{1}); 
+0098     op_uncomp = iTen + <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(dtTen, aop);
+0099     
+0100     <span class="comment">%% Compress Operator</span>
+0101     fprintf(<span class="string">'Attempt to compress operator, rank(op)=%d\n'</span>, ncomponents(op_uncomp));
+0102     rank_op_uncomp = ncomponents(op_uncomp);
+0103     tic;
+0104     start_compress = tic;
+0105 
+0106     [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(op_uncomp,tol_err_op);
+0107 
+0108     compress_time = toc(start_compress);
+0109     toc;
+0110     rank_op_comp = ncomponents(op);
+0111     fprintf(<span class="string">'Number of components after compression, %d\n'</span>, ncomponents(op));
+0112 
+0113 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makefuncdyn</title>
+  <meta name="keywords" content="makefuncdyn">
+  <meta name="description" content="MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makefuncdyn
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.
+ Inputs:
+   f - the function f in symbolic representation.
+   G - the function G in symbolic representation.
+   B - the function B in symbolic representation.
+   noise_cov - the noise covariance matrix.
+   q - the state cost in symbolic representation.
+   R - the control cost matrix.
+   x - the symbolic state vector.
+ Outputs:
+   fFunc - f as MATLAB function.
+   GFunc - G as MATLAB function.
+   BFunc - B as MATLAB function.
+   noise_covFunc - noise_cov as MATLAB function.
+   qFunc - q as MATLAB function.
+   RFunc - R as MATLAB function.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x)</a>
+0002 <span class="comment">%MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   f - the function f in symbolic representation.</span>
+0005 <span class="comment">%   G - the function G in symbolic representation.</span>
+0006 <span class="comment">%   B - the function B in symbolic representation.</span>
+0007 <span class="comment">%   noise_cov - the noise covariance matrix.</span>
+0008 <span class="comment">%   q - the state cost in symbolic representation.</span>
+0009 <span class="comment">%   R - the control cost matrix.</span>
+0010 <span class="comment">%   x - the symbolic state vector.</span>
+0011 <span class="comment">% Outputs:</span>
+0012 <span class="comment">%   fFunc - f as MATLAB function.</span>
+0013 <span class="comment">%   GFunc - G as MATLAB function.</span>
+0014 <span class="comment">%   BFunc - B as MATLAB function.</span>
+0015 <span class="comment">%   noise_covFunc - noise_cov as MATLAB function.</span>
+0016 <span class="comment">%   qFunc - q as MATLAB function.</span>
+0017 <span class="comment">%   RFunc - R as MATLAB function.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% See also MAIN_RUN.</span>
+0020 
+0021 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0022 
+0023 <span class="comment">%% create fFunc</span>
+0024 <span class="keyword">if</span> isa(f,<span class="string">'sym'</span>) == 0 <span class="comment">%not sym (constant matrix)</span>
+0025     f = sym(f);
+0026 <span class="keyword">end</span>
+0027 fFunc = matlabFunction(f,<span class="string">'Vars'</span>,{x});
+0028 
+0029 <span class="comment">%% create GFunc</span>
+0030 <span class="keyword">if</span> isa(G,<span class="string">'sym'</span>) == 0
+0031     G = sym(G);
+0032 <span class="keyword">end</span>
+0033 GFunc = matlabFunction(G,<span class="string">'Vars'</span>,{x});
+0034 
+0035 <span class="comment">%% create BFunc</span>
+0036 <span class="keyword">if</span> isa(B,<span class="string">'sym'</span>) == 0
+0037     B = sym(B);
+0038 <span class="keyword">end</span>
+0039 BFunc = matlabFunction(B,<span class="string">'Vars'</span>,{x});
+0040 
+0041 <span class="comment">%% create noise_covFunc</span>
+0042 <span class="keyword">if</span> isa(noise_cov,<span class="string">'sym'</span>) == 0
+0043     noise_cov = sym(noise_cov);
+0044 <span class="keyword">end</span>
+0045 noise_covFunc = matlabFunction(noise_cov,<span class="string">'Vars'</span>,{x});
+0046 
+0047 <span class="comment">%% create qFunc</span>
+0048 <span class="keyword">if</span> isa(q,<span class="string">'sym'</span>) == 0
+0049     q = sym(q);
+0050 <span class="keyword">end</span>
+0051 qFunc = matlabFunction(q,<span class="string">'Vars'</span>,{x});
+0052 
+0053 <span class="comment">%% create RFunc</span>
+0054 <span class="keyword">if</span> isa(R,<span class="string">'sym'</span>) == 0
+0055     R = sym(R);
+0056 <span class="keyword">end</span>
+0057 RFunc = matlabFunction(R,<span class="string">'Vars'</span>,{x});
+0058  
+0059 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_tenid</title>
+  <meta name="keywords" content="test_tenid">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_tenid
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>	Create random sparse ctd with uniformly distributed elements.</li><li><a href="../../../src/ctdlab/rofpi1.html" class="code" title="function [T,err,alpha] = rofpi1(A,T,tol,maxit,vbs)">rofpi1</a>	Fixed point iteration for rank-1 update with provided initial guess.</li><li><a href="../../../src/ctdlab/snorma.html" class="code" title="function [nrm,T] = snorma(A,tol,maxit)">snorma</a>	Estimate the snorm of tensor A using top singular vectors of factor</li><li><a href="../../../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 fprintf(<span class="string">'\n***test_tenid***\n'</span>)
+0002 
+0003 fprintf(<span class="string">'which -all snorma\n'</span>)
+0004 which -all <a href="../../../src/ctdlab/snorma.html" class="code" title="function [nrm,T] = snorma(A,tol,maxit)">snorma</a>
+0005 fprintf(<span class="string">'which -all rofpi1\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/rofpi1.html" class="code" title="function [T,err,alpha] = rofpi1(A,T,tol,maxit,vbs)">rofpi1</a>
+0007 fprintf(<span class="string">'which -all tenid\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>
+0009 
+0010 ok = 1;
+0011 
+0012 d = 10;
+0013 n = 64;
+0014 r = 1024;
+0015 
+0016 <span class="comment">% generate ctd with exponentially decaying svals</span>
+0017 A = <a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>(d,n,r,1);
+0018 A = normalize(A);
+0019 A.lambda = A.lambda / A.lambda(1);
+0020 A.lambda = A.lambda .* exp(-1000*linspace(0,1,r).^2)';
+0021 
+0022 <span class="comment">% use tensor ID to grab the significant terms, using frobenius error</span>
+0023 tol = 1e-7;
+0024 k0 = 1;
+0025 kmax = 9;
+0026 nrmtype = <span class="string">'frob'</span>;
+0027 delta = [];
+0028 Anorm = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0029 vb = 0;
+0030 fprintf(<span class="string">'Target CTD: %d terms above tol\n'</span>, length(find(A.lambda&gt;tol)));
+0031 fprintf(<span class="string">'Running TENID with frobenius norm:\n'</span>)
+0032 [B,err] = <a href="../../../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(A,tol,k0,kmax,nrmtype,delta,Anorm,vb);
+0033 
+0034 <span class="comment">% now use snorm</span>
+0035 fprintf(<span class="string">'Running TENID with snorm:\n'</span>)
+0036 nrmtype = <span class="string">'snorm'</span>;
+0037 [B,err] = <a href="../../../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(A,tol,k0,kmax,nrmtype,delta,Anorm,vb);
+0038</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

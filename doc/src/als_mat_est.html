@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als_mat_est</title>
+  <meta name="keywords" content="als_mat_est">
+  <meta name="description" content="ALS_MAT_EST estimates the matrices M{1,1} and the produkt terms in">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als_mat_est
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS_MAT_EST estimates the matrices M{1,1} and the produkt terms in</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [M_cell,Aprodsum_cell] = als_mat_est(A,F) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS_MAT_EST estimates the matrices M{1,1} and the produkt terms in
+ M{1,1} for each dimension, which is used to scale the boundary conditions
+ in MAKE_BC_SCA. ALS_MAT_EST originates from ALS_ONESTEP_SYS. Thus, see
+ <a href="als_onestep_sys.html" class="code" title="function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging)">ALS_ONESTEP_SYS</a> first. See also the paper.
+ Inputs:
+   A - the operator.
+   F - estimated solution F to AF=G.
+ Outputs:
+   M_cell - cell with all the matrices M{1,1} in each dimension.
+   Aprodsum_cell - cell with the products terms in M{1,1} in each
+   dimension.
+
+ See also <a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">MAKE_BC_SCA</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [M_cell,Aprodsum_cell] = als_mat_est(A,F)</a>
+0002 <span class="comment">% ALS_MAT_EST estimates the matrices M{1,1} and the produkt terms in</span>
+0003 <span class="comment">% M{1,1} for each dimension, which is used to scale the boundary conditions</span>
+0004 <span class="comment">% in MAKE_BC_SCA. ALS_MAT_EST originates from ALS_ONESTEP_SYS. Thus, see</span>
+0005 <span class="comment">% ALS_ONESTEP_SYS first. See also the paper.</span>
+0006 <span class="comment">% Inputs:</span>
+0007 <span class="comment">%   A - the operator.</span>
+0008 <span class="comment">%   F - estimated solution F to AF=G.</span>
+0009 <span class="comment">% Outputs:</span>
+0010 <span class="comment">%   M_cell - cell with all the matrices M{1,1} in each dimension.</span>
+0011 <span class="comment">%   Aprodsum_cell - cell with the products terms in M{1,1} in each</span>
+0012 <span class="comment">%   dimension.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% See also MAKE_BC_SCA.</span>
+0015 
+0016 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0017 
+0018 A = arrange(A);
+0019 F = arrange(F);
+0020 
+0021 nd = ndims(F);
+0022 
+0023 sizeA = size(A);
+0024 rA = ncomponents(A);
+0025 rF = ncomponents(F);
+0026 
+0027 <span class="comment">% incooporate normalization factor, evenly distributed;</span>
+0028 <span class="keyword">for</span> i = 1:nd
+0029     A.U{i} = A.U{i}*diag((A.lambda).^(1/nd));
+0030     F.U{i} = F.U{i}*diag((F.lambda).^(1/nd));
+0031 <span class="keyword">end</span>
+0032 A.lambda = ones(rA,1);
+0033 F.lambda = ones(rF,1);
+0034 
+0035 <span class="comment">% get matrices</span>
+0036 <span class="keyword">for</span> k = 1:nd
+0037     nf = sqrt(sizeA(k));
+0038     Acell{k} = reshape(A.U{k},nf,nf,rA);
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="comment">%%% for scaling %%%</span>
+0042 M_cell = cell(1,nd);
+0043 Aprodsum_cell = cell(1,nd);
+0044 <span class="comment">%%% for scaling %%%</span>
+0045 
+0046 <span class="keyword">for</span> k = 1:nd
+0047     nf = sqrt(sizeA(k));
+0048     
+0049     idx = [1:(k-1) (k+1):nd];
+0050     Fcell = cell(nd,1);
+0051     <span class="keyword">for</span> n = 1:nd
+0052         Fcell{n} = F.U{n};
+0053     <span class="keyword">end</span>
+0054     
+0055     M = cell(rF,rF);
+0056     
+0057     <span class="comment">%Calculate B matrix</span>
+0058     <span class="keyword">for</span> i=1:rF
+0059         <span class="keyword">for</span> j=1:rF
+0060             
+0061             M{i,j} = zeros(nf);
+0062             
+0063             <span class="comment">%%% for scaling %%%</span>
+0064             Aprodsum = 0;
+0065             <span class="comment">%%% for scaling %%%</span>
+0066             
+0067             <span class="comment">%%% for scaling %%%%</span>
+0068             <span class="comment">% ignored for scaling case</span>
+0069             <span class="comment">%if i==j</span>
+0070             <span class="comment">%    M{i,j} = M{i,j}+alpha*eye(nf);</span>
+0071             <span class="comment">%end</span>
+0072             <span class="comment">%%% for scaling %%%</span>
+0073             
+0074             <span class="keyword">for</span> ia=1:rA
+0075                 A_k_ia = Acell{k}(:,:,ia);
+0076                 <span class="keyword">for</span> ja=1:rA
+0077                     A_k_ja = Acell{k}(:,:,ja);
+0078                     
+0079                     Aprod = 1;
+0080                     <span class="keyword">for</span> d = idx
+0081                         
+0082                         A_d_ia = Acell{d}(:,:,ia);
+0083                         A_d_ja = Acell{d}(:,:,ja);
+0084                         
+0085                         u_d_i = Fcell{d}(:,i);
+0086                         u_d_j = Fcell{d}(:,j);
+0087                         
+0088                         Aprod = Aprod * (A_d_ia*u_d_j)' * (A_d_ja*u_d_i);
+0089                     <span class="keyword">end</span>
+0090                     
+0091                     Aprodsum = Aprodsum+Aprod;
+0092                     M{i,j} = M{i,j} + A_k_ja'*A_k_ia*Aprod;
+0093                     
+0094                 <span class="keyword">end</span>
+0095             <span class="keyword">end</span>
+0096             
+0097         <span class="keyword">end</span>
+0098     <span class="keyword">end</span>
+0099     
+0100     <span class="comment">%%% for scaling %%%</span>
+0101     M_cell{k} = M{1,1};
+0102     Aprodsum_cell{k} = Aprodsum;
+0103     <span class="comment">%%% for scaling %%%</span>
+0104     
+0105 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

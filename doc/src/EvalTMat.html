@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of EvalTMat</title>
+  <meta name="keywords" content="EvalTMat">
+  <meta name="description" content="EVALTMAT evaluates a matrix-valued ktensor function at a point x">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>EvalTMat
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>EVALTMAT evaluates a matrix-valued ktensor function at a point x</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ y ] = EvalTMat( TMat, x, gridT ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> EVALTMAT evaluates a matrix-valued ktensor function at a point x
+ Inputs:
+   TMat - the matrix-valued ktensor function.
+   x - the points where the value of TMat should be evaluated.
+   grid - the discretization grid.
+ Outputs:
+   y - the value at x (a matrix).</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>	EVALT evaluates a ktensor (function) at an individual point</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="sim_finite_run.html" class="code" title="function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_finite_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li><li><a href="sim_run.html" class="code" title="function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ y ] = EvalTMat( TMat, x, gridT )</a>
+0002 <span class="comment">% EVALTMAT evaluates a matrix-valued ktensor function at a point x</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   TMat - the matrix-valued ktensor function.</span>
+0005 <span class="comment">%   x - the points where the value of TMat should be evaluated.</span>
+0006 <span class="comment">%   grid - the discretization grid.</span>
+0007 <span class="comment">% Outputs:</span>
+0008 <span class="comment">%   y - the value at x (a matrix).</span>
+0009 
+0010 [n,m] = size(TMat);
+0011 y = zeros(n,m);
+0012 
+0013 <span class="keyword">for</span> i=1:n
+0014     <span class="keyword">for</span> j=1:m
+0015         y(i,j) = <a href="EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>(TMat{i,j},x,gridT);
+0016     <span class="keyword">end</span>
+0017 <span class="keyword">end</span>
+0018 
+0019 <span class="keyword">end</span>
+0020</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

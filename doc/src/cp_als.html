@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of cp_als</title>
+  <meta name="keywords" content="cp_als">
+  <meta name="description" content="CP_ALS Compute a CP decomposition of any type of tensor.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>cp_als
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CP_ALS Compute a CP decomposition of any type of tensor.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [P,Uinit,output] = cp_als(X,R,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">CP_ALS Compute a CP decomposition of any type of tensor.
+
+   P = CP_ALS(X,R) computes an estimate of the best rank-R
+   CP model of a tensor X using an alternating least-squares
+   algorithm.  The input X can be a tensor, sptensor, ktensor, or
+   ttensor. The result P is a ktensor.
+
+   P = CP_ALS(X,R,'param',value,...) specifies optional parameters and
+   values. Valid parameters and their default values are:
+      'tol' - Tolerance on difference in fit {1.0e-4}
+      'maxiters' - Maximum number of iterations {50}
+      'dimorder' - Order to loop through dimensions {1:ndims(A)}
+      'init' - Initial guess [{'random'}|'nvecs'|cell array]
+      'printitn' - Print fit every n iterations; 0 for no printing {1}
+
+   [P,U0] = CP_ALS(...) also returns the initial guess.
+
+   [P,U0,out] = CP_ALS(...) also returns additional output that contains
+   the input parameters.
+
+   Note: The &quot;fit&quot; is defined as 1 - norm(X-full(P))/norm(X) and is
+   loosely the proportion of the data described by the CP model, i.e., a
+   fit of 1 is perfect.
+
+   NOTE: Updated in various minor ways per work of Phan Anh Huy. See Anh
+   Huy Phan, Petr Tichavský, Andrzej Cichocki, On Fast Computation of
+   Gradients for CANDECOMP/PARAFAC Algorithms, arXiv:1204.1586, 2012.
+
+   Examples:
+   X = sptenrand([5 4 3], 10);
+   P = cp_als(X,2);
+   P = cp_als(X,2,'dimorder',[3 2 1]);
+   P = cp_als(X,2,'dimorder',[3 2 1],'init','nvecs');
+   U0 = {rand(5,2),rand(4,2),[]}; %&lt;-- Initial guess for factors of P
+   [P,U0,out] = cp_als(X,2,'dimorder',[3 2 1],'init',U0);
+   P = cp_als(X,2,out.params); %&lt;-- Same params as previous run
+
+   See also KTENSOR, TENSOR, SPTENSOR, TTENSOR.
+
+MATLAB Tensor Toolbox.
+Copyright 2015, Sandia Corporation.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li><li><a href="../test/test_convergence_radar.html" class="code" title="">test_convergence_radar</a>	% Load data</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [P,Uinit,output] = cp_als(X,R,varargin)</a>
+0002 <span class="comment">%CP_ALS Compute a CP decomposition of any type of tensor.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%   P = CP_ALS(X,R) computes an estimate of the best rank-R</span>
+0005 <span class="comment">%   CP model of a tensor X using an alternating least-squares</span>
+0006 <span class="comment">%   algorithm.  The input X can be a tensor, sptensor, ktensor, or</span>
+0007 <span class="comment">%   ttensor. The result P is a ktensor.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   P = CP_ALS(X,R,'param',value,...) specifies optional parameters and</span>
+0010 <span class="comment">%   values. Valid parameters and their default values are:</span>
+0011 <span class="comment">%      'tol' - Tolerance on difference in fit {1.0e-4}</span>
+0012 <span class="comment">%      'maxiters' - Maximum number of iterations {50}</span>
+0013 <span class="comment">%      'dimorder' - Order to loop through dimensions {1:ndims(A)}</span>
+0014 <span class="comment">%      'init' - Initial guess [{'random'}|'nvecs'|cell array]</span>
+0015 <span class="comment">%      'printitn' - Print fit every n iterations; 0 for no printing {1}</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%   [P,U0] = CP_ALS(...) also returns the initial guess.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%   [P,U0,out] = CP_ALS(...) also returns additional output that contains</span>
+0020 <span class="comment">%   the input parameters.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%   Note: The &quot;fit&quot; is defined as 1 - norm(X-full(P))/norm(X) and is</span>
+0023 <span class="comment">%   loosely the proportion of the data described by the CP model, i.e., a</span>
+0024 <span class="comment">%   fit of 1 is perfect.</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%   NOTE: Updated in various minor ways per work of Phan Anh Huy. See Anh</span>
+0027 <span class="comment">%   Huy Phan, Petr Tichavský, Andrzej Cichocki, On Fast Computation of</span>
+0028 <span class="comment">%   Gradients for CANDECOMP/PARAFAC Algorithms, arXiv:1204.1586, 2012.</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%   Examples:</span>
+0031 <span class="comment">%   X = sptenrand([5 4 3], 10);</span>
+0032 <span class="comment">%   P = cp_als(X,2);</span>
+0033 <span class="comment">%   P = cp_als(X,2,'dimorder',[3 2 1]);</span>
+0034 <span class="comment">%   P = cp_als(X,2,'dimorder',[3 2 1],'init','nvecs');</span>
+0035 <span class="comment">%   U0 = {rand(5,2),rand(4,2),[]}; %&lt;-- Initial guess for factors of P</span>
+0036 <span class="comment">%   [P,U0,out] = cp_als(X,2,'dimorder',[3 2 1],'init',U0);</span>
+0037 <span class="comment">%   P = cp_als(X,2,out.params); %&lt;-- Same params as previous run</span>
+0038 <span class="comment">%</span>
+0039 <span class="comment">%   See also KTENSOR, TENSOR, SPTENSOR, TTENSOR.</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%MATLAB Tensor Toolbox.</span>
+0042 <span class="comment">%Copyright 2015, Sandia Corporation.</span>
+0043 
+0044 <span class="comment">% This is the MATLAB Tensor Toolbox by T. Kolda, B. Bader, and others.</span>
+0045 <span class="comment">% http://www.sandia.gov/~tgkolda/TensorToolbox.</span>
+0046 <span class="comment">% Copyright (2015) Sandia Corporation. Under the terms of Contract</span>
+0047 <span class="comment">% DE-AC04-94AL85000, there is a non-exclusive license for use of this</span>
+0048 <span class="comment">% work by or on behalf of the U.S. Government. Export of this data may</span>
+0049 <span class="comment">% require a license from the United States Government.</span>
+0050 <span class="comment">% The full license terms can be found in the file LICENSE.txt</span>
+0051 
+0052 warning(<span class="string">'error'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0053 
+0054 <span class="comment">%% Extract number of dimensions and norm of X.</span>
+0055 N = ndims(X);
+0056 normX = norm(X);
+0057 
+0058 <span class="comment">%% Set algorithm parameters from input or by using defaults</span>
+0059 params = inputParser;
+0060 params.addParamValue(<span class="string">'tol'</span>,1e-4,@isscalar);
+0061 params.addParamValue(<span class="string">'maxiters'</span>,50,@(x) isscalar(x) &amp; x &gt; 0);
+0062 params.addParamValue(<span class="string">'dimorder'</span>,1:N,@(x) isequal(sort(x),1:N));
+0063 params.addParamValue(<span class="string">'init'</span>, <span class="string">'random'</span>, @(x) (iscell(x) || ismember(x,{<span class="string">'random'</span>,<span class="string">'nvecs'</span>})));
+0064 params.addParamValue(<span class="string">'printitn'</span>,1,@isscalar);
+0065 params.parse(varargin{:});
+0066 
+0067 <span class="comment">%% Copy from params object</span>
+0068 fitchangetol = params.Results.tol;
+0069 maxiters = params.Results.maxiters;
+0070 dimorder = params.Results.dimorder;
+0071 init = params.Results.init;
+0072 printitn = params.Results.printitn;
+0073 
+0074 <span class="comment">%% Error checking</span>
+0075 
+0076 <span class="comment">%% Set up and error checking on initial guess for U.</span>
+0077 <span class="keyword">if</span> iscell(init)
+0078     Uinit = init;
+0079     <span class="keyword">if</span> numel(Uinit) ~= N
+0080         error(<span class="string">'OPTS.init does not have %d cells'</span>,N);
+0081     <span class="keyword">end</span>
+0082     <span class="keyword">for</span> n = dimorder(2:end);
+0083         <span class="keyword">if</span> ~isequal(size(Uinit{n}),[size(X,n) R])
+0084             error(<span class="string">'OPTS.init{%d} is the wrong size'</span>,n);
+0085         <span class="keyword">end</span>
+0086     <span class="keyword">end</span>
+0087 <span class="keyword">else</span>
+0088     <span class="comment">% Observe that we don't need to calculate an initial guess for the</span>
+0089     <span class="comment">% first index in dimorder because that will be solved for in the first</span>
+0090     <span class="comment">% inner iteration.</span>
+0091     <span class="keyword">if</span> strcmp(init,<span class="string">'random'</span>)
+0092         Uinit = cell(N,1);
+0093         <span class="keyword">for</span> n = dimorder(2:end)
+0094             Uinit{n} = rand(size(X,n),R);
+0095         <span class="keyword">end</span>
+0096     <span class="keyword">elseif</span> strcmp(init,<span class="string">'nvecs'</span>) || strcmp(init,<span class="string">'eigs'</span>) 
+0097         Uinit = cell(N,1);
+0098         <span class="keyword">for</span> n = dimorder(2:end)
+0099             Uinit{n} = nvecs(X,n,R);
+0100         <span class="keyword">end</span>
+0101     <span class="keyword">else</span>
+0102         error(<span class="string">'The selected initialization method is not supported'</span>);
+0103     <span class="keyword">end</span>
+0104 <span class="keyword">end</span>
+0105 
+0106 <span class="comment">%% Set up for iterations - initializing U and the fit.</span>
+0107 U = Uinit;
+0108 fit = 0;
+0109 ill_cond = 0;
+0110 
+0111 <span class="keyword">if</span> printitn&gt;0
+0112   fprintf(<span class="string">'\nCP_ALS:\n'</span>);
+0113 <span class="keyword">end</span>
+0114 
+0115 <span class="comment">%% Main Loop: Iterate until convergence</span>
+0116 
+0117 <span class="keyword">if</span> (isa(X,<span class="string">'sptensor'</span>) || isa(X,<span class="string">'tensor'</span>)) &amp;&amp; (exist(<span class="string">'cpals_core'</span>,<span class="string">'file'</span>) == 3)
+0118  
+0119     <span class="comment">%fprintf('Using C++ code\n');</span>
+0120     [lambda,U] = cpals_core(X, Uinit, fitchangetol, maxiters, dimorder);
+0121     P = ktensor(lambda,U);
+0122     
+0123 <span class="keyword">else</span>
+0124     
+0125     UtU = zeros(R,R,N);
+0126     <span class="keyword">for</span> n = 1:N
+0127         <span class="keyword">if</span> ~isempty(U{n})
+0128             UtU(:,:,n) = U{n}'*U{n};
+0129         <span class="keyword">end</span>
+0130     <span class="keyword">end</span>
+0131     
+0132     err = zeros(maxiters,1);
+0133     t_step = zeros(maxiters,1);
+0134     <span class="keyword">for</span> iter = 1:maxiters
+0135         
+0136         tic
+0137         
+0138         fitold = fit;
+0139         
+0140         <span class="comment">% Iterate over all N modes of the tensor</span>
+0141         <span class="keyword">for</span> n = dimorder(1:end)
+0142             
+0143             <span class="comment">% Calculate Unew = X_(n) * khatrirao(all U except n, 'r').</span>
+0144             Unew = mttkrp(X,U,n);
+0145             
+0146             <span class="comment">% Compute the matrix of coefficients for linear system</span>
+0147             Y = prod(UtU(:,:,[1:n-1 n+1:N]),3);
+0148             <span class="keyword">try</span>
+0149                 Unew = Unew / Y;
+0150             <span class="keyword">catch</span>
+0151                 ill_cond = 1;
+0152                 warning(<span class="string">'off'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0153                 Unew = Unew / Y;
+0154                 warning(<span class="string">'error'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0155             <span class="keyword">end</span>
+0156             <span class="keyword">if</span> issparse(Unew)
+0157                 Unew = full(Unew);   <span class="comment">% for the case R=1</span>
+0158             <span class="keyword">end</span>
+0159             
+0160             <span class="keyword">if</span> cond(Y) &gt; 1e13
+0161                 ill_cond = 1;
+0162             <span class="keyword">end</span>
+0163                         
+0164             <span class="comment">% Normalize each vector to prevent singularities in coefmatrix</span>
+0165             <span class="keyword">if</span> iter == 1
+0166                 lambda = sqrt(sum(Unew.^2,1))'; <span class="comment">%2-norm</span>
+0167             <span class="keyword">else</span>
+0168                 lambda = max( max(abs(Unew),[],1), 1 )'; <span class="comment">%max-norm</span>
+0169             <span class="keyword">end</span>            
+0170             
+0171             <span class="keyword">try</span>
+0172                 Unew = bsxfun(@rdivide, Unew, lambda');
+0173             <span class="keyword">catch</span>
+0174                 ill_cond = 1;
+0175                 warning(<span class="string">'off'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0176                 Unew = bsxfun(@rdivide, Unew, lambda');
+0177                 warning(<span class="string">'error'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0178             <span class="keyword">end</span>
+0179 
+0180             U{n} = Unew;
+0181             UtU(:,:,n) = U{n}'*U{n};
+0182         <span class="keyword">end</span>
+0183         
+0184         P = ktensor(lambda,U);
+0185         <span class="keyword">if</span> normX == 0
+0186             fit = norm(P)^2 - 2 * innerprod(X,P);
+0187             err(iter) = 1-fit;
+0188         <span class="keyword">else</span>
+0189             <span class="keyword">try</span> 
+0190                 normresidual = norm(X-P); <span class="comment">%sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );</span>
+0191             <span class="keyword">catch</span>
+0192                 normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+0193             <span class="keyword">end</span>
+0194             err(iter) = normresidual/normX;
+0195             fit = 1 - err(iter); <span class="comment">%fraction explained by model</span>
+0196             
+0197         <span class="keyword">end</span>
+0198         fitchange = abs(fitold - fit);
+0199         
+0200         <span class="comment">% Check for convergence</span>
+0201         <span class="keyword">if</span> (iter &gt; 1) &amp;&amp; (fitchange &lt; fitchangetol)
+0202             flag = 0;
+0203         <span class="keyword">else</span>
+0204             flag = 1;
+0205         <span class="keyword">end</span>
+0206         
+0207         <span class="keyword">if</span> (mod(iter,printitn)==0) || ((printitn&gt;0) &amp;&amp; (flag==0))
+0208             fprintf(<span class="string">' Iter %2d: f = %e f-delta = %7.1e\n'</span>, iter, fit, fitchange);
+0209         <span class="keyword">end</span>
+0210         
+0211         <span class="comment">% Check for convergence</span>
+0212         <span class="keyword">if</span> (flag == 0)
+0213             <span class="keyword">break</span>;
+0214         <span class="keyword">end</span>
+0215         
+0216         t_step(iter) = toc;
+0217         
+0218         <span class="keyword">if</span> ill_cond
+0219             fprintf(<span class="string">'Matrix is ill condition. \n'</span>)
+0220             <span class="keyword">break</span>
+0221         <span class="keyword">end</span>
+0222     <span class="keyword">end</span>   
+0223 <span class="keyword">end</span>
+0224 
+0225 
+0226 <span class="comment">%% Clean up final result</span>
+0227 <span class="comment">% Arrange the final tensor so that the columns are normalized.</span>
+0228 P = arrange(P);
+0229 <span class="comment">% Fix the signs</span>
+0230 P = fixsigns(P);
+0231 
+0232 <span class="keyword">if</span> printitn&gt;0
+0233     <span class="keyword">if</span> normX == 0
+0234         fit = norm(P)^2 - 2 * innerprod(X,P);
+0235     <span class="keyword">else</span>
+0236         <span class="keyword">try</span> 
+0237             normresidual = norm(X-P); <span class="comment">%sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );</span>
+0238         <span class="keyword">catch</span>
+0239             normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+0240         <span class="keyword">end</span>
+0241         fit = 1 - (normresidual / normX); <span class="comment">%fraction explained by model</span>
+0242     <span class="keyword">end</span>
+0243   fprintf(<span class="string">' Final f = %e, error = %e\n'</span>, fit, 1-fit);
+0244 <span class="keyword">end</span>
+0245 
+0246 output = struct;
+0247 output.params = params.Results;
+0248 output.iters = iter;
+0249 output.err = err(1:iter);
+0250 output.ill_cond = ill_cond;
+0251 output.t_step = t_step(1:iter);
+0252 
+0253 warning(<span class="string">'on'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0254</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of meanCovTensor</title>
+  <meta name="keywords" content="meanCovTensor">
+  <meta name="description" content="Compute the mean and covariance of a tensor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>meanCovTensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Compute the mean and covariance of a tensor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Compute the mean and covariance of a tensor
+
+ itens, 
+ gridT, cell(n,1)
+ weMean, weights for the mean. cell(dim,dim);
+ weCov, weights for the covariance, cell(dim,dim,dim);</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>	F - ktensor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plot2DtimeMFibers.html" class="code" title="function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )">plot2DtimeMFibers</a>	Plot the time evolution of the tensor marginalized for each dimension</li><li><a href="plotkTensor.html" class="code" title="function [ handleOutput ] = plotkTensor( F, gridT, varargin )">plotkTensor</a>	Plot a ktensor using different plotting styles</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )</a>
+0002 <span class="comment">% Compute the mean and covariance of a tensor</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% itens,</span>
+0005 <span class="comment">% gridT, cell(n,1)</span>
+0006 <span class="comment">% weMean, weights for the mean. cell(dim,dim);</span>
+0007 <span class="comment">% weCov, weights for the covariance, cell(dim,dim,dim);</span>
+0008 
+0009     dim = ndims(itens);
+0010     itens = itens*(1/<a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(itens, [], gridT, weOnes)); <span class="comment">%normalice</span>
+0011     meanT = zeros(dim,1);
+0012     <span class="keyword">for</span> i=1:dim
+0013         meanT(i)  = <a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(itens, [], gridT, weMean(i,:));
+0014     <span class="keyword">end</span>
+0015     covT = zeros(dim,dim);
+0016     <span class="keyword">for</span> i=1:dim
+0017         <span class="keyword">for</span> j = 1:dim
+0018             covT(i,j) = <a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(itens, [], gridT, weCov(i,j,:)) - meanT(i)*meanT(j);
+0019         <span class="keyword">end</span>
+0020     <span class="keyword">end</span>
+0021 
+0022 <span class="keyword">end</span>
+0023</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

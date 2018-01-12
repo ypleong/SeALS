@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of stoploop</title>
+  <meta name="keywords" content="stoploop">
+  <meta name="description" content="STOPLOOP - creates stop button to have a user interrupt a loop">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>stoploop
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>STOPLOOP - creates stop button to have a user interrupt a loop</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function F = stoploop(str) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> STOPLOOP - creates stop button to have a user interrupt a loop
+ 
+  FS = STOPLOOP creates a message box window and returns a structure FS that
+  holds two functions, called FS.Stop and FS.Clear. The function FS.Stop()
+  will return true, if the OK button has been clicked (or the message box
+  has been removed), so that a loop can be interrupted.
+  The function FS.Clear() can be used to remove the message box, if a loop
+  has ended without user interruption.
+
+  FS = STOPLOOP(STR) uses the string STR to display instead of the default
+  'Stop the Loop'.
+
+  Example:
+    tic ;         % We will measure elapsed time in a loop
+                  % Set up the stop box:
+    FS = stoploop({'Stop me before', '5 seconds have elapsed'}) ;
+                  % Display elapsed time
+    fprintf('\nSTOPLOOP: elapsed time (s): %5.2f\n',toc)
+                  % start the loop
+    while(~FS.Stop() &amp;&amp; toc &lt; 5),       % Check if the loop has to be stopped
+        fprintf('%c',repmat(8,6,1)) ;   % clear up previous time
+        fprintf('%5.2f\n',toc) ;        % display elapsed time
+    end
+    FS.Clear() ;  % Clear up the box
+    clear FS ;    % this structure has no use anymore
+
+  Notes:
+  - The function call F.Stop() issues a drawnow command.
+  - The function call F.Clear() does nothing when the message box already
+    has been cleared.
+  
+  See also MSGBOX, KEYBOARD, DBSTOP, WHILE, FOR
+           GETKEYNOW, GETKEYWAIT, GETKEY (on the File Exchange)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>	ALS_SYS_VAR is a modified version of the original ALS algorithm found</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function r = stopfun(H)</a></li><li><a href="#_sub2" class="code">function clearfun(H)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function F = stoploop(str)</a>
+0002 <span class="comment">% STOPLOOP - creates stop button to have a user interrupt a loop</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  FS = STOPLOOP creates a message box window and returns a structure FS that</span>
+0005 <span class="comment">%  holds two functions, called FS.Stop and FS.Clear. The function FS.Stop()</span>
+0006 <span class="comment">%  will return true, if the OK button has been clicked (or the message box</span>
+0007 <span class="comment">%  has been removed), so that a loop can be interrupted.</span>
+0008 <span class="comment">%  The function FS.Clear() can be used to remove the message box, if a loop</span>
+0009 <span class="comment">%  has ended without user interruption.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">%  FS = STOPLOOP(STR) uses the string STR to display instead of the default</span>
+0012 <span class="comment">%  'Stop the Loop'.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%  Example:</span>
+0015 <span class="comment">%    tic ;         % We will measure elapsed time in a loop</span>
+0016 <span class="comment">%                  % Set up the stop box:</span>
+0017 <span class="comment">%    FS = stoploop({'Stop me before', '5 seconds have elapsed'}) ;</span>
+0018 <span class="comment">%                  % Display elapsed time</span>
+0019 <span class="comment">%    fprintf('\nSTOPLOOP: elapsed time (s): %5.2f\n',toc)</span>
+0020 <span class="comment">%                  % start the loop</span>
+0021 <span class="comment">%    while(~FS.Stop() &amp;&amp; toc &lt; 5),       % Check if the loop has to be stopped</span>
+0022 <span class="comment">%        fprintf('%c',repmat(8,6,1)) ;   % clear up previous time</span>
+0023 <span class="comment">%        fprintf('%5.2f\n',toc) ;        % display elapsed time</span>
+0024 <span class="comment">%    end</span>
+0025 <span class="comment">%    FS.Clear() ;  % Clear up the box</span>
+0026 <span class="comment">%    clear FS ;    % this structure has no use anymore</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">%  Notes:</span>
+0029 <span class="comment">%  - The function call F.Stop() issues a drawnow command.</span>
+0030 <span class="comment">%  - The function call F.Clear() does nothing when the message box already</span>
+0031 <span class="comment">%    has been cleared.</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%  See also MSGBOX, KEYBOARD, DBSTOP, WHILE, FOR</span>
+0034 <span class="comment">%           GETKEYNOW, GETKEYWAIT, GETKEY (on the File Exchange)</span>
+0035 
+0036 <span class="comment">% for Matlab R14+</span>
+0037 <span class="comment">% version 1.0 (jun 2008)</span>
+0038 <span class="comment">% (c) Jos van der Geest</span>
+0039 <span class="comment">% email: jos@jasen.nl</span>
+0040 
+0041 <span class="comment">% History:</span>
+0042 <span class="comment">% 1.0 (jun 2008) Inspired by several requests over the years on CSSM</span>
+0043 
+0044 error(nargoutchk(1,1,nargout)) ;
+0045 
+0046 <span class="keyword">if</span> nargin,
+0047     <span class="keyword">if</span> ~ischar(str) &amp;&amp; ~iscellstr(str),
+0048         error([mfilename <span class="string">':InputString'</span>],<span class="keyword">...</span>
+0049             <span class="string">'Input should be a string, or a cell array of strings.'</span>) ;
+0050     <span class="keyword">end</span>
+0051 <span class="keyword">else</span>
+0052     <span class="comment">% default message string</span>
+0053     str = <span class="string">'Stop the Loop'</span> ;
+0054 <span class="keyword">end</span>
+0055 
+0056 <span class="comment">% create a msgbox displaying the string</span>
+0057 H = msgbox(str,<span class="string">'STOPLOOP'</span>) ;
+0058 
+0059 <span class="comment">% create the two anonymous functions</span>
+0060 F.Stop = @() <a href="#_sub1" class="code" title="subfunction r = stopfun(H)">stopfun</a>(H) ; <span class="comment">% false if message box still exists</span>
+0061 F.Clear = @() <a href="#_sub2" class="code" title="subfunction clearfun(H)">clearfun</a>(H) ; <span class="comment">% delete message box</span>
+0062 
+0063 <a name="_sub1" href="#_subfunctions" class="code">function r = stopfun(H)</a>
+0064 drawnow ;          <span class="comment">% ensure that button presses are recorded</span>
+0065 r = ~ishandle(H) ; <span class="comment">% false if message box still exists</span>
+0066 
+0067 <a name="_sub2" href="#_subfunctions" class="code">function clearfun(H)</a>
+0068 <span class="comment">% clear the message box if it still exists</span>
+0069 <span class="keyword">if</span> ishandle(H),
+0070     delete(H) ;
+0071 <span class="keyword">end</span>
+0072 
+0073</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

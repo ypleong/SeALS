@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fcell2ftens</title>
+  <meta name="keywords" content="fcell2ftens">
+  <meta name="description" content="FUNC2TENS Creates a function in ktensor form from cell array">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>fcell2ftens
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>FUNC2TENS Creates a function in ktensor form from cell array</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [fTens] = fcell2ftens(fcell,grid) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">FUNC2TENS Creates a function in ktensor form from cell array
+representation.
+ Input:
+   fcell - the function in cell array representation.
+   grid - the discretization grid.
+ Output:
+   fTens - the function as a cell array. fTens{i,j} is the ktensor of
+   element (i,j) in the original function f.
+
+ See also <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">FSYM2FCELL</a>, <a href="maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">MAKETENSDYN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">makebc</a>	MAKEBC creates the boundary conditions with scaling.</li><li><a href="maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>	MAKETENSDYN creates ktensor representation of symbolic functions, given below.</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [fTens] = fcell2ftens(fcell,grid)</a>
+0002 <span class="comment">%FUNC2TENS Creates a function in ktensor form from cell array</span>
+0003 <span class="comment">%representation.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   fcell - the function in cell array representation.</span>
+0006 <span class="comment">%   grid - the discretization grid.</span>
+0007 <span class="comment">% Output:</span>
+0008 <span class="comment">%   fTens - the function as a cell array. fTens{i,j} is the ktensor of</span>
+0009 <span class="comment">%   element (i,j) in the original function f.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% See also FSYM2FCELL, MAKETENSDYN.</span>
+0012 
+0013 <span class="comment">% Elis Stefansson, Aug 5 2015</span>
+0014 <span class="comment">% The function will be denoted f below.</span>
+0015 
+0016 size_fcell = size(fcell);
+0017 fTens = cell(size_fcell);
+0018 
+0019 <span class="keyword">for</span> i = 1:size_fcell(1)
+0020     
+0021     <span class="keyword">for</span> j = 1:size_fcell(2);
+0022         
+0023         c = fcell{i,j}; <span class="comment">% cell repr. of the function in entry (i,j) of f.</span>
+0024         
+0025         <span class="keyword">for</span> ii = 1:length(c)
+0026             
+0027             cc = c{ii};
+0028             size_cc = size(cc);
+0029             
+0030             <span class="comment">% vectors for the corresponding ktensor</span>
+0031             U = cell(1,length(grid));
+0032             
+0033             <span class="keyword">for</span> jj = 1:size_cc(1)
+0034                 
+0035                 <span class="comment">% take function and corresponding dimension</span>
+0036                 c_func = cc{jj,1};
+0037                 dim = cc{jj,2};
+0038                 c_grid = grid{dim};
+0039                 c_vect = c_func(c_grid); <span class="comment">%convert to vector</span>
+0040                 
+0041                 <span class="comment">% if c_func is constant, length(c_vect) = 1</span>
+0042                 lgd = length(grid{dim});
+0043                 <span class="keyword">if</span> length(c_vect) ~= lgd
+0044                     c_vect = c_vect*ones(lgd,1);
+0045                 <span class="keyword">end</span>
+0046                 
+0047                 <span class="keyword">if</span> isempty(U{dim}) == 1
+0048                     U{dim} = c_vect;
+0049                 <span class="keyword">else</span>
+0050                     U{dim} = U{dim}.*c_vect; <span class="comment">%multiply terms in same dim</span>
+0051                 <span class="keyword">end</span>
+0052                 
+0053             <span class="keyword">end</span>
+0054             
+0055             <span class="comment">% add ones to dimension not included in U already</span>
+0056             <span class="keyword">for</span> k = 1:length(grid)
+0057                 <span class="keyword">if</span> isempty(U{k}) == 1
+0058                     U{k} = ones(length(grid{k}),1);
+0059                 <span class="keyword">end</span>
+0060             <span class="keyword">end</span>
+0061             
+0062             <span class="keyword">if</span> isempty(fTens{i,j})
+0063                 fTens{i,j} = fixsigns(arrange(ktensor(U)));
+0064             <span class="keyword">else</span>
+0065                 fTens{i,j} = fixsigns(arrange(fTens{i,j}+ktensor(U)));
+0066             <span class="keyword">end</span>
+0067             
+0068         <span class="keyword">end</span>
+0069     <span class="keyword">end</span>
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

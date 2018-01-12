@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of keepSign</title>
+  <meta name="keywords" content="keepSign">
+  <meta name="description" content="keep the signs of the basis">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>keepSign
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>keep the signs of the basis</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ Tcell, flipSign] = keepSign( Tcell ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> keep the signs of the basis</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ Tcell, flipSign] = keepSign( Tcell )</a>
+0002 <span class="comment">% keep the signs of the basis</span>
+0003 
+0004     nCell = length(Tcell);
+0005     dim = ndims(Tcell{1});
+0006     flipSign = zeros(nCell,1);
+0007     <span class="keyword">for</span> j=2:nCell
+0008         <span class="keyword">for</span> k=1:min(length(Tcell{j-1}.lambda),length(Tcell{j}.lambda))
+0009             <span class="keyword">for</span> i=1:dim
+0010                 uproduct = Tcell{j}.U{i}(:,k)'*Tcell{j-1}.U{i}(:,k);
+0011                 <span class="keyword">if</span> ( uproduct &lt; 0   )
+0012                     flipSign(j) = flipSign(j) + 1;
+0013                     Tcell{j}.U{i}(:,k)   = -Tcell{j}.U{i}(:,k);
+0014                     <span class="comment">%outTens{j}.U{i+1}(:,k) = -outTens{j}.U{i+1}(:,k);</span>
+0015                 <span class="keyword">end</span>                    
+0016             <span class="keyword">end</span>
+0017             <span class="keyword">if</span> mod(flipSign,2)~=0
+0018                 fprintf(<span class="string">'Trouble fixing signs for mode %d\n'</span>, k);
+0019             <span class="keyword">end</span>
+0020         <span class="keyword">end</span>
+0021     <span class="keyword">end</span>
+0022 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

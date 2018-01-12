@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of Inverted_Pendulum</title>
+  <meta name="keywords" content="Inverted_Pendulum">
+  <meta name="description" content="% Example - Inverted Pendulum">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html examples -->
+<h1>Inverted_Pendulum
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Example - Inverted Pendulum</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Example - Inverted Pendulum
+ Elis Stefansson, Aug 2015</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Example - Inverted Pendulum</span>
+0002 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0003 
+0004 <span class="comment">% The following example is taken from the paper:</span>
+0005 <span class="comment">% Linear Hamilton-Jacobi-Bellan Equations in High Dimensions</span>
+0006 <span class="comment">% by Matanya B. Horowitz et al.</span>
+0007 
+0008 <span class="comment">%% setup</span>
+0009 addpath(genpath(<span class="string">'../src'</span>));
+0010 
+0011 <span class="comment">% 1. domain</span>
+0012 d = 2;
+0013 x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0014 n = [200 251];
+0015 bdim = [-2*pi 2*pi ; -11 11];
+0016 bcon = { {<span class="string">'p'</span>} , {<span class="string">'v'</span>} };<span class="comment">%{ {'p'} , {'d', exp(-10/0.2), exp(-10/0.2)} };</span>
+0017 bsca = []; <span class="comment">%no manual scaling</span>
+0018 region = [0 0;0 0];<span class="comment">%0.3*[0 0.6 ; -1 1];</span>
+0019 regval = 1;
+0020 regsca = 10;
+0021 sca_ver = 1; <span class="comment">%second scaling method</span>
+0022 ord_of_acc = 4;
+0023 
+0024 <span class="comment">% 2. dynamics</span>
+0025 lambda = 0.2;
+0026 m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
+0027 f1 = (g/l)*sin(x(1))/den;
+0028 f2 = -0.5*mr*x(2)^2*sin(2*x(1))/den;
+0029 f = [x(2) ; f1+f2];
+0030 G = [0.1 ; -mr/(m*l)*cos(x(1))/den];
+0031 B = G;
+0032 noise_cov = 10;
+0033 q = 0.1*x(1)^2+0.05*x(2)^2;
+0034 R = 0.02;
+0035 
+0036 <span class="comment">% 3. artificial diffusion, compress operator and solve als</span>
+0037 artdiff_option = [];<span class="comment">%{1,'needed',10};</span>
+0038 tol_err_op = 1e-5;
+0039 comp_options = [];
+0040 tol_err = 1e-6;
+0041 als_options = [];
+0042 als_variant = [];<span class="comment">%{10,20}; %for speed</span>
+0043 debugging = 0;
+0044 
+0045 <span class="comment">% 4. visualize result and run simulation</span>
+0046 plotdata = 1;
+0047 saveplots = 0;
+0048 savedata = 1;
+0049 sim_config = {60,0.005,repmat([-0.5; 0],1,10),[],[]};
+0050 
+0051 <span class="comment">% 5. run index</span>
+0052 run = 1;
+0053 
+0054 <span class="comment">% Setup run</span>
+0055 input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};
+0056 input2 = {x,f,G,B,noise_cov,q,R,lambda};
+0057 input3 = {artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging};
+0058 input4 = {saveplots,savedata,plotdata,sim_config};
+0059 
+0060 save([<span class="string">'./test_run/inverted_pendulum_'</span>,num2str(run),<span class="string">'_setup'</span>])
+0061 
+0062 <span class="comment">% Solve for F</span>
+0063 [F, grid] = <a href="../src/main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>(input1,input2,input3,input4,run,<span class="string">'./test_run/inverted_pendulum_'</span>);</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

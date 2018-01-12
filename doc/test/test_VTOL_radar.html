@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_VTOL_radar</title>
+  <meta name="keywords" content="test_VTOL_radar">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_VTOL_radar
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>	x:[6,1] state ( x, xdot, y, ydot, theta, thetadot)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 close all
+0003 
+0004 
+0005 <span class="comment">% Parameters</span>
+0006 g = 9.81;
+0007 epsilon = 0.01;
+0008 
+0009 
+0010 <span class="comment">% Simulation Parameters</span>
+0011 dt = 0.01;
+0012 t = 0:dt:20;
+0013 xGT = zeros(6,length(t));
+0014 <span class="comment">%x(:,1) = [1, 0.1, 5, 0.2, 0.1, -0.01]'; % some movement</span>
+0015 xGT(:,1) = [1, 0.0, 5, 0.0, 0.00, -0.00]'; <span class="comment">% static</span>
+0016 
+0017 
+0018 <span class="comment">% Kalman Estimation</span>
+0019 xhat = zeros(6,length(t));
+0020 xhat(:,1) = [1.1, 0.0, 5.05, 0.0, 0.00, -0.00]';
+0021 Phat = zeros(6,6,length(t));
+0022 Phat(:,:,1) = diag([3^2,0.2^2,3^2,0.2^2,0.1^2,0.01^2]);
+0023 
+0024 GK = [0 0 0
+0025  1 0 0
+0026  0 0 0
+0027  0 1 0
+0028  0 0 0
+0029  0 0 1];
+0030 
+0031 
+0032 QK = 1*diag([0.1^2, 0.1^2, 0.01^2]);
+0033 
+0034 GQGp = GK*QK*GK';
+0035 sigmaX2 = 0.3^2;
+0036 sigmaY2 = 0.3^2;
+0037 R = diag([sigmaX2,sigmaY2]);
+0038 zmes = zeros(2,length(t));
+0039 
+0040 <span class="comment">%radars</span>
+0041 r1 = [0,6]';
+0042 r2 = [2,4]'; 
+0043 
+0044   
+0045 <span class="keyword">for</span> i = 2:length(t)
+0046     xref = 2; <span class="comment">%+ cos(t(i)*2*pi/20);</span>
+0047     yref = 6; <span class="comment">%+ sin(t(i)*2*pi/20);</span>
+0048     u = g - 0.2*(xGT(3,i-1)-yref)  - 0.7*xGT(4,i-1);
+0049     uu(i) = u;
+0050     tau = -6*xGT(5,i-1) - 6*xGT(6,i-1) + 0.2*(xGT(1,i-1)-xref) + 0.9*xGT(2,i-1);
+0051     tautau(i) = tau;
+0052     <span class="comment">% Propagate</span>
+0053     xGT(:,i) =  xGT(:,i-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( xGT(:,i-1), u, tau, epsilon, g );
+0054     <span class="comment">% Kalman</span>
+0055     F = [0 1 0 0 0 0
+0056          0 0 0 0 (-u*cos(xGT(5,i-1))-epsilon*tau*sin(xGT(5,i-1))) 0
+0057          0 0 0 1 0 0
+0058          0 0 0 0 (-u*sin(xGT(5,i-1))+epsilon*tau*cos(xGT(5,i-1))) 0
+0059          0 0 0 0 0 1
+0060          0 0 0 0 0 0];
+0061     xhat(:,i) =  xhat(:,i-1)  + dt*<a href="fVTOL.html" class="code" title="function [ xdot ] = fVTOL( x, u, tau, epsilon, g )">fVTOL</a>( xhat(:,i-1), u, tau, epsilon, g );
+0062     Phat(:,:,i) = F*Phat(:,:,i-1)*F' + dt*GQGp;
+0063     
+0064     <span class="comment">% assume measure with noise R</span>
+0065     z = [xGT(1,i) + randn(1)*sqrt(sigmaX2) 
+0066          xGT(3,i) + randn(1)*sqrt(sigmaY2)];
+0067      
+0068     zradar = [(xGT(1,i)-r1(1))^2+(xGT(3,i)-r1(2))^2 + randn(1)*sqrt(sigmaX2)
+0069               (xGT(1,i)-r2(1))^2+(xGT(3,i)-r2(2))^2 + randn(1)*sqrt(sigmaY2)];
+0070     hradar = [(xhat(1,i)-r1(1))^2+(xhat(3,i)-r1(2))^2
+0071               (xhat(1,i)-r2(1))^2+(xhat(3,i)-r2(2))^2];
+0072     HK = [2*(xGT(1,i)-r1(1)) 0 2*(xGT(3,i)-r1(2)) 0 0 0
+0073           2*(xGT(1,i)-r2(1)) 0 2*(xGT(3,i)-r2(2)) 0 0 0];
+0074     zmes(:,i) = zradar;
+0075     SG = HK*Phat(:,:,i)*HK' + R;
+0076     KG = Phat(:,:,i)*HK'/(SG);
+0077     xhat(:,i) = xhat(:,i) + KG*(zradar - hradar);
+0078     Phat(:,:,i) = (eye(6) - KG*HK)*Phat(:,:,i);
+0079 <span class="keyword">end</span>
+0080 
+0081 
+0082 <span class="comment">%% Plot</span>
+0083 
+0084 figure
+0085 subplot(2,4,1)
+0086 plot(t,xGT(1,:))
+0087 grid on
+0088 xlabel(<span class="string">'Time(s)'</span>)
+0089 ylabel(<span class="string">'X'</span>)
+0090 subplot(2,4,2)
+0091 plot(t,xGT(2,:))
+0092 grid on
+0093 xlabel(<span class="string">'Time(s)'</span>)
+0094 ylabel(<span class="string">'VX'</span>)
+0095 subplot(2,4,3)
+0096 plot(t,xGT(3,:))
+0097 grid on
+0098 xlabel(<span class="string">'Time(s)'</span>)
+0099 ylabel(<span class="string">'Y'</span>)
+0100 subplot(2,4,4)
+0101 plot(t,xGT(4,:))
+0102 grid on
+0103 xlabel(<span class="string">'Time(s)'</span>)
+0104 ylabel(<span class="string">'VY'</span>)
+0105 subplot(2,4,5)
+0106 plot(t,xGT(5,:))
+0107 grid on
+0108 xlabel(<span class="string">'Time(s)'</span>)
+0109 ylabel(<span class="string">'\theta'</span>)
+0110 subplot(2,4,6)
+0111 plot(t,xGT(6,:))
+0112 grid on
+0113 xlabel(<span class="string">'Time(s)'</span>)
+0114 ylabel(<span class="string">'Theta Dot'</span>)
+0115 subplot(2,4,7)
+0116 plot(t,uu)
+0117 grid on
+0118 xlabel(<span class="string">'Time(s)'</span>)
+0119 ylabel(<span class="string">'u input'</span>)
+0120 subplot(2,4,8)
+0121 plot(t,tautau)
+0122 grid on
+0123 xlabel(<span class="string">'Time(s)'</span>)
+0124 ylabel(<span class="string">'\tau input'</span>)
+0125 
+0126 figure
+0127 hold on
+0128 plot( xGT(1,:), xGT(3,:) ,xhat(1,:), xhat(3,:), expec(1,:),expec(3,:) )
+0129 scatter (r1(1),r1(2))
+0130 scatter (r2(1),r2(2))
+0131 <span class="comment">%scatter ( zmes(1,:), zmes(2,:))</span>
+0132 legend(<span class="string">'truth'</span>,<span class="string">'kalman'</span>,<span class="string">'tensor'</span>,<span class="string">'radar1'</span>,<span class="string">'radar2'</span>)
+0133 
+0134 figure
+0135 plot( t, sqrt( (xGT(1,:)-xhat(1,:)).^2 + (xGT(3,:)- xhat(3,:)).^2) )
+0136 grid on
+0137 xlabel(<span class="string">'Time(s)'</span>)
+0138 ylabel(<span class="string">'Estimation Error(m)'</span>)
+0139 
+0140 detP = zeros(length(t),1);
+0141 <span class="keyword">for</span> i=1:length(t)
+0142    detP(i) = det(Phat(:,:,i));
+0143 <span class="keyword">end</span>
+0144 
+0145 figure
+0146 plot( t, detP )
+0147 grid on
+0148 xlabel(<span class="string">'Time(s)'</span>)
+0149 ylabel(<span class="string">'Covariance Determinant'</span>)
+0150 
+0151 
+0152 <span class="comment">% figure</span>
+0153 <span class="comment">% hold on</span>
+0154 <span class="comment">% axis ([0,4,3,8])</span>
+0155 <span class="comment">% scatter(xref,yref)</span>
+0156 <span class="comment">% ht_pdf = quiver(x(1,1),x(3,1),-sin(x(5,1)),cos(x(5,1)));</span>
+0157 <span class="comment">% ht_scatter = plot(x(1,1),x(3,1));</span>
+0158 <span class="comment">% grid on</span>
+0159 <span class="comment">% for i = 2:5:length(t)</span>
+0160 <span class="comment">%      set ( ht_pdf, 'XData', x(1,i), ...</span>
+0161 <span class="comment">%                    'YData', x(3,i), ...</span>
+0162 <span class="comment">%                    'UData', -sin(x(5,i)), ...</span>
+0163 <span class="comment">%                    'VData', cos(x(5,i)) );</span>
+0164 <span class="comment">%      set ( ht_scatter, 'XData', x(1,1:i), ...</span>
+0165 <span class="comment">%                    'YData', x(3,1:i)  );</span>
+0166 <span class="comment">%      drawnow</span>
+0167 <span class="comment">%      pause(1.0/100.0);</span>
+0168 <span class="comment">% end</span>
+0169 
+0170 <span class="comment">% close all</span>
+0171 <span class="comment">% axis tight</span>
+0172 <span class="comment">% set(gca,'nextplot','replacechildren')</span>
+0173 <span class="comment">% set(gcf,'Renderer', 'zbuffer')</span>
+0174 <span class="comment">% f = getframe;</span>
+0175 <span class="comment">% [im,map] = rgb2ind(f.cdata,256,'nodither');</span>
+0176 <span class="comment">% im(1,1,1,length(t)) = 0;</span>
+0177 <span class="comment">% for i = 2:5:length(t)</span>
+0178 <span class="comment">%     quiver(x(1,i),x(3,i),-sin(x(5,i)),cos(x(5,i)));</span>
+0179 <span class="comment">%     axis ([0,4,3,8])</span>
+0180 <span class="comment">%     frame = getframe;</span>
+0181 <span class="comment">%     im(:,:,1,i) = rgb2ind(f.cdata,map,'nodither');</span>
+0182 <span class="comment">% end</span>
+0183 <span class="comment">%imwrite(im,map,'DancingPeaks.gif','DelayTime',0,'LoopCount',inf) %g443800</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

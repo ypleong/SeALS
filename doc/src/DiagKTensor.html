@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DiagKTensor</title>
+  <meta name="keywords" content="DiagKTensor">
+  <meta name="description" content="DIAGKTENSOR Diagonalize a series of vectors in each dimension to a">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>DiagKTensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [tens] = DiagKTensor(vec) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> DIAGKTENSOR Diagonalize a series of vectors in each dimension to a
+ diagonal tensor operator
+Input:
+   vec - ktensor
+Output:
+   tens - corresponding ktensor operator</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>	MATKTENS converts a cell array of ktensor functions to corresponding cell</li><li><a href="artdiff_ver2.html" class="code" title="function [opArtdiff] =  artdiff_ver2(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver2</a>	ARTDIFF_VER1 is the second version for adding artificial diffusion.</li><li><a href="artdiff_ver3.html" class="code" title="function [opArtdiff] = artdiff_ver3(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver3</a>	ARTDIFF_VER1 is the third version for adding artificial diffusion.</li><li><a href="create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [tens] = DiagKTensor(vec)</a>
+0002 <span class="comment">% DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</span>
+0003 <span class="comment">% diagonal tensor operator</span>
+0004 <span class="comment">%Input:</span>
+0005 <span class="comment">%   vec - ktensor</span>
+0006 <span class="comment">%Output:</span>
+0007 <span class="comment">%   tens - corresponding ktensor operator</span>
+0008 
+0009 d = ndims(vec);
+0010 sr = ncomponents(vec);
+0011 
+0012 <span class="comment">% incooporate scale factors into vec, evenly distributed. Then we</span>
+0013 <span class="comment">% don't need to worry about vec.lambda</span>
+0014 <span class="keyword">for</span> i=1:d
+0015     vec.U{i} = vec.U{i}*diag((vec.lambda.^(1/d)));
+0016 <span class="keyword">end</span>
+0017 vec.lambda = ones(sr,1);
+0018 
+0019 
+0020 Ut = cell(1,d);
+0021 <span class="keyword">for</span> i=1:d
+0022     myDiag = diag(vec.U{i}(:,1));
+0023     Ut{i} = myDiag(:);
+0024 <span class="keyword">end</span>
+0025 tens = ktensor(Ut);
+0026  
+0027 <span class="keyword">for</span> k=2:sr
+0028     Ut = cell(1,d);
+0029     <span class="keyword">for</span> i=1:d
+0030         myDiag = diag(vec.U{i}(:,k));
+0031         Ut{i} = myDiag(:);
+0032     <span class="keyword">end</span>
+0033 
+0034     tens = tens + ktensor(Ut);
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="keyword">end</span>
+0038</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of sim_run</title>
+  <meta name="keywords" content="sim_run">
+  <meta name="description" content="SIMULATION simulates trajectories starting from x0_list using results">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>sim_run
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SIMULATION simulates trajectories starting from x0_list using results</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> SIMULATION simulates trajectories starting from x0_list using results
+ from MAIN_RUN.
+ Inputs:
+   sim_config is cell with the following data:
+      T - end time for simulations.
+      dt - time step.
+      x0_list - matrix with starting points; each row corresponds to a
+      starting point.
+      new_noise_cov - variance vector for noise in simulation. The noise
+      from main_run_data will be used if new_noise_cov is empty.
+      new_region - goal region in simulation, replaces the old region. The
+      old region will be used if new_region is empty.
+      run - run index.
+   sim_data is a cell with the following data:
+      lambda - the scalar lambda.
+      grid - the discretization grid.
+      R - the cost matrix.
+      noise_cov - the covariance matrix of the noise.
+      F - the solution F (desirability function) as ktensor.
+      D - cell with first order differentiation operators. D{i} is
+      differentiation with respect to dimension i.
+      fFunc - f as MATLAB function.
+      GFunc - G as MATLAB function.
+      BFunc - B as MATLAB function.
+      qFunc - q as MATLAB function.
+      bdim - the dimensions of the hyperrectangle domain.
+      bcon - the boundary conditions. bcon{i} is boundary conditions in
+      dimension i:
+         bcon{i} = {'p'}. Periodic
+         bcon{i} = {'d',val_lo,val_up}. Dirichlet with val_lo and val_up 
+         for lower and upper boundary in dimension i.
+         bcon{i} = {'n',val_lo,val_up}. Neumann with val_lo and val_up for
+         lower and upper boundary in dimension i.
+         where all the values are for the desirability function.
+      region - the dimensions of the goal region.
+   saveplots - 1 if plots will be saved.
+   savedata - 1 if data will be saved.
+   run - run index.
+   See also MAIN_PROGRAM.
+ Outputs: (OBS: only saved!)
+   simulation plots - state trajectories, control trajectories and cost
+   trajectories.
+   simulation data - saved as sim_data_run where run is the corresponding
+   run index.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>	EVALT evaluates a ktensor (function) at an individual point</li><li><a href="EvalTMat.html" class="code" title="function [ y ] = EvalTMat( TMat, x, gridT )">EvalTMat</a>	EVALTMAT evaluates a matrix-valued ktensor function at a point x</li><li><a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function sim_run(sim_config,sim_data,saveplots,savedata,run,save_folder)</a>
+0002 <span class="comment">% SIMULATION simulates trajectories starting from x0_list using results</span>
+0003 <span class="comment">% from MAIN_RUN.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   sim_config is cell with the following data:</span>
+0006 <span class="comment">%      T - end time for simulations.</span>
+0007 <span class="comment">%      dt - time step.</span>
+0008 <span class="comment">%      x0_list - matrix with starting points; each row corresponds to a</span>
+0009 <span class="comment">%      starting point.</span>
+0010 <span class="comment">%      new_noise_cov - variance vector for noise in simulation. The noise</span>
+0011 <span class="comment">%      from main_run_data will be used if new_noise_cov is empty.</span>
+0012 <span class="comment">%      new_region - goal region in simulation, replaces the old region. The</span>
+0013 <span class="comment">%      old region will be used if new_region is empty.</span>
+0014 <span class="comment">%      run - run index.</span>
+0015 <span class="comment">%   sim_data is a cell with the following data:</span>
+0016 <span class="comment">%      lambda - the scalar lambda.</span>
+0017 <span class="comment">%      grid - the discretization grid.</span>
+0018 <span class="comment">%      R - the cost matrix.</span>
+0019 <span class="comment">%      noise_cov - the covariance matrix of the noise.</span>
+0020 <span class="comment">%      F - the solution F (desirability function) as ktensor.</span>
+0021 <span class="comment">%      D - cell with first order differentiation operators. D{i} is</span>
+0022 <span class="comment">%      differentiation with respect to dimension i.</span>
+0023 <span class="comment">%      fFunc - f as MATLAB function.</span>
+0024 <span class="comment">%      GFunc - G as MATLAB function.</span>
+0025 <span class="comment">%      BFunc - B as MATLAB function.</span>
+0026 <span class="comment">%      qFunc - q as MATLAB function.</span>
+0027 <span class="comment">%      bdim - the dimensions of the hyperrectangle domain.</span>
+0028 <span class="comment">%      bcon - the boundary conditions. bcon{i} is boundary conditions in</span>
+0029 <span class="comment">%      dimension i:</span>
+0030 <span class="comment">%         bcon{i} = {'p'}. Periodic</span>
+0031 <span class="comment">%         bcon{i} = {'d',val_lo,val_up}. Dirichlet with val_lo and val_up</span>
+0032 <span class="comment">%         for lower and upper boundary in dimension i.</span>
+0033 <span class="comment">%         bcon{i} = {'n',val_lo,val_up}. Neumann with val_lo and val_up for</span>
+0034 <span class="comment">%         lower and upper boundary in dimension i.</span>
+0035 <span class="comment">%         where all the values are for the desirability function.</span>
+0036 <span class="comment">%      region - the dimensions of the goal region.</span>
+0037 <span class="comment">%   saveplots - 1 if plots will be saved.</span>
+0038 <span class="comment">%   savedata - 1 if data will be saved.</span>
+0039 <span class="comment">%   run - run index.</span>
+0040 <span class="comment">%   See also MAIN_PROGRAM.</span>
+0041 <span class="comment">% Outputs: (OBS: only saved!)</span>
+0042 <span class="comment">%   simulation plots - state trajectories, control trajectories and cost</span>
+0043 <span class="comment">%   trajectories.</span>
+0044 <span class="comment">%   simulation data - saved as sim_data_run where run is the corresponding</span>
+0045 <span class="comment">%   run index.</span>
+0046 <span class="comment">%</span>
+0047 <span class="comment">% See also MAIN_RUN.</span>
+0048 
+0049 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0050 
+0051 <span class="comment">%% extract data</span>
+0052 [T,dt,x0_list,new_noise_cov,new_region] = deal(sim_config{:});
+0053 
+0054 [lambda,grid,R,noise_cov,F,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region] = deal(sim_data{:});
+0055 
+0056 dirpath = [save_folder, <span class="string">'saved_data/'</span>];
+0057 <span class="keyword">if</span> 7~=exist(dirpath,<span class="string">'dir'</span>) 
+0058     mkdir(dirpath); 
+0059 <span class="keyword">end</span>
+0060 
+0061 d = length(grid);
+0062 ninputs = length(R);
+0063 
+0064 <span class="keyword">if</span> isempty(new_noise_cov) == 0
+0065     sigma = new_noise_cov; <span class="comment">%use other noise</span>
+0066 <span class="keyword">else</span>
+0067     sigma = diag(noise_cov); <span class="comment">%convert cov-matrix to vector</span>
+0068 <span class="keyword">end</span>
+0069 
+0070 <span class="keyword">if</span> isempty(new_region) == 0
+0071     region = new_region; <span class="comment">%use other goal region</span>
+0072 <span class="keyword">end</span>
+0073 
+0074 F = F*(1/<a href="EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>(F,zeros(d,1),grid));
+0075 dF = cell(d,1);
+0076 <span class="keyword">for</span> i = 1:d
+0077     dF{i} = <a href="SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(D{i},F);
+0078 <span class="keyword">end</span>
+0079 
+0080 <span class="comment">%% simulation</span>
+0081 
+0082 size_x0_list = size(x0_list);
+0083 n_trial = size_x0_list(2);
+0084 t = 0:dt:T;
+0085 t_length = length(t);
+0086 
+0087 traj = zeros(n_trial,t_length,d);
+0088 traj_u = zeros(n_trial,t_length,ninputs);
+0089 c_traj = zeros(n_trial,t_length);
+0090 
+0091 end_list = t_length*ones(n_trial);
+0092 periodic_list = cell(n_trial,d); <span class="comment">%index for periodic jumps for each dim</span>
+0093 conv_list = zeros(n_trial,1);
+0094 end_point = zeros(n_trial,d);
+0095 
+0096 fprintf(<span class="string">'Simulation number = \n'</span>);
+0097 
+0098 <span class="keyword">for</span> m = 1:n_trial
+0099     
+0100     current = x0_list(:,m);
+0101     traj(m,1,:) = current;
+0102     
+0103     periodic_list_m = cell(1,d);
+0104     <span class="keyword">for</span> i = 1:d
+0105         periodic_list_m{i} = 0;
+0106     <span class="keyword">end</span>
+0107     
+0108     <span class="keyword">for</span> k = 1:t_length-1
+0109         
+0110         <span class="comment">% calculate current values</span>
+0111         c_f = fFunc(current);
+0112         c_G = GFunc(current);
+0113         c_B = BFunc(current);
+0114         c_F = <a href="EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>(F,current,grid);
+0115         c_dF = <a href="EvalTMat.html" class="code" title="function [ y ] = EvalTMat( TMat, x, gridT )">EvalTMat</a>(dF,current,grid);
+0116         c_q = qFunc(current);
+0117         
+0118         c_n = normrnd(0,sigma);
+0119         c_u = (1/c_F)*lambda*(R\c_G')*c_dF;
+0120         
+0121         next = current + dt*(c_f+c_G*c_u+c_B*c_n);
+0122         cost = c_q + 0.5*c_u'*R*c_u;
+0123         current = next;
+0124         
+0125         traj_u(m,k,:) = c_u;
+0126         traj(m,k+1,:) = current;
+0127         c_traj(m,k) = cost;
+0128         
+0129         <span class="comment">% check where current state is</span>
+0130         region_check = zeros(1,d);
+0131         
+0132         <span class="keyword">for</span> i=1:d
+0133             
+0134             bdim_i = bdim(i,:);
+0135             bdim_i_l = bdim_i(2)-bdim_i(1);
+0136             bcon_i = bcon{i};
+0137             
+0138             <span class="keyword">if</span> current(i) &lt; bdim_i(1)
+0139                 
+0140                 <span class="keyword">if</span> length(bcon_i) == 1 <span class="comment">%then periodic</span>
+0141                     current(i) = current(i)+bdim_i_l;
+0142                     periodic_list_m{i} = [periodic_list_m{i} k+1];
+0143                 <span class="keyword">else</span>
+0144                     end_list(m) = k+1;
+0145                     conv_list(m) = -1; <span class="comment">%goes unstable</span>
+0146                     <span class="keyword">for</span> j = 1:d
+0147                         periodic_list_m{j} = [periodic_list_m{j} k+1];
+0148                     <span class="keyword">end</span>
+0149                 <span class="keyword">end</span>
+0150                 
+0151             <span class="keyword">elseif</span> current(i) &gt; bdim_i(2)
+0152                 
+0153                 <span class="keyword">if</span> length(bcon_i) == 1 <span class="comment">%then periodic</span>
+0154                     current(i) = current(i)-bdim_i_l;
+0155                     periodic_list_m{i} = [periodic_list_m{i} k+1];
+0156                 <span class="keyword">else</span>
+0157                     end_list(m) = k+1;
+0158                     conv_list(m) = -1;
+0159                     <span class="keyword">for</span> j = 1:d
+0160                         periodic_list_m{j} = [periodic_list_m{j} k+1];
+0161                     <span class="keyword">end</span>
+0162                 <span class="keyword">end</span>
+0163                 
+0164             <span class="keyword">end</span>
+0165             
+0166             <span class="keyword">if</span> isempty(region) == 0
+0167                 <span class="keyword">if</span> current(i) &gt; region(i,1) &amp;&amp; current(i) &lt; region(i,2)
+0168                     region_check(i) = 1;
+0169                 <span class="keyword">end</span>
+0170             <span class="keyword">end</span>
+0171             
+0172         <span class="keyword">end</span>
+0173         
+0174         <span class="keyword">if</span> conv_list(m) == -1
+0175             <span class="keyword">break</span>;
+0176         <span class="keyword">end</span>
+0177         
+0178         <span class="keyword">if</span> isempty(region) == 0
+0179             <span class="keyword">if</span> sum(region_check) == d
+0180                 end_list(m) = k+1;
+0181                 conv_list(m) = 1; <span class="comment">%stable to goal region</span>
+0182                 <span class="keyword">for</span> j=1:d
+0183                     periodic_list_m{j} = [periodic_list_m{j} k+1];
+0184                 <span class="keyword">end</span>
+0185                 <span class="keyword">break</span>;
+0186             <span class="keyword">end</span>
+0187         <span class="keyword">end</span>
+0188         
+0189     <span class="keyword">end</span>
+0190     
+0191     end_point(m,:) = current;
+0192     <span class="keyword">for</span> j = 1:d
+0193         periodic_list_m{j} = [periodic_list_m k+1];
+0194         periodic_list_m{j} = unique(cell2mat(periodic_list_m{j}));
+0195         periodic_list{m,j} = periodic_list_m{j};
+0196     <span class="keyword">end</span>
+0197     fprintf(<span class="string">' %d'</span>,m);
+0198     
+0199 <span class="keyword">end</span>
+0200 
+0201 fprintf(<span class="string">'\n'</span>);
+0202 
+0203 <span class="comment">%% calculate total cost</span>
+0204 c_tot = dt*sum(c_traj,2);
+0205 
+0206 <span class="comment">%% plot state trajectories</span>
+0207 
+0208 pdim = ceil(sqrt(d));
+0209 ccc = jet(n_trial);
+0210 
+0211 <span class="comment">% plot state trajectories for each dimension seperately</span>
+0212 fig = figure;
+0213 <span class="keyword">for</span> i=1:d
+0214     
+0215     subplot(pdim,pdim,i);
+0216     hold on
+0217     <span class="keyword">for</span> j = 1:n_trial
+0218         
+0219         c_per_list = periodic_list{j,i};
+0220         
+0221         <span class="keyword">for</span> k = 1:length(c_per_list)-1
+0222             
+0223             cc_per_list = c_per_list(k)+1:c_per_list(k+1);
+0224             plot( t(cc_per_list), squeeze( traj(j,cc_per_list,i) ), <span class="string">'color'</span>, ccc(j,:) );
+0225             
+0226         <span class="keyword">end</span>
+0227         
+0228     <span class="keyword">end</span>
+0229     
+0230     <span class="keyword">if</span> isempty(region) == 0
+0231         plot([t(1) t(end_list(j))],[region(i,1) region(i,1)], <span class="string">'--'</span>, <span class="string">'Color'</span>,[.3 .3 .3], <span class="string">'LineWidth'</span>,1);
+0232         plot([t(1) t(end_list(j))],[region(i,2) region(i,2)], <span class="string">'--'</span>, <span class="string">'Color'</span>,[.3 .3 .3], <span class="string">'LineWidth'</span>,1);
+0233     <span class="keyword">end</span>
+0234     hold off
+0235     xlabel(<span class="string">'time(s)'</span>)
+0236     axis([0 inf bdim(i,1) bdim(i,2)])
+0237     title([<span class="string">'state traj for x_'</span>,num2str(i)])
+0238     
+0239 <span class="keyword">end</span>
+0240 
+0241 <span class="keyword">if</span> saveplots == 1
+0242     saveas(fig,[dirpath,<span class="string">'traj_plot_run'</span>,num2str(run)]);
+0243 <span class="keyword">end</span>
+0244 
+0245 <span class="comment">% plot trajectories at all dimensions</span>
+0246 
+0247 <span class="keyword">for</span> i = 1:n_trial
+0248     [gridt,gridx] = meshgrid(t(1:end_list(i)), 1:d);
+0249     figure; surf(gridt, gridx, squeeze(traj(i,1:end_list(i),:))', <span class="string">'EdgeColor'</span>, <span class="string">'None'</span>);
+0250     ylabel(<span class="string">'Coordinates'</span>)
+0251     xlabel(<span class="string">'Time, s'</span>)
+0252     title([<span class="string">'Trial '</span>, i])
+0253 <span class="keyword">end</span>
+0254 
+0255 <span class="keyword">if</span> saveplots == 1
+0256     saveas(fig,[dirpath,<span class="string">'traj_plot_all_run'</span>,num2str(run)]);
+0257 <span class="keyword">end</span>
+0258 
+0259 <span class="comment">% special case when d = 2, trajectories in one plot.</span>
+0260 <span class="keyword">if</span> d == 2
+0261     
+0262     <span class="comment">% combine peridic_list for dimension 1 and 2</span>
+0263     per_list_d2 = cell(1,n_trial);
+0264     <span class="keyword">for</span> j = 1:n_trial
+0265         per_list_d2{j} = unique([periodic_list{j,1} periodic_list{j,2}]);
+0266     <span class="keyword">end</span>
+0267     
+0268     fig = figure;
+0269     hold on
+0270     <span class="keyword">for</span> j = 1:n_trial
+0271         
+0272         c_per_list = per_list_d2{j};
+0273         
+0274         <span class="keyword">for</span> k = 1:length(c_per_list)-1
+0275             
+0276             cc_per_list = c_per_list(k)+1:c_per_list(k+1);
+0277             plot(squeeze((traj(j,cc_per_list,1))),squeeze((traj(j,cc_per_list,2))),<span class="string">'color'</span>,ccc(j,:))
+0278             
+0279         <span class="keyword">end</span>
+0280         
+0281     <span class="keyword">end</span>
+0282     
+0283     <span class="keyword">if</span> isempty(region) == 0
+0284         rectangle(<span class="string">'Position'</span>,[region(1,1),region(2,1),region(1,2)-region(1,1),region(2,2)-region(2,1)],<span class="keyword">...</span>
+0285             <span class="string">'Curvature'</span>,[0,0],<span class="string">'FaceColor'</span>,<span class="string">'r'</span>)
+0286     <span class="keyword">end</span>
+0287     xlabel(<span class="string">'x_1'</span>)
+0288     ylabel(<span class="string">'x_2'</span>)
+0289     title(<span class="string">'state trajectories'</span>)
+0290     axis([bdim(1,1) bdim(1,2) bdim(2,1) bdim(2,2)])
+0291     <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(gca,<span class="string">'fontsize'</span>, 16)
+0292     box on
+0293     hold off;
+0294     
+0295     <span class="keyword">if</span> saveplots == 1
+0296         saveas(fig,[dirpath,<span class="string">'traj_2Dplot_run'</span>,num2str(run)]);
+0297     <span class="keyword">end</span>
+0298     
+0299 <span class="keyword">end</span>
+0300 
+0301 <span class="comment">%% plot control trajectories</span>
+0302 
+0303 pdim = ceil(sqrt(ninputs));
+0304 ccc = jet(n_trial);
+0305 
+0306 <span class="comment">% plot control trajectories for each control dimension seperately</span>
+0307 fig = figure;
+0308 <span class="keyword">for</span> i=1:ninputs
+0309     
+0310     subplot(pdim,pdim,i);
+0311     hold on
+0312     <span class="keyword">for</span> j = 1:n_trial
+0313         plot( t(1:end_list(j)-1), squeeze( traj_u(j,1:end_list(j)-1,i) ), <span class="string">'color'</span>, ccc(j,:) );
+0314     <span class="keyword">end</span>
+0315     hold off
+0316     xlabel(<span class="string">'time(s)'</span>)
+0317     title([<span class="string">'control traj:s for u_'</span>,num2str(i)])
+0318     
+0319 <span class="keyword">end</span>
+0320 
+0321 <span class="keyword">if</span> saveplots == 1
+0322     saveas(fig,[dirpath,<span class="string">'traj_u_plot_run'</span>,num2str(run)]);
+0323 <span class="keyword">end</span>
+0324 
+0325 <span class="comment">%% plot cost trajectory</span>
+0326 
+0327 ccc = jet(n_trial);
+0328 fig = figure;
+0329 
+0330 hold on
+0331 <span class="keyword">for</span> j = 1:n_trial
+0332     plot( t(1:end_list(j)-1), c_traj(j,1:end_list(j)-1), <span class="string">'color'</span>, ccc(j,:) );
+0333 <span class="keyword">end</span>
+0334 hold off
+0335 xlabel(<span class="string">'time(s)'</span>)
+0336 title(<span class="string">'cost trajectories'</span>)
+0337 
+0338 <span class="keyword">if</span> saveplots == 1
+0339     saveas(fig,[dirpath,<span class="string">'c_traj_plot_run'</span>,num2str(run)]);
+0340 <span class="keyword">end</span>
+0341 
+0342 <span class="comment">%% save data</span>
+0343 
+0344 <span class="keyword">if</span> savedata == 1
+0345     clear fig;
+0346     save([save_folder,<span class="string">'simdata_run_'</span>,num2str(run)]);
+0347 <span class="keyword">end</span>
+0348 
+0349 
+0350</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

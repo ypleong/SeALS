@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of maketensdyn</title>
+  <meta name="keywords" content="maketensdyn">
+  <meta name="description" content="MAKETENSDYN creates ktensor representation of symbolic functions, given below.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>maketensdyn
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKETENSDYN creates ktensor representation of symbolic functions, given below.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKETENSDYN creates ktensor representation of symbolic functions, given below.
+ Inputs:
+   f - the function f in symbolic representation.
+   G - the function G in symbolic representation.
+   B - the function B in symbolic representation.
+   noise_cov - the noise covariance matrix.
+   q - the state cost in symbolic representation.
+   R - the control cost matrix.
+   x - the symbolic state vector.
+   grid - the discretization grid.
+ Outputs: (matrices where the entries are ktensors)
+   fTens - f as ktensor.
+   GTens - G as ktensor.
+   BTens - B as ktensor.
+   noise_covTens - noise_cov as ktensor.
+   qTens - q as ktensor.
+   RTens - R as ktensor.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)</a>
+0002 <span class="comment">% MAKETENSDYN creates ktensor representation of symbolic functions, given below.</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   f - the function f in symbolic representation.</span>
+0005 <span class="comment">%   G - the function G in symbolic representation.</span>
+0006 <span class="comment">%   B - the function B in symbolic representation.</span>
+0007 <span class="comment">%   noise_cov - the noise covariance matrix.</span>
+0008 <span class="comment">%   q - the state cost in symbolic representation.</span>
+0009 <span class="comment">%   R - the control cost matrix.</span>
+0010 <span class="comment">%   x - the symbolic state vector.</span>
+0011 <span class="comment">%   grid - the discretization grid.</span>
+0012 <span class="comment">% Outputs: (matrices where the entries are ktensors)</span>
+0013 <span class="comment">%   fTens - f as ktensor.</span>
+0014 <span class="comment">%   GTens - G as ktensor.</span>
+0015 <span class="comment">%   BTens - B as ktensor.</span>
+0016 <span class="comment">%   noise_covTens - noise_cov as ktensor.</span>
+0017 <span class="comment">%   qTens - q as ktensor.</span>
+0018 <span class="comment">%   RTens - R as ktensor.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% See also MAIN_RUN.</span>
+0021 
+0022 <span class="comment">% Elis Stefansson, Aug 5 2015</span>
+0023 
+0024 <span class="comment">%% create fTens</span>
+0025 <span class="keyword">if</span> isa(f,<span class="string">'sym'</span>) == 0 <span class="comment">%not sym (constant matrix)</span>
+0026     f = sym(f); <span class="comment">%convert to symbolic</span>
+0027 <span class="keyword">end</span>
+0028 fcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(f,x); <span class="comment">%create cell representation</span>
+0029 fTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(fcell,grid); <span class="comment">%create ktensor</span>
+0030 
+0031 <span class="comment">%% create GTens</span>
+0032 <span class="keyword">if</span> isa(G,<span class="string">'sym'</span>) == 0
+0033     G = sym(G);
+0034 <span class="keyword">end</span>
+0035 Gcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(G,x);
+0036 GTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(Gcell,grid);
+0037 
+0038 <span class="comment">%% create BTens</span>
+0039 <span class="keyword">if</span> isa(B,<span class="string">'sym'</span>) == 0
+0040     B = sym(B);
+0041 <span class="keyword">end</span>
+0042 Bcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(B,x);
+0043 BTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(Bcell,grid);
+0044 
+0045 <span class="comment">%% create noise_covTens</span>
+0046 <span class="keyword">if</span> isa(noise_cov,<span class="string">'sym'</span>) == 0
+0047     noise_cov = sym(noise_cov);
+0048 <span class="keyword">end</span>
+0049 noise_covcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(noise_cov,x);
+0050 noise_covTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(noise_covcell,grid);
+0051 
+0052 <span class="comment">%% create qTens</span>
+0053 <span class="keyword">if</span> isa(q,<span class="string">'sym'</span>) == 0
+0054     q = sym(q);
+0055 <span class="keyword">end</span>
+0056 qcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(q,x);
+0057 qTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(qcell,grid);
+0058 
+0059 <span class="comment">%% create RTens</span>
+0060 <span class="keyword">if</span> isa(R,<span class="string">'sym'</span>) == 0
+0061     R = sym(R);
+0062 <span class="keyword">end</span>
+0063 Rcell = <a href="fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(R,x);
+0064 RTens = <a href="fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>(Rcell,grid);
+0065  
+0066 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of clencurt</title>
+  <meta name="keywords" content="clencurt">
+  <meta name="description" content="CLENCURT nodes x (Chebyshev points) and weights w">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html dmsuite -->
+<h1>clencurt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>CLENCURT nodes x (Chebyshev points) and weights w</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [w] = clencurt(N, a, b) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> CLENCURT nodes x (Chebyshev points) and weights w
+ for Clenshaw-Curtis quadrature
+ N number of nodes
+ a minimum in range
+ b maximum in range</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/intTensWeights.html" class="code" title="function [w] = intTensWeights(n, bdim, gridt)">intTensWeights</a>	n - number of grid points in each dimension.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [w] = clencurt(N, a, b)</a>
+0002 
+0003 <span class="comment">% CLENCURT nodes x (Chebyshev points) and weights w</span>
+0004 <span class="comment">% for Clenshaw-Curtis quadrature</span>
+0005 <span class="comment">% N number of nodes</span>
+0006 <span class="comment">% a minimum in range</span>
+0007 <span class="comment">% b maximum in range</span>
+0008 
+0009 N = N-1;
+0010 theta = pi*(0:N)'/N; 
+0011 w = zeros(1,N+1); 
+0012 ii = 2:N; 
+0013 v = ones(N-1,1);
+0014 
+0015 <span class="keyword">if</span> mod(N,2)==0
+0016     w(1) = 1/(N^2-1); w(N+1) = w(1);
+0017     <span class="keyword">for</span> k=1:N/2-1 
+0018         v = v - 2*cos(2*k*theta(ii))/(4*k^2-1); 
+0019     <span class="keyword">end</span>
+0020     v = v - cos(N*theta(ii))/(N^2-1);
+0021 <span class="keyword">else</span>    
+0022     w(1) = 1/N^2; w(N+1) = w(1);
+0023     <span class="keyword">for</span> k=1:(N-1)/2 
+0024         v = v - 2*cos(2*k*theta(ii))/(4*k^2-1); 
+0025     <span class="keyword">end</span>
+0026 <span class="keyword">end</span>
+0027 w(ii) = 2*v/N;
+0028 
+0029 <span class="keyword">if</span> nargin &gt; 1
+0030     w = w*(b-a)/2;
+0031 <span class="keyword">end</span>
+0032</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

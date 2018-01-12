@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotkTensor</title>
+  <meta name="keywords" content="plotkTensor">
+  <meta name="description" content="Plot a ktensor using different plotting styles">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>plotkTensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Plot a ktensor using different plotting styles</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ handleOutput ] = plotkTensor( F, gridT, varargin ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Plot a ktensor using different plotting styles
+
+ F: ktensor with 'dim' dimensions
+ gridT: a dim,1 cell with the grid coordinates for each dimension
+ varargin: input arguments to change the default behaviour</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>	Create weights for integration</li><li><a href="meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>	Compute the mean and covariance of a tensor</li><li><a href="plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>	Plots a visualization of the Tensor. For each pair of dimensions it</li><li><a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>	Plots a visualization of the Tensor. Integrate over all dimensions</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plotkTensorCell.html" class="code" title="function [ handleoutput ] = plotkTensorCell( Fcell, gridT, seqVector, varargin )">plotkTensorCell</a>	Plot a sequence of ktensors</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ handleOutput ] = plotkTensor( F, gridT, varargin )</a>
+0002 <span class="comment">% Plot a ktensor using different plotting styles</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% F: ktensor with 'dim' dimensions</span>
+0005 <span class="comment">% gridT: a dim,1 cell with the grid coordinates for each dimension</span>
+0006 <span class="comment">% varargin: input arguments to change the default behaviour</span>
+0007 
+0008 validateattributes(F,{<span class="string">'ktensor'</span>},{<span class="string">'nonempty'</span>})
+0009 dim = ndims(F);
+0010 validateattributes(gridT,{<span class="string">'cell'</span>},{<span class="string">'numel'</span>,dim})
+0011 ngrid = arrayfun(@(x) length(gridT{x}),1:dim);
+0012 [weMean,weCov,weOnes] = <a href="createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>(gridT,ngrid);
+0013 [ meanT, ~ ] = <a href="meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>( F, gridT, weMean, weCov, weOnes );
+0014 
+0015 params = inputParser;
+0016 
+0017 addParameter(params,<span class="string">'takeLog'</span>,0,@isscalar);
+0018 
+0019 
+0020 defaultPlot2D = <span class="string">'slice'</span>;
+0021 expectedPlot2D = {<span class="string">'no'</span>,<span class="string">'marginalized'</span>,<span class="string">'slice'</span>};
+0022 addParameter(params,<span class="string">'plot2D'</span>,defaultPlot2D,<span class="keyword">...</span>
+0023                  @(x) any(validatestring(x,expectedPlot2D)));
+0024              
+0025 defaultPlot1D = <span class="string">'marginalized'</span>;
+0026 expectedPlot1D = {<span class="string">'no'</span>,<span class="string">'marginalized'</span>,<span class="string">'basis'</span>};
+0027 addParameter(params,<span class="string">'plot1D'</span>,defaultPlot1D,<span class="keyword">...</span>
+0028                  @(x) any(validatestring(x,expectedPlot1D)));
+0029              
+0030              
+0031 defaultplotType = <span class="string">'surf'</span>;
+0032 expectedplotType = {<span class="string">'surf'</span>,<span class="string">'pcolor'</span>};
+0033 addParameter(params,<span class="string">'plotType'</span>,defaultplotType,<span class="keyword">...</span>
+0034                  @(x) any(validatestring(x,expectedplotType)));
+0035              
+0036 addParameter(params,<span class="string">'slicePoint'</span>,meanT,@(x) length(x)==dim)
+0037 addParameter(params,<span class="string">'handleInput'</span>,[],@(x) iscell(x) )
+0038 
+0039 
+0040 
+0041 params.parse(varargin{:});
+0042 
+0043 <span class="comment">%% Copy from params object</span>
+0044 plot2D = params.Results.plot2D;
+0045 plot1D = params.Results.plot1D;
+0046 plotType = params.Results.plotType;
+0047 takeLog = params.Results.takeLog;
+0048 slicePoint = params.Results.slicePoint;
+0049 handleInput = params.Results.handleInput;
+0050 
+0051 <span class="comment">%% Plot ktensor</span>
+0052 <span class="keyword">switch</span> plot2D
+0053     <span class="keyword">case</span> <span class="string">'no'</span>
+0054         figure
+0055         title(<span class="string">'Marginalized fibers for each dimension'</span>)
+0056         Uu = cell(dim,1);
+0057         <span class="keyword">for</span> i=1:dim
+0058             subplot(dim,1,i)
+0059             Uu{i} = sum( repmat(F.lambda',size(F.U{i},1),1).*F.U{i},2);  
+0060             plot(gridT{i},Uu{i}) 
+0061             grid on
+0062             xlabel([<span class="string">'x_'</span>,num2str(i)])
+0063             ylabel([<span class="string">'U_'</span>,num2str(i)])   
+0064         <span class="keyword">end</span>
+0065     <span class="keyword">case</span> <span class="string">'slice'</span>
+0066         <span class="keyword">if</span> (isempty(handleInput))
+0067             [ handleOutput ] = <a href="plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>(F, slicePoint, gridT, handleInput, plotType);
+0068         <span class="keyword">else</span>
+0069             <a href="plot2DslicesAroundPoint.html" class="code" title="function [ handleOutput ] = plot2DslicesAroundPoint(Ftensor, point, gridT, handleInput, plotType)">plot2DslicesAroundPoint</a>(F, slicePoint, gridT, handleInput, plotType);
+0070         <span class="keyword">end</span>
+0071         
+0072     <span class="keyword">case</span> <span class="string">'marginalized'</span>
+0073         <span class="keyword">if</span> (isempty(handleInput))
+0074             [ handleOutput ] = <a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>(F, gridT, handleInput);
+0075         <span class="keyword">else</span>
+0076             <a href="plot2DslicesMarginalized.html" class="code" title="function [ handleOutput ] = plot2DslicesMarginalized(Ftensor, gridT, handleInput )">plot2DslicesMarginalized</a>(F, gridT, handleInput)
+0077         <span class="keyword">end</span>
+0078 <span class="keyword">end</span>
+0079 
+0080 <span class="keyword">end</span>
+0081</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

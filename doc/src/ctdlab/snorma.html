@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of snorma</title>
+  <meta name="keywords" content="snorma">
+  <meta name="description" content="Estimate the snorm of tensor A using top singular vectors of factor">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>snorma
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Estimate the snorm of tensor A using top singular vectors of factor</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [nrm,T] = snorma(A,tol,maxit) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Estimate the snorm of tensor A using top singular vectors of factor
+ matrices.
+ Inputs:
+  A = ktensor
+  tol = stopping tolerance (defaults to 1e-10)
+  maxit = max iterations (defaults to 50)
+ Outputs:
+  nrm = s-value of rank-1 approximation (snorm)
+  T = corresponding rank-1 approximation</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="rofpi1.html" class="code" title="function [T,err,alpha] = rofpi1(A,T,tol,maxit,vbs)">rofpi1</a>	Fixed point iteration for rank-1 update with provided initial guess.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="../../src/ctdlab/tests/test_tenid.html" class="code" title="">test_tenid</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [nrm,T] = snorma(A,tol,maxit)</a>
+0002   <span class="comment">% Estimate the snorm of tensor A using top singular vectors of factor</span>
+0003   <span class="comment">% matrices.</span>
+0004   <span class="comment">% Inputs:</span>
+0005   <span class="comment">%  A = ktensor</span>
+0006   <span class="comment">%  tol = stopping tolerance (defaults to 1e-10)</span>
+0007   <span class="comment">%  maxit = max iterations (defaults to 50)</span>
+0008   <span class="comment">% Outputs:</span>
+0009   <span class="comment">%  nrm = s-value of rank-1 approximation (snorm)</span>
+0010   <span class="comment">%  T = corresponding rank-1 approximation</span>
+0011   
+0012   <span class="keyword">if</span> nargin &lt;3
+0013     maxit = 25;
+0014   <span class="keyword">end</span>
+0015   <span class="keyword">if</span> nargin &lt; 2
+0016     tol = 1e-8;
+0017   <span class="keyword">end</span>
+0018   
+0019   T = cell(ndims(A),1);
+0020   <span class="keyword">for</span> d = 1:ndims(A)
+0021     <span class="comment">%[T{d},~,~,~] = powm(A{d},tol,maxit);</span>
+0022     <span class="comment">%T{d} = sparse(T{d});</span>
+0023     T{d} = sum(A{d}*diag(A.lambda),2);
+0024     T{d} = T{d} / norm(T{d});
+0025   <span class="keyword">end</span>
+0026   T = ktensor(1,T);
+0027   
+0028   [T,~,alpha] = <a href="rofpi1.html" class="code" title="function [T,err,alpha] = rofpi1(A,T,tol,maxit,vbs)">rofpi1</a>(A,T,tol,maxit);
+0029   nrm = alpha(end);
+0030 
+0031 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SRMultM</title>
+  <meta name="keywords" content="SRMultM">
+  <meta name="description" content="SRMULTM multiplies two ktensor operators A and B. The result is a new">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>SRMultM
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>SRMULTM multiplies two ktensor operators A and B. The result is a new</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function res = SRMultM(A,B) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> SRMULTM multiplies two ktensor operators A and B. The result is a new
+ ktensor AB.
+ Input:
+   A - ktensor operator A.
+   B - ktensor operator B.
+ Output:
+   AB - the product of A and B.
+
+ Note:
+ The matrices of A and B are stored as vectors. For
+ example, a matrix of size mxm is stored as a vector with m^2 entries.
+
+ SRMULTM is for example used in HESSIAN.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>	</li><li><a href="blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="TMatM.html" class="code" title="function [C] = TMatM(A,B)">TMatM</a>	TMATM Tensor Matrix Multiply. Multiplies two cell array with ktensor</li><li><a href="artdiff_ver2.html" class="code" title="function [opArtdiff] =  artdiff_ver2(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver2</a>	ARTDIFF_VER1 is the second version for adding artificial diffusion.</li><li><a href="artdiff_ver3.html" class="code" title="function [opArtdiff] = artdiff_ver3(artdiff_dims,artdiff_scale,conv,diff,D2,fTens,h)">artdiff_ver3</a>	ARTDIFF_VER1 is the third version for adding artificial diffusion.</li><li><a href="create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="hessian.html" class="code" title="function [hess] = hessian(D, D2)">hessian</a>	HESSIAN generates the Hessian operator as a cell array with ktensor</li><li><a href="makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li><li><a href="../test/als_test_code.html" class="code" title="function [] = als_test_code()">als_test_code</a>	load('./test/test_data_smooth2D.mat')</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function res = SRMultM(A,B)</a>
+0002 <span class="comment">% SRMULTM multiplies two ktensor operators A and B. The result is a new</span>
+0003 <span class="comment">% ktensor AB.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   A - ktensor operator A.</span>
+0006 <span class="comment">%   B - ktensor operator B.</span>
+0007 <span class="comment">% Output:</span>
+0008 <span class="comment">%   AB - the product of A and B.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Note:</span>
+0011 <span class="comment">% The matrices of A and B are stored as vectors. For</span>
+0012 <span class="comment">% example, a matrix of size mxm is stored as a vector with m^2 entries.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% SRMULTM is for example used in HESSIAN.</span>
+0015 
+0016 rA = ncomponents(A);
+0017 rB = ncomponents(B);
+0018 nd = ndims(A);
+0019 
+0020 LL = B.lambda*A.lambda';
+0021 AB = cell(nd,1);
+0022 <span class="keyword">for</span> nn = 1:nd
+0023     N = round(sqrt(size(B,nn)));
+0024     AB{nn} = reshape(<a href="blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>(<a href="blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>(reshape(A.U{nn},N,N*rA),N)*reshape(B.U{nn},N,N*rB),N),N*N,[]);
+0025 <span class="keyword">end</span>
+0026 res = ktensor(LL(:),AB);
+0027 res = fixsigns(arrange(res));</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot2d</title>
+  <meta name="keywords" content="plot2d">
+  <meta name="description" content="Plot a 2d mesh using pcolor.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>plot2d
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Plot a 2d mesh using pcolor.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [  ] = plot2d( xvector,zmatrix ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Plot a 2d mesh using pcolor.
+
+ xvector: {nx1,mx1} cell with the x and y vectors
+ zmatrix nxm matrix with values</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="test_pdf_2D_PFE.html" class="code" title="">test_pdf_2D_PFE</a>	% Test Finite Difference PDF Evolution 2 dimensions</li><li><a href="test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [  ] = plot2d( xvector,zmatrix )</a>
+0002 <span class="comment">% Plot a 2d mesh using pcolor.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% xvector: {nx1,mx1} cell with the x and y vectors</span>
+0005 <span class="comment">% zmatrix nxm matrix with values</span>
+0006 
+0007     <span class="keyword">if</span> ndims(zmatrix) == 2
+0008         hh = pcolor(xvector{1}',xvector{2}',zmatrix');
+0009         colorbar
+0010         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(hh, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0011         xlabel(<span class="string">'x'</span>)
+0012         ylabel(<span class="string">''</span>)
+0013         grid on        
+0014     <span class="keyword">else</span>
+0015         disp(<span class="string">'Zmatrix is not a 2way matrix'</span>)
+0016     <span class="keyword">end</span>
+0017 
+0018 
+0019 
+0020 
+0021 <span class="keyword">end</span>
+0022</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

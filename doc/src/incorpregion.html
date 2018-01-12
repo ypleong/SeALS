@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of incorpregion</title>
+  <meta name="keywords" content="incorpregion">
+  <meta name="description" content="INCORPREGION modifies operator and boundary conditions to incooporate">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>incorpregion
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>INCORPREGION modifies operator and boundary conditions to incooporate</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> INCORPREGION modifies operator and boundary conditions to incooporate
+ Dirichlet boundary conditions at the goal region.
+ Inputs:
+   op - the operator as ktensor
+   bc - the boundary conditions as ktensor.
+   region - the dimensions of the goal region.
+   grid - the discretization grid.
+   regval - the Dirichlet value at the goal region.
+   regsca - the boundary scaling at the goal region.
+ Outputs:
+   op - the adjusted operator.
+   bc - the adjusted boundary conditions.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [op,bc] = incorpregion(op,bc,region,grid,regval,regsca)</a>
+0002 <span class="comment">% INCORPREGION modifies operator and boundary conditions to incooporate</span>
+0003 <span class="comment">% Dirichlet boundary conditions at the goal region.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   op - the operator as ktensor</span>
+0006 <span class="comment">%   bc - the boundary conditions as ktensor.</span>
+0007 <span class="comment">%   region - the dimensions of the goal region.</span>
+0008 <span class="comment">%   grid - the discretization grid.</span>
+0009 <span class="comment">%   regval - the Dirichlet value at the goal region.</span>
+0010 <span class="comment">%   regsca - the boundary scaling at the goal region.</span>
+0011 <span class="comment">% Outputs:</span>
+0012 <span class="comment">%   op - the adjusted operator.</span>
+0013 <span class="comment">%   bc - the adjusted boundary conditions.</span>
+0014 
+0015 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0016 
+0017 sr = ncomponents(op);
+0018 sr_b = ncomponents(bc);
+0019 d = length(grid);
+0020 
+0021 <span class="comment">% select out the region from the operator</span>
+0022 opAdd = cell(1,d);
+0023 opRem = op;
+0024 
+0025 bcAdd = cell(d,1); <span class="comment">%will be the added bc in region.</span>
+0026 bcd = bc; <span class="comment">%will be a copy of bc in region</span>
+0027 
+0028 <span class="keyword">for</span> i=1:d
+0029     
+0030     gridi = grid{i};
+0031     ni = length(gridi);
+0032     d_ind = (gridi &gt;= region(i,1)) &amp; (gridi &lt;= region(i,2));
+0033     d_out = (gridi &lt; region(i,1)) | (gridi &gt; region(i,2));
+0034     
+0035     <span class="comment">%Go through each rank and eliminate nodes outside region</span>
+0036     temp = reshape(opRem.U{i},ni,ni*sr);
+0037     temp(d_out,:) = 0;
+0038     opRem.U{i} = reshape(temp,ni*ni,sr);
+0039     
+0040     <span class="comment">%Create identity for nodes inside region</span>
+0041     id = eye(ni);
+0042     id(d_out,:) = 0;
+0043     id(:,d_out) = 0;
+0044     opAdd{i} = id(:);
+0045     
+0046     <span class="comment">%Go through the boundary and eliminate nodes outside region</span>
+0047     newBCU = bcd.U{i};
+0048     newBCU(d_out,:) = zeros(sum(d_out),sr_b);
+0049     bcd.U{i} = newBCU;
+0050     bcAdd{i} = zeros(ni,1);
+0051     bcAdd{i}(d_ind,1) = ones(sum(d_ind),1);
+0052     
+0053 <span class="keyword">end</span>
+0054 
+0055 op = fixsigns(arrange(op - opRem + regsca*ktensor(opAdd)));
+0056 bc = fixsigns(arrange(bc - bcd + regsca*regval*ktensor(bcAdd)));
+0057 
+0058 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

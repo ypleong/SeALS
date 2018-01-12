@@ -1,0 +1,561 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_finite_horizon_hjb_scaling</title>
+  <meta name="keywords" content="test_finite_horizon_hjb_scaling">
+  <meta name="description" content="Finite Horizon">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>test_finite_horizon_hjb_scaling
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Finite Horizon</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Finite Horizon
+ Sept 7, 2017</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="../src/EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>	EVALT evaluates a ktensor (function) at an individual point</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../src/cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>	CP_ALS Compute a CP decomposition of any type of tensor.</li><li><a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li><li><a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>	FUNC2TENS Creates a function in ktensor form from cell array</li><li><a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>	FSYM2FCELL Creates a function in cell array representation from symbolic</li><li><a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>	MAKE_BC_SCA creates scalings for the boundary condition and goal region</li><li><a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>	MAKE_BC_SCA_VAR creates scalings for the boundary condition and goal</li><li><a href="../src/makebcbackward.html" class="code" title="function [bc] = makebcbackward(bc,bcon,n)">makebcbackward</a>	MAKEBC modifies the ktensor to incooporate boundary conditions.</li><li><a href="../src/makebcforward.html" class="code" title="function [bc] = makebcforward(bcon,n)">makebcforward</a>	MAKEBC modifies the ktensor to incooporate boundary conditions.</li><li><a href="../src/makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="../src/makebcopforward.html" class="code" title="function [op] = makebcopforward(op,bcon,n)">makebcopforward</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li><li><a href="../src/makefuncdyn.html" class="code" title="function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x)">makefuncdyn</a>	MAKEFUNCDYN creates MATLAB functions of symbolic functions, given below.</li><li><a href="../src/makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>	MAKEOP creates the operator of the linear HJB equation.</li><li><a href="../src/maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>	MAKETENSDYN creates ktensor representation of symbolic functions, given below.</li><li><a href="../src/oneTens.html" class="code" title="function idTens = oneTens(d, n)">oneTens</a>	Create a d dimensional all ones tensor of size n</li><li><a href="../src/plot2Dslice.html" class="code" title="function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,gridT, handleInput,lambda,plotType)">plot2Dslice</a>	Inputs:</li><li><a href="../src/sim_finite_run.html" class="code" title="function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_finite_run</a>	SIMULATION simulates trajectories starting from x0_list using results</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% Finite Horizon</span>
+0002 <span class="comment">% Sept 7, 2017</span>
+0003 
+0004 addpath(genpath(<span class="string">'../src'</span>));
+0005 clear all
+0006 
+0007 <span class="comment">%%</span>
+0008 run = 1;
+0009 dirpath = [<span class="string">'./test_run/test_finite_horizon_hjb_scaling/run_'</span>,num2str(run),<span class="string">'/'</span>];
+0010 <span class="keyword">if</span> 7~=exist(dirpath,<span class="string">'dir'</span>) 
+0011     mkdir(dirpath); 
+0012 <span class="keyword">end</span>
+0013 diary([dirpath,<span class="string">'run_'</span>,num2str(run),<span class="string">'output'</span>])
+0014 fprintf(<span class="string">'--------------------- New Run --------------------- \n\n'</span>)
+0015 disp(datetime)
+0016 
+0017 start_whole = tic;
+0018 
+0019 dynamic_choice = <span class="string">'Linear'</span>;
+0020 time_stepping_choice = <span class="string">'backward'</span>; <span class="comment">% forward</span>
+0021 
+0022 <span class="comment">%% Define dynamics</span>
+0023 
+0024 <span class="comment">% dynamic choices</span>
+0025 
+0026 <span class="keyword">if</span> strcmp(dynamic_choice,<span class="string">'VTOL'</span>)
+0027 
+0028     d = 6;
+0029     ninputs = 2;
+0030     x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0031     
+0032     n = [101; 103; 105; 107; 107; 101];
+0033     bdim = [-5 5; -5 5; -5 5; -5 5; -pi pi-(2*pi/(n(5)+1)); -5 5;];
+0034     bcon = {{<span class="string">'d'</span>,0,0},{<span class="string">'d'</span>,0,0},{<span class="string">'d'</span>,0,0},{<span class="string">'d'</span>,0,0},{<span class="string">'p'</span>},{<span class="string">'d'</span>,0,0}};
+0035     bsca = ones(d,2);
+0036     als_options = {100,25,<span class="string">'average'</span>,1e-7,1e-12,0.01,15};
+0037     als_variant = {10,20};
+0038     tol_err_op = 1e-6;
+0039     c_err = 1e-7;
+0040         
+0041     g = 9.8; eps = 0.01;
+0042     G = [0 0; -sin(x(5)) eps*cos(x(5)); 0 0; cos(x(5)) eps*sin(x(5)); 0 0; 0 1];
+0043     B = G;
+0044     uref = [g 0]';
+0045     f1 = [x(2); 0; x(4); -g; x(6); 0];
+0046     f2 = G*uref ;
+0047     f = f1 + f2;
+0048     noise_cov = diag([1 1]);
+0049     q = x'*x;
+0050     R = diag([1 1]);
+0051     lambda = 1;<span class="comment">%noise_cov*R;</span>
+0052 
+0053     <span class="comment">% linearized dynamics</span>
+0054     AA = [0 1 0 0 0 0; 
+0055           0 0 0 0 -g 0; 
+0056           0 0 0 1 0 0; 
+0057           zeros(1,d); 
+0058           0 0 0 0 0 1; 
+0059           zeros(1,6);]; 
+0060     BB = [0 0; 0 eps; 0 0; 1 0; 0 0; 0 1]; 
+0061     QQ = diag(ones(d,1));
+0062     RR = 1/2*R;
+0063     PP = care(AA,BB,QQ,RR);
+0064 
+0065 <span class="keyword">elseif</span> strcmp(dynamic_choice,<span class="string">'Quadcopter'</span>)
+0066  
+0067     d = 12;
+0068     ninputs = 4;
+0069     x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0070     n = 51*ones(d,1);
+0071     bdim = [-5 5 ; -5 5; -5 5; -pi pi; -pi pi; -pi pi;<span class="keyword">...</span>
+0072         -5 5; -5 5; -5 5; -pi pi-(2*pi/n(10)); -pi pi-(2*pi/n(11)); -pi pi-(2*pi/n(12))];
+0073     bcon = { {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , <span class="keyword">...</span>
+0074         {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'d'</span>,0,0} , {<span class="string">'p'</span>} , {<span class="string">'p'</span>} , {<span class="string">'p'</span>} };
+0075     bsca = ones(d,2);
+0076     als_options = {100,20,<span class="string">'average'</span>,1e-7,1e-12,0.01,15};
+0077     als_variant = {10,20};
+0078     tol_err_op = 1e-4;
+0079     c_err = 1e-4;
+0080 
+0081     g = 9.8;
+0082     hf1 = sin(x(12))*sin(x(10))+cos(x(12))*cos(x(10))*sin(x(11));
+0083     hf2 = cos(x(12))*sin(x(11))*sin(x(10))-cos(x(10))*sin(x(12));
+0084     hf3 = cos(x(11))*cos(x(12));
+0085     G = [hf1 0 0 0; hf2 0 0 0; hf3 0 0 0; <span class="keyword">...</span>
+0086         0 1 0 0; 0 0 1 0; 0 0 0 1; <span class="keyword">...</span>
+0087         0 0 0 0; 0 0 0 0; 0 0 0 0; <span class="keyword">...</span>
+0088         0 0 0 0; 0 0 0 0; 0 0 0 0];
+0089     B = G;
+0090     uref = [g 0 0 0]';
+0091     f2 = G*uref ;
+0092     f1 = [0; 0; -g; 0; 0; 0; x(1); x(2); x(3); x(4); x(5); x(6)];
+0093     f = f1+f2;
+0094     noise_cov = eye(ninputs);
+0095     q = x'*x;
+0096     R = eye(ninputs);
+0097     lambda = 1;
+0098 
+0099     AA = [0 0 0 0 0 0 0 0 0 0 g 0; 
+0100           0 0 0 0 0 0 0 0 0 0 0 -g; 
+0101           zeros(4,d); 
+0102           1 0 0 0 0 0 0 0 0 0 0 0; 
+0103           0 1 0 0 0 0 0 0 0 0 0 0;
+0104           0 0 1 0 0 0 0 0 0 0 0 0;
+0105           0 0 0 1 0 0 0 0 0 0 0 0;
+0106           0 0 0 0 1 0 0 0 0 0 0 0;
+0107           0 0 0 0 0 1 0 0 0 0 0 0];
+0108     BB = [zeros(2,ninputs); 1 0 0 0; 
+0109           0 1 0 0; 0 0 1 0; 0 0 0 1;
+0110           zeros(6,ninputs)]; 
+0111     QQ = diag(ones(d,1));
+0112     RR = 1/2*R;
+0113     PP = care(AA,BB,QQ,RR);
+0114 
+0115 <span class="keyword">elseif</span> strcmp(dynamic_choice,<span class="string">'Linear'</span>)
+0116 
+0117     d = 2;
+0118     ninputs = 1;
+0119     x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0120     n = 51;
+0121     bdim = [-5,5];
+0122     bcon = {{<span class="string">'d'</span>, 0,0}};
+0123     bsca = ones(d,2);
+0124     <span class="keyword">for</span> i = 2:d
+0125         n = [n; n(i-1)+2];
+0126         bdim = [bdim;-5 5]; 
+0127         bcon{i} = {<span class="string">'d'</span>, 0, 0}; 
+0128     <span class="keyword">end</span>
+0129     als_options = {100,20,<span class="string">'average'</span>,1e-7,1e-12,0.01,15};
+0130     als_variant = {10,20};
+0131     tol_err_op = 1e-5;
+0132     c_err = 1e-7;
+0133 
+0134     AA = randn(d,d);
+0135     BB = eye(d,ninputs);
+0136     QQ = diag(ones(d,1));
+0137     RR = 1/2*diag(ones(ninputs,1));
+0138     PP = care(AA,BB,QQ,RR);
+0139     B = BB;
+0140     G = B;
+0141     f = AA*x;
+0142     f1 = f;
+0143     noise_cov = diag(ones(ninputs,1));
+0144     q = x'*QQ*x;
+0145     R = RR;
+0146     lambda = 1;<span class="comment">%noise_cov*R;</span>
+0147     
+0148 <span class="keyword">elseif</span> strcmp(dynamic_choice,<span class="string">'SimplePendulum'</span>)
+0149     
+0150     d = 2;
+0151     ninputs = 1;
+0152     x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0153     n = [101; 103;];
+0154     bdim = [-pi pi-(2*pi/(n(5)+1)); -5 5;];
+0155     bcon = {{<span class="string">'p'</span>},{<span class="string">'d'</span>,0,0}};
+0156     bsca = ones(d,2);
+0157     als_options = {100,25,<span class="string">'average'</span>,1e-7,1e-12,0.01,15};
+0158     tol_err_op = 1e-6;
+0159     c_err = 1e-7;
+0160 
+0161     <span class="comment">% Simple Pendulum</span>
+0162     f = [x(2) ; sin(x(1))];
+0163     f1 = f;
+0164     G = [0.01 ; 1];
+0165     B = G;
+0166     noise_cov = 1;
+0167     q = 0.1*x(1)^2+0.05*x(2)^2;
+0168     R = 0.02;
+0169     lambda = noise_cov*R;
+0170     
+0171     AA = [0 1; 
+0172           1 0]; 
+0173     BB = B;
+0174     QQ = diag(ones(d,1));
+0175     RR = 1/2*R;
+0176     PP = care(AA,BB,QQ,RR);
+0177 
+0178 <span class="keyword">elseif</span> strcmp(dynamic_choice,<span class="string">'InvertedPendulum'</span>)
+0179     
+0180     d = 2;
+0181     ninputs = 1;
+0182     x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0183     n = [101; 103;];
+0184     bdim = [-pi pi-(2*pi/(n(5)+1)); -10 10;];
+0185     bcon = {{<span class="string">'p'</span>},{<span class="string">'d'</span>,0,0}};
+0186     bsca = ones(d,2);
+0187     als_options = {100,25,<span class="string">'average'</span>,1e-7,1e-12,0.01,15};
+0188     tol_err_op = 1e-6;
+0189     c_err = 1e-7;
+0190     
+0191     m = 2; M = 8; l = .5; g = 9.8; mr = m/(m+M); den = 4/3-mr*cos(x(1))^2;
+0192     ff1 = (g/l)*sin(x(1))/den;
+0193     ff2 = -0.5*mr*x(2)^2*sin(2*x(1))/den;
+0194     f = [x(2) ; ff1+ff2];
+0195     f1 = f;
+0196     G = [0.01 ; -mr/(m*l)*cos(x(1))/den];
+0197     B = G;
+0198     noise_cov = 10*pi;
+0199     q = 0.1*x(1)^2+0.05*x(2)^2;
+0200     R = 0.02;
+0201     lambda = noise_cov*R;
+0202 
+0203     <span class="comment">% linearized dynamics</span>
+0204     AA = [0 1; (g/l)/(4/3-mr) 0];<span class="comment">%randn(d,d);%</span>
+0205     BB = [0.01; -mr/(m*l)/(4/3-mr)]; <span class="comment">%eye(d);%</span>
+0206     QQ = diag([0.1 0.05]);
+0207     RR = 1/2*R;
+0208     PP = care(AA,BB,QQ,RR);
+0209 
+0210 <span class="keyword">end</span>
+0211 
+0212 
+0213 <span class="comment">%% Initialization</span>
+0214 
+0215 h = 0.001;  <span class="comment">% time step size</span>
+0216 tend = 5;
+0217 tt = 0:h:tend;
+0218 
+0219 region = [];
+0220 regval = 1;
+0221 regsca = [];
+0222 sca_ver = 1;
+0223 
+0224 debugging = 0;
+0225 
+0226 fprintf([<span class="string">'Starting run '</span>,num2str(run),<span class="string">' with main_run \n'</span>])
+0227 
+0228 
+0229 <span class="comment">%% Calculate differentiation operators and finite difference matrices</span>
+0230 
+0231 fprintf(<span class="string">'Creating differential operators ...\n'</span>);
+0232 start_diff = tic;
+0233 
+0234 <span class="keyword">for</span> i=1:d
+0235     gridT{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+0236     nd(i) = n(i);
+0237     dxd(i) = abs(gridT{i}(2) - gridT{i}(1));
+0238     acc(:,i) = [2,2]';
+0239 <span class="keyword">end</span>
+0240 
+0241 [D,D2,fd1,fd2] = <a href="../src/makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>(gridT,nd,dxd,acc,bcon,region);
+0242 
+0243 <span class="comment">% [~,gridT,~,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,[0 0]);</span>
+0244 toc(start_diff)
+0245 end_diff = toc(start_diff);
+0246 
+0247 <span class="comment">%% Calculate dynamics</span>
+0248 fprintf(<span class="string">'Creating dynamics operator ...\n'</span>);
+0249 start_dynamics = tic;
+0250 [fTens,GTens,BTens,noise_covTens,qTens,RTens] = <a href="../src/maketensdyn.html" class="code" title="function [fTens,GTens,BTens,noise_covTens,qTens,RTens] = maketensdyn(f,G,B,noise_cov,q,R,x,grid)">maketensdyn</a>(f,G,B,noise_cov,q,R,x,gridT);
+0251 toc(start_dynamics)
+0252 end_dynamics = toc(start_dynamics);
+0253 
+0254 <span class="comment">%% Calculate operator</span>
+0255 fprintf(<span class="string">'Creating PDE operator ...\n'</span>);
+0256 start_PDEop = tic;
+0257 [op,conv,diff] = <a href="../src/makeop.html" class="code" title="function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)">makeop</a>(fTens,BTens,noise_covTens,qTens,D,D2,0,lambda);
+0258 <span class="keyword">if</span> strcmp(time_stepping_choice, <span class="string">'forward'</span>)
+0259     op = <a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(<a href="../src/oneTens.html" class="code" title="function idTens = oneTens(d, n)">oneTens</a>(d, n)) + op*h; <span class="comment">% forward</span>
+0260 <span class="keyword">elseif</span> strcmp(time_stepping_choice, <span class="string">'backward'</span>)
+0261     op = <a href="../src/DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(<a href="../src/oneTens.html" class="code" title="function idTens = oneTens(d, n)">oneTens</a>(d, n)) - op*h; <span class="comment">% backward</span>
+0262 <span class="keyword">else</span>
+0263     error([time_stepping_choice, <span class="string">' time stepping scheme does not exist.'</span>])
+0264 <span class="keyword">end</span>
+0265 toc(start_PDEop)
+0266 end_PDEop = toc(start_PDEop);
+0267 
+0268 <span class="comment">%% Create boundary conditions</span>
+0269 
+0270 <span class="comment">% create scaling for bc</span>
+0271 <span class="keyword">if</span> isempty(bsca) == 1 || isempty(regsca) == 1
+0272     
+0273     <span class="keyword">if</span> sca_ver == 1
+0274         [bscat, ~] = <a href="../src/make_bc_sca_var.html" class="code" title="function [bsca, regsca] = make_bc_sca_var(A,grid,region,bcon)">make_bc_sca_var</a>(op,gridT,region,bcon);    
+0275     <span class="keyword">elseif</span> sca_ver == 2
+0276         [bscat, ~] = <a href="../src/make_bc_sca.html" class="code" title="function [bsca, regsca] = make_bc_sca(op,bcon,region,regval,als_options,fd1,grid,x,n)">make_bc_sca</a>(op,bcon,region,regval,als_options,fd1,gridT,x,n);
+0277     <span class="keyword">else</span>
+0278         error(<span class="string">'wrong specification on boundary scaling'</span>);
+0279     <span class="keyword">end</span>
+0280 <span class="keyword">end</span>
+0281 
+0282 <span class="keyword">if</span> isempty(bsca)
+0283     bsca = bscat;
+0284 <span class="keyword">end</span>
+0285 
+0286 <span class="comment">% NOTE: This is bad for backward euler. Not if the boundary condition</span>
+0287 <span class="comment">% scaling is 1 for Dirichlet BC. For periodic and neumann, need to adjust</span>
+0288 <span class="comment">% the boundary of F_all as well.</span>
+0289 <span class="comment">% [op] = makebcop(op,bcon,bsca,n,fd1);</span>
+0290 <span class="comment">% [op] = makebcopspectral(op,bcon,bsca,n,fd1);</span>
+0291 
+0292 <span class="keyword">if</span> strcmp(time_stepping_choice, <span class="string">'forward'</span>)
+0293     [op] = <a href="../src/makebcopforward.html" class="code" title="function [op] = makebcopforward(op,bcon,n)">makebcopforward</a>(op,bcon,n); <span class="comment">% forward</span>
+0294 <span class="keyword">elseif</span> strcmp(time_stepping_choice, <span class="string">'backward'</span>)
+0295     [op] = <a href="../src/makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>(op,bcon,bsca,n,fd1); <span class="comment">% backward</span>
+0296 <span class="keyword">else</span>
+0297     error([time_stepping_choice, <span class="string">' time stepping scheme does not exist.'</span>])
+0298 <span class="keyword">end</span>
+0299 
+0300 <span class="comment">%% Create initial conditions</span>
+0301 fprintf(<span class="string">'Creating initial conditions ...\n'</span>);
+0302 start_PDEinit = tic;
+0303 
+0304 <span class="keyword">if</span> strcmp(dynamic_choice,<span class="string">'Linear'</span>)
+0305     <span class="keyword">if</span> d == 2
+0306         [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+0307         init = reshape(exp(-(sum(([gridx(:) gridy(:)]*PP).*[gridx(:) gridy(:)],2))/lambda),n(2),n(1));
+0308         initTens  = {<a href="../src/cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>(tensor(init'),10)};
+0309     <span class="keyword">else</span>
+0310         init = exp(-x(1)'*PP*x(1)/lambda);
+0311         initTens  = <a href="../src/fcell2ftens.html" class="code" title="function [fTens] = fcell2ftens(fcell,grid)">fcell2ftens</a>( <a href="../src/fsym2fcell.html" class="code" title="function [fcell] = fsym2fcell(fsym,x)">fsym2fcell</a>(sym(init) ,x), gridT);
+0312     <span class="keyword">end</span>
+0313 <span class="keyword">else</span>
+0314     U = cell(d,1);
+0315     <span class="keyword">for</span> i = 1:d
+0316         U{i} = exp(-gridT{i}.^2);
+0317     <span class="keyword">end</span>
+0318     initTens = {ktensor(U)};
+0319 <span class="keyword">end</span>
+0320     
+0321 toc(start_PDEinit)
+0322 end_PDEinit = toc(start_PDEinit);
+0323 
+0324 <span class="comment">%% Compress operator</span>
+0325 
+0326 op_uncomp = op; <span class="comment">%save uncompressed op</span>
+0327 
+0328 fprintf(<span class="string">'Attempt to compress operator, rank(op)=%d\n'</span>, ncomponents(op));
+0329 rank_op_uncomp = ncomponents(op);
+0330 
+0331 start_compress_id = tic;
+0332 fprintf(<span class="string">'Target CTD: %d terms above tol\n'</span>, length(find(op.lambda&gt;tol_err_op)));
+0333 fprintf(<span class="string">'Running TENID with frobenius norm:\n'</span>)
+0334 [op,~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(op,tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(op),0);
+0335 op = fixsigns(arrange(op));
+0336 compress_time_id = toc(start_compress_id);
+0337 fprintf(<span class="string">'Number of components after TENID compression, %d\n'</span>, ncomponents(op));
+0338 toc(start_compress_id)
+0339 
+0340 start_compress = tic;
+0341 fprintf(<span class="string">'Running ALS:\n'</span>)
+0342 [op, err_op, iter_op, enrich_op, t_step_op, cond_op, noreduce] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(op,tol_err_op);
+0343 rank_op_comp = ncomponents(op);
+0344 fprintf(<span class="string">'Number of components after ALS compression, %d\n'</span>, ncomponents(op));
+0345 compress_time = toc(start_compress);
+0346 toc(start_compress)
+0347 
+0348 <span class="comment">%% Solve system</span>
+0349 
+0350 disp(<span class="string">'Beginning Solving'</span>);
+0351 tic;
+0352 start_solve = tic;
+0353 
+0354 nt = length(tt);
+0355 
+0356 F_all = cell(1,nt+1);
+0357 F_all{1} = initTens{1};
+0358 F_scale = ones(1,nt+1);
+0359 
+0360 t = 0;
+0361 
+0362 iter_time = zeros(nt,1);
+0363 <span class="comment">%%</span>
+0364 <span class="keyword">for</span> ind = 2:nt+1
+0365     start_iter = tic;
+0366     <span class="keyword">if</span> strcmp(time_stepping_choice, <span class="string">'forward'</span>)
+0367         [bc] = <a href="../src/makebcforward.html" class="code" title="function [bc] = makebcforward(bcon,n)">makebcforward</a>(bcon,n);
+0368         F = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(op,F_all{ind-1}) + bc;
+0369     <span class="keyword">elseif</span> strcmp(time_stepping_choice, <span class="string">'backward'</span>)
+0370         [bc] = <a href="../src/makebcbackward.html" class="code" title="function [bc] = makebcbackward(bc,bcon,n)">makebcbackward</a>(F_all{ind-1},bcon,n);
+0371         [F, ~] = <a href="../src/als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>(op,bc,bc,tol_err_op,als_options,debugging, 0);
+0372     <span class="keyword">else</span>
+0373         error([time_stepping_choice, <span class="string">' time stepping scheme does not exist.'</span>])
+0374     <span class="keyword">end</span>
+0375     
+0376     <span class="keyword">if</span> ncomponents(F) &gt; ncomponents(F_all{ind-1})
+0377         [F,~] = <a href="../src/ctdlab/tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>(F,tol_err_op,1,9,<span class="string">'frob'</span>,[],<a href="../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(F),0);
+0378         [F, ~] = <a href="../src/als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(F,tol_err_op);
+0379     <span class="keyword">end</span>
+0380     
+0381     F_norm = norm(F)/sqrt(ncomponents(F)*sum(n));
+0382     F_scale(ind) = F_scale(ind-1)*F_norm;
+0383     F_all{ind} = F*(1/F_norm);
+0384     iter_time(ind-1) = toc(start_iter);
+0385     
+0386     <span class="keyword">if</span> mod(ind,20) == 0
+0387         fprintf(<span class="string">'Time: %.4fs  Current tensor rank: %d \n'</span>, tt(ind), ncomponents(F_all{ind}))
+0388     <span class="keyword">end</span>
+0389 <span class="keyword">end</span>
+0390 
+0391 time_solve = toc(start_solve);
+0392 toc;
+0393 disp(<span class="string">'Solution complete'</span>);
+0394 
+0395 time_whole = toc(start_whole);
+0396 
+0397 fprintf([<span class="string">'Run '</span>,num2str(run),<span class="string">' with main_run is complete \n'</span>])
+0398 
+0399 diary off
+0400 
+0401 save([dirpath,<span class="string">'run_'</span>,num2str(run),<span class="string">'data'</span>])
+0402 
+0403 <span class="comment">%% Visualize results</span>
+0404 
+0405 <span class="comment">%% Dimension = 1</span>
+0406 
+0407 <span class="keyword">if</span> d == 1
+0408 
+0409 <span class="comment">%% Plot result</span>
+0410 
+0411     px = zeros(n,length(tt));
+0412     <span class="keyword">for</span> k=1:ind-1;<span class="comment">%length(tt)</span>
+0413        px(:,k) = double(F_all{k}*F_scale(k)); 
+0414     <span class="keyword">end</span>
+0415 
+0416     plottend = length(tt)-length(tt)+ind-1;
+0417     figure
+0418     hold on
+0419     surf(gridT{1},tt(end:-1:end-plottend+1),px(:,1:plottend)',<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0420     zlim([0 1])
+0421     xlabel(<span class="string">'X(m)'</span>)
+0422     ylabel(<span class="string">'Time(s)'</span>)
+0423     zlabel(<span class="string">'Desirability(x,t)'</span>)
+0424     title(<span class="string">'Desirability function evolution'</span>)
+0425     colorbar
+0426 <span class="keyword">end</span>
+0427 
+0428 <span class="comment">%% Dimension &gt; 1</span>
+0429 
+0430 <span class="keyword">if</span> d == 2
+0431     
+0432 <span class="comment">%%</span>
+0433     dim_plot = [1 2];
+0434     coord = ceil(n/2);
+0435     <span class="keyword">for</span> k = 1:10:ind-1
+0436          <a href="../src/plot2Dslice.html" class="code" title="function [handleOutput] = plot2Dslice(F,slices_dim,coordinates,gridT, handleInput,lambda,plotType)">plot2Dslice</a>(F_all{k}*F_scale(k),dim_plot,coord,gridT);
+0437          colorbar;
+0438 <span class="comment">%          caxis([0 1])</span>
+0439          axis ([bdim(dim_plot(1),:),bdim(dim_plot(2),:)])
+0440          title([<span class="string">'Time = '</span>,num2str(tt(k))]);
+0441          zlim([0 100000])
+0442          pause(1.0/1000);
+0443     <span class="keyword">end</span>
+0444     
+0445 <span class="keyword">end</span>
+0446 
+0447 
+0448 <span class="comment">%% Simulations</span>
+0449 
+0450 saveplots = 0;
+0451 savedata = 0;
+0452 ninputs = 1;
+0453 uref = zeros(ninputs,1);
+0454 
+0455 [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = <a href="../src/makefuncdyn.html" class="code" title="function [fFunc,GFunc,BFunc,noise_covFunc,qFunc,RFunc] = makefuncdyn(f,G,B,noise_cov,q,R,x)">makefuncdyn</a>(f1,G,B,noise_cov,q,R,x);
+0456 sim_config = {h*(ind-1),h,repmat([0.2; 0; ],1,1),[],[]};
+0457 sim_data = {lambda,gridT,R,noise_cov,F_all,uref,D,fFunc,GFunc,BFunc,qFunc,bdim,bcon,region};
+0458 
+0459 <a href="../src/sim_finite_run.html" class="code" title="function sim_finite_run(sim_config,sim_data,saveplots,savedata,run,save_folder)">sim_finite_run</a>(sim_config,sim_data,saveplots,savedata,run,dirpath)
+0460 
+0461 <span class="comment">%% LQR</span>
+0462 
+0463 SS = zeros(d,d,length(tt));
+0464 qq = zeros(length(tt),1);
+0465 SS(:,:,1) = PP;
+0466 qq(1) = 0;
+0467 <span class="keyword">for</span> ind = 1:length(tt)-1
+0468     SS(:,:,ind+1) = SS(:,:,ind)+(AA'*SS(:,:,ind)+SS(:,:,ind)*AA-2*SS(:,:,ind)*BB/R*BB'*SS(:,:,ind)+QQ)*h;
+0469     qq(ind+1) = qq(ind) + trace(SS(:,:,ind)*BB*noise_cov*BB')*h;
+0470 <span class="keyword">end</span>
+0471 
+0472 <span class="comment">%% dimension = 2</span>
+0473 <span class="keyword">if</span> d == 2
+0474     
+0475 <span class="comment">%% Plot result</span>
+0476     
+0477     [gridx, gridy] = meshgrid(gridT{1},gridT{2});
+0478     lqr_values = exp(-(sum(([gridx(:) gridy(:)]*SS(:,:,1)).*[gridx(:) gridy(:)],2)+qq(1))/lambda);
+0479     
+0480     figure
+0481     ht_pdf = surf(gridT{1},gridT{2},reshape(lqr_values,n(2),n(1)),<span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0482     colorbar;
+0483     view(0,90)
+0484 <span class="comment">%     caxis([0 1])</span>
+0485     xlabel(<span class="string">'x'</span>)
+0486     ylabel(<span class="string">'y'</span>)
+0487     title([<span class="string">'Time = '</span>,num2str(tt(1))]);
+0488     axis ([bdim(1,:),bdim(2,:)])
+0489     <span class="keyword">for</span> k = 2:10:ind<span class="comment">%length(tt)</span>
+0490          lqr_values = exp(-(sum(([gridx(:) gridy(:)]*SS(:,:,ind)).*[gridx(:) gridy(:)],2)+qq(k))/lambda);
+0491          <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(ht_pdf, <span class="string">'ZData'</span>, reshape(lqr_values,n(2),n(1)) );
+0492          title([<span class="string">'Time = '</span>,num2str(tt(k))]);
+0493          drawnow
+0494          pause(1.0/1000);
+0495     <span class="keyword">end</span>
+0496     
+0497     
+0498     <span class="comment">%%</span>
+0499     
+0500     ten_ori = zeros(length(tt),1);
+0501     <span class="keyword">for</span> k = 1:ind<span class="comment">%length(tt)</span>
+0502         ten_ori(k) = <a href="../src/EvalT.html" class="code" title="function [y] = EvalT(tens,x,grid)">EvalT</a>(F_all{k}*F_scale(k),[0,0], gridT);<span class="comment">% max(double(F_all{k}));%</span>
+0503     <span class="keyword">end</span>
+0504     
+0505     figure
+0506     plot(tt,[-lambda*log(ten_ori) qq])
+0507     
+0508     figure
+0509     plot(tt,[ten_ori exp(-qq/lambda)])
+0510     
+0511     figure
+0512     plot(tt,(-lambda*log(ten_ori)-qq))
+0513     
+0514 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

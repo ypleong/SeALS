@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_krand</title>
+  <meta name="keywords" content="test_krand">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_krand
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>	Count the non-zero elements of a spktensor</li><li><a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>	Number of elements in a ktensor</li><li><a href="../../../src/ctdlab/krandb.html" class="code" title="function B=krandb(D,N,R,density)">krandb</a>	Create random sparse ctd with Bernoulli (+1/-1) elements.</li><li><a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>	Create random sparse ctd with normally distributed elements.</li><li><a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>	Create random sparse ctd with uniformly distributed elements.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all;
+0002 
+0003 fprintf(<span class="string">'\n***test_krand***\n'</span>)
+0004 
+0005 fprintf(<span class="string">'which -all krandn\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>
+0007 fprintf(<span class="string">'which -all krandb\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/krandb.html" class="code" title="function B=krandb(D,N,R,density)">krandb</a>
+0009 fprintf(<span class="string">'which -all krandu\n'</span>)
+0010 which -all <a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>
+0011 
+0012 ok = 1;
+0013 
+0014 d = 5;
+0015 n = 1024;
+0016 r = 10;
+0017 
+0018 <span class="comment">% not sure what tests to run here ... I guess just make sure they execute</span>
+0019 
+0020 <span class="keyword">try</span>
+0021   A = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n,r,1);
+0022   A2 = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n,r,.1);
+0023 <span class="keyword">catch</span>
+0024  ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0025 <span class="keyword">end</span>
+0026 <span class="keyword">if</span> <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A) ~= <a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A)
+0027   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0028 <span class="keyword">end</span>
+0029 fprintf(<span class="string">'krandn:  p = .1, knnz(A2)/knumel(A2) = %f\n'</span>, <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A2)/<a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A2));
+0030 
+0031 <span class="keyword">try</span>
+0032   A = <a href="../../../src/ctdlab/krandb.html" class="code" title="function B=krandb(D,N,R,density)">krandb</a>(d,n,r,1);
+0033   A2 = <a href="../../../src/ctdlab/krandb.html" class="code" title="function B=krandb(D,N,R,density)">krandb</a>(d,n,r,.1);
+0034 <span class="keyword">catch</span>
+0035  ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0036 <span class="keyword">end</span>
+0037 <span class="keyword">if</span> <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A) ~= <a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A)  <span class="comment">% A should be dense</span>
+0038   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0039 <span class="keyword">end</span>
+0040 fprintf(<span class="string">'krandb:  p = .1, knnz(A2)/knumel(A2) = %f\n'</span>, <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A2)/<a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A2));
+0041 
+0042 <span class="keyword">try</span>
+0043   A = <a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>(d,n,r,1);
+0044   A2 = <a href="../../../src/ctdlab/krandu.html" class="code" title="function B=krandu(D,N,R,density)">krandu</a>(d,n,r,.1);
+0045 <span class="keyword">catch</span>
+0046  ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0047 <span class="keyword">end</span>
+0048 <span class="keyword">if</span> <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A) ~= <a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A)  <span class="comment">% A should be dense</span>
+0049   ok = 0;  fprintf(<span class="string">'FAILED\n'</span>);  <span class="keyword">return</span>;
+0050 <span class="keyword">end</span>
+0051 fprintf(<span class="string">'krandu:  p = .1, knnz(A2)/knumel(A2) = %f\n'</span>, <a href="../../../src/ctdlab/knnz.html" class="code" title="function n=knnz(A)">knnz</a>(A2)/<a href="../../../src/ctdlab/knumel.html" class="code" title="function n = knumel(A)">knumel</a>(A2));
+0052 
+0053 fprintf(<span class="string">'PASSED\n'</span>)</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

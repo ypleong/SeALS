@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als</title>
+  <meta name="keywords" content="als">
+  <meta name="description" content="ALS code to perform the ALS algorithm as described in Beylkin">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS code to perform the ALS algorithm as described in Beylkin</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS code to perform the ALS algorithm as described in Beylkin
+ and Mohlenkamp 2005.
+ Input:
+   G - tensor to be approximated.
+   F - inital guess, if empty a random guess will be used.
+   e - desired accuracy.
+   options - cell with the following data:
+      maxit - maximum number of iterations.
+      r_tol - minimum decrease for error, adds rank when below.
+      alpha - regularization term.
+      if options is empty, ALS will use the default setup maxit = 2000, r_tol
+      = 1e-3 and alpha = 1e-14.
+ Output:
+   F - the low rank approimxation of G.
+   err - the error during the run.
+   iter - the number of iterations.
+   Fcond - the condition number of F during the run.
+   e_list - index when tensor term is added.
+   t_step - computing time for als onestep during the run.
+   illcond - 1 if a als matrice were illcond, otherwise 0.
+   noreduce - 1 if als couldn't reduce rank, otherwise 0.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als_onestep.html" class="code" title="function [Flambda, FU, status] = als_onestep(Glambda,GU,Flambda,FU,alpha)">als_onestep</a>	ALS_ONESTEP performs one step of the ALS algorithm. Based on the version</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/ctdlab/tests/test_als.html" class="code" title="">test_als</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)</a>
+0002 <span class="comment">% ALS code to perform the ALS algorithm as described in Beylkin</span>
+0003 <span class="comment">% and Mohlenkamp 2005.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   G - tensor to be approximated.</span>
+0006 <span class="comment">%   F - inital guess, if empty a random guess will be used.</span>
+0007 <span class="comment">%   e - desired accuracy.</span>
+0008 <span class="comment">%   options - cell with the following data:</span>
+0009 <span class="comment">%      maxit - maximum number of iterations.</span>
+0010 <span class="comment">%      r_tol - minimum decrease for error, adds rank when below.</span>
+0011 <span class="comment">%      alpha - regularization term.</span>
+0012 <span class="comment">%      if options is empty, ALS will use the default setup maxit = 2000, r_tol</span>
+0013 <span class="comment">%      = 1e-3 and alpha = 1e-14.</span>
+0014 <span class="comment">% Output:</span>
+0015 <span class="comment">%   F - the low rank approimxation of G.</span>
+0016 <span class="comment">%   err - the error during the run.</span>
+0017 <span class="comment">%   iter - the number of iterations.</span>
+0018 <span class="comment">%   Fcond - the condition number of F during the run.</span>
+0019 <span class="comment">%   e_list - index when tensor term is added.</span>
+0020 <span class="comment">%   t_step - computing time for als onestep during the run.</span>
+0021 <span class="comment">%   illcond - 1 if a als matrice were illcond, otherwise 0.</span>
+0022 <span class="comment">%   noreduce - 1 if als couldn't reduce rank, otherwise 0.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% See also MAIN_RUN.</span>
+0025 
+0026 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0027 <span class="comment">% new version for Toolbox</span>
+0028 
+0029 <span class="keyword">if</span> isempty(options) == 1
+0030     maxit = 2000;
+0031     r_tol = 1e-3; <span class="comment">%when to add to the rank</span>
+0032     alpha = 1e-14; <span class="comment">%regularization</span>
+0033 <span class="keyword">else</span>
+0034     [maxit,r_tol,alpha] = deal(options{:});
+0035 <span class="keyword">end</span>
+0036 
+0037 noreduce = 0;
+0038 illcond = 0;
+0039 
+0040 G = arrange(G);
+0041 nd = ndims(G);
+0042 sizeG = size(G);
+0043 rG = ncomponents(G);
+0044 Fcond = 1;
+0045 
+0046 <span class="keyword">if</span> isempty(F)
+0047     U = cell(1,nd);
+0048     <span class="keyword">for</span> n = 1:nd
+0049         U{n} = randn(sizeG(n),1);
+0050         U{n} = U{n}/norm(U{n});
+0051     <span class="keyword">end</span>
+0052     F = ktensor(U);
+0053 <span class="keyword">end</span>
+0054 rF = ncomponents(F);
+0055 
+0056 Flambda = F.lambda;
+0057 Glambda = G.lambda;
+0058 
+0059 FU = cell(nd,1);
+0060 GU = cell(nd,1);
+0061 <span class="keyword">for</span> k = 1:nd
+0062     FU{k} = F.U{k};
+0063     GU{k} = G.U{k};
+0064 <span class="keyword">end</span>
+0065 
+0066 norG = norm(G);
+0067 old_err = norm(F-G)/norG;
+0068 <span class="comment">%old_err = norm(F-G);</span>
+0069 
+0070 reverseStr = <span class="string">''</span>;
+0071 
+0072 e_count = 2;
+0073 e_list(1) = 1;
+0074 
+0075 <span class="keyword">for</span> iter = 1:maxit
+0076     
+0077     <span class="comment">%display progress</span>
+0078     <span class="keyword">if</span> 1 == 0
+0079         msg = sprintf(<span class="string">'Iteration: %d (%d), error=%2.3f (%2.3f)'</span>, iter, maxit, old_err, e); <span class="comment">%don't forget this semicolon</span>
+0080         fprintf([reverseStr, msg]);
+0081         reverseStr = repmat(sprintf(<span class="string">'\b'</span>), 1, length(msg));
+0082     <span class="keyword">end</span>
+0083     
+0084     step_time = tic;
+0085     [Flambda, FU, status] = <a href="als_onestep.html" class="code" title="function [Flambda, FU, status] = als_onestep(Glambda,GU,Flambda,FU,alpha)">als_onestep</a>(Glambda,GU,Flambda,FU,alpha);
+0086     t_step(iter) = toc(step_time);
+0087     
+0088     <span class="keyword">if</span> status == 0
+0089         fprintf(<span class="string">'ALS matrix inversion ill-conditioned, returning after iteration %d\n'</span>, iter);
+0090         illcond = 1;
+0091         <span class="keyword">break</span>;
+0092     <span class="keyword">end</span>
+0093     
+0094     F = arrange(F);
+0095     Fcond(iter) = norm(F.lambda)/norm(F);
+0096     
+0097     ETlambda = [Flambda ; -1*Glambda];
+0098     ETU = cell(nd,1);
+0099     <span class="keyword">for</span> k = 1:nd
+0100         ETU{k} = [FU{k} GU{k}];
+0101     <span class="keyword">end</span>
+0102     ET = ktensor(ETlambda,ETU);
+0103     
+0104     err(iter) = norm(ET)/norG;
+0105     <span class="comment">%err(iter) = norm(ET);</span>
+0106     
+0107     <span class="keyword">if</span> err(iter) &lt;= e
+0108         <span class="keyword">break</span>;
+0109     <span class="keyword">end</span>
+0110     
+0111     <span class="keyword">if</span> abs(err(iter) - old_err)/old_err &lt; r_tol
+0112         clear nF U
+0113         rF = rF + 1;
+0114         e_list(e_count) = iter;
+0115         e_count = e_count + 1;
+0116         
+0117         <span class="keyword">if</span> rF == rG
+0118             F = G;
+0119             err(iter) = 0;
+0120             disp(<span class="string">'cannot reduce rank'</span>)
+0121             noreduce = 1;
+0122             <span class="keyword">break</span>;
+0123         <span class="keyword">end</span>
+0124         
+0125         <span class="keyword">for</span> n = 1:nd
+0126             U = randn(sizeG(n),1);
+0127             U = U/norm(U);
+0128             FU{n} = [FU{n} U];
+0129         <span class="keyword">end</span>
+0130         Flambda = [Flambda; 1];
+0131         
+0132     <span class="keyword">end</span>
+0133     old_err = err(iter);
+0134 <span class="keyword">end</span>
+0135 
+0136 <span class="keyword">if</span> (iter == maxit &amp;&amp; err(iter) &gt; e)
+0137     disp(<span class="string">'Max iterations reached without finding a good solution'</span>)
+0138     noreduce = 1;
+0139     F = G;
+0140 <span class="keyword">end</span>
+0141 
+0142 <span class="keyword">if</span> ~noreduce
+0143     F = ktensor(Flambda,FU);
+0144 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

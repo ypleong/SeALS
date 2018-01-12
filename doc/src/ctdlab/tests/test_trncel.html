@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_trncel</title>
+  <meta name="keywords" content="test_trncel">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_trncel
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>	Create random sparse ctd with normally distributed elements.</li><li><a href="../../../src/ctdlab/trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>	Absolute truncation of factor matrices.  All entries less than delta in</li><li><a href="../../../src/ctdlab/trncel2.html" class="code" title="function A = trncel2(A,delta)">trncel2</a>	Relative truncation of factor matrices.  All entries less than delta</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="run_tests.html" class="code" title="">run_tests</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 
+0003 fprintf(<span class="string">'\n***test_trncel***\n'</span>)
+0004 
+0005 fprintf(<span class="string">'which -all trncel\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>
+0007 fprintf(<span class="string">'which -all trncel2\n'</span>)
+0008 which -all <a href="../../../src/ctdlab/trncel2.html" class="code" title="function A = trncel2(A,delta)">trncel2</a>
+0009 
+0010 ok = 1;
+0011 
+0012 d = 10;
+0013 n = 1024;
+0014 r = 10;
+0015 A = <a href="../../../src/ctdlab/krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(d,n,r,1);
+0016 A = (1/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A)) * A;
+0017 
+0018 tol = 1e-6;
+0019 
+0020 <span class="keyword">try</span> 
+0021   B = <a href="../../../src/ctdlab/trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>(A,0);
+0022 <span class="keyword">catch</span>
+0023   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel(A,0)\n'</span>);  <span class="keyword">return</span>;
+0024 <span class="keyword">end</span>
+0025 <span class="keyword">try</span>
+0026   B = <a href="../../../src/ctdlab/trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>(A,[]);
+0027 <span class="keyword">catch</span>
+0028   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel(A,[])\n'</span>);  <span class="keyword">return</span>;
+0029 <span class="keyword">end</span>
+0030 <span class="keyword">try</span>
+0031   B = <a href="../../../src/ctdlab/trncel.html" class="code" title="function A = trncel(A,delta)">trncel</a>(A,tol);
+0032 <span class="keyword">catch</span>
+0033   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel(A,tol)\n'</span>);  <span class="keyword">return</span>;
+0034 <span class="keyword">end</span>
+0035 err = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A-B)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0036 <span class="keyword">if</span> err &gt; tol
+0037   ok = 0;  fprintf(<span class="string">'FAILED  :  err &gt; tol\n'</span>);  <span class="keyword">return</span>;
+0038 <span class="keyword">end</span>
+0039 
+0040 <span class="keyword">try</span> 
+0041   B = <a href="../../../src/ctdlab/trncel2.html" class="code" title="function A = trncel2(A,delta)">trncel2</a>(A,0);
+0042 <span class="keyword">catch</span>
+0043   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel2(A,0)\n'</span>);  <span class="keyword">return</span>;
+0044 <span class="keyword">end</span>
+0045 <span class="keyword">try</span>
+0046   B = <a href="../../../src/ctdlab/trncel2.html" class="code" title="function A = trncel2(A,delta)">trncel2</a>(A,[]);
+0047 <span class="keyword">catch</span>
+0048   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel2(A,[])\n'</span>);  <span class="keyword">return</span>;
+0049 <span class="keyword">end</span>
+0050 <span class="keyword">try</span>
+0051   B = <a href="../../../src/ctdlab/trncel2.html" class="code" title="function A = trncel2(A,delta)">trncel2</a>(A,tol);
+0052 <span class="keyword">catch</span>
+0053   ok = 0; fprintf(<span class="string">'FAILED  :  B = trncel2(A,tol)\n'</span>);  <span class="keyword">return</span>;
+0054 <span class="keyword">end</span>
+0055 err = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A-B)/<a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0056 <span class="keyword">if</span> err &gt; tol
+0057   ok = 0;  fprintf(<span class="string">'FAILED  :  err &gt; tol\n'</span>);  <span class="keyword">return</span>;
+0058 <span class="keyword">end</span>
+0059 
+0060 fprintf(<span class="string">'PASSED\n'</span>)</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

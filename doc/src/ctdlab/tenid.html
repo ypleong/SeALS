@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of tenid</title>
+  <meta name="keywords" content="tenid">
+  <meta name="description" content="Tensor ID.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>tenid
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Tensor ID.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Tensor ID.
+
+ Input:
+  X = input tensor
+  tol = stop when  ||X-Y|| &lt; tol*||X||
+  k0 = start with projections of size 2^k0
+  kmax = max projection size is 2^kmax
+  nrmtype = 'frob' or 'snorm'
+  Xnorm = norm of X (should match nrmtype)
+  vb = verbose flag
+
+ Output:
+  Y = tensor of reduced separation rank
+  err = err per number of random projections performed</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li><li><a href="getterms.html" class="code" title="function B = getterms(A,idx)">getterms</a>	extract the terms specificed by vector idx.  This is slow if you try to</li><li><a href="gram.html" class="code" title="function G = gram(A)">gram</a>	Gram matrix of a tensor A.  Normally you might exploit symmetry, but</li><li><a href="gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>	gram matrix of tensors A and B.</li><li><a href="iprod.html" class="code" title="function ip=iprod(A,B)">iprod</a>	Inner product of two ktensors in vector format</li><li><a href="krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>	Create random sparse ctd with normally distributed elements.</li><li><a href="kskel.html" class="code" title="function [P,ix] = kskel(Y,tol)">kskel</a>	Compute the skeletonization of a matrix Y, s.t., Y = Y(:,ix)*P</li><li><a href="poswts.html" class="code" title="function A = poswts(A)">poswts</a>	make weights all positive.</li><li><a href="snorma.html" class="code" title="function [nrm,T] = snorma(A,tol,maxit)">snorma</a>	Estimate the snorm of tensor A using top singular vectors of factor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/ctdlab/tests/test_tenid.html" class="code" title="">test_tenid</a>	</li><li><a href="../../src/main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../../src/main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li><li><a href="../../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)</a>
+0002 <span class="comment">% Tensor ID.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%  X = input tensor</span>
+0006 <span class="comment">%  tol = stop when  ||X-Y|| &lt; tol*||X||</span>
+0007 <span class="comment">%  k0 = start with projections of size 2^k0</span>
+0008 <span class="comment">%  kmax = max projection size is 2^kmax</span>
+0009 <span class="comment">%  nrmtype = 'frob' or 'snorm'</span>
+0010 <span class="comment">%  Xnorm = norm of X (should match nrmtype)</span>
+0011 <span class="comment">%  vb = verbose flag</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Output:</span>
+0014 <span class="comment">%  Y = tensor of reduced separation rank</span>
+0015 <span class="comment">%  err = err per number of random projections performed</span>
+0016 
+0017   <span class="keyword">if</span> vb
+0018     fprintf(<span class="string">'TENSOR ID:\n'</span>)
+0019   <span class="keyword">end</span>
+0020 
+0021   D = ndims(X);
+0022   N2 = size(X);
+0023 
+0024   tol_id = 1e-8;   <span class="comment">% internal tolerance for skeletonization</span>
+0025 
+0026   kk = 2.^(k0:kmax);   <span class="comment">% vector of number of random projections</span>
+0027   dk = kk - [0,kk(1:(end-1))];   <span class="comment">% number of new projections per iteration</span>
+0028   
+0029   <span class="comment">% if number of terms is already less than minimum number of projections,</span>
+0030   <span class="comment">% return</span>
+0031   <span class="comment">% Also turned off by MR</span>
+0032   <span class="comment">%if length(X.lambda) &lt;= min(kk)</span>
+0033   <span class="comment">%  Y = X;</span>
+0034   <span class="comment">%  fprintf('Not performing tensor ID, rank is low enough\n')</span>
+0035   <span class="comment">%  return</span>
+0036   <span class="comment">%end</span>
+0037   
+0038   err = zeros(length(kk),1);
+0039   Ymat = zeros(kk(end),length(X.lambda));
+0040   icurr = 1;
+0041   
+0042   svCell = cell(length(kk),1);
+0043   
+0044   <span class="keyword">for</span> i = 1:length(kk)
+0045     
+0046     <span class="comment">% if you can't do better, return</span>
+0047     <span class="comment">% MR turned this off...</span>
+0048     <span class="comment">%if (i&gt;1) &amp;&amp; (length(X.lambda) &lt;= kk(i));</span>
+0049     <span class="comment">%  fprintf('No improvement from tensor ID, exiting\n')</span>
+0050     <span class="comment">%  Y = X;</span>
+0051     <span class="comment">%  return</span>
+0052     <span class="comment">%end</span>
+0053     
+0054     <span class="comment">% Added by MR</span>
+0055     <span class="comment">% Print which iteration we wre on</span>
+0056     <span class="keyword">if</span> vb; fprintf(<span class="string">'Computing tenid for kk = %d:\n'</span>, kk(i)); <span class="keyword">end</span>;
+0057     
+0058     <span class="comment">% generate gram matrix with random vectors</span>
+0059     <span class="keyword">if</span> vb; fprintf(<span class="string">'  Forming Gram matrix...'</span>);  <span class="keyword">end</span>;
+0060     Ri = normalize(<a href="krandn.html" class="code" title="function B=krandn(D,N,R,density)">krandn</a>(D,N2,dk(i),1));
+0061     <span class="keyword">if</span> i==1
+0062       R = Ri;
+0063     <span class="keyword">else</span>
+0064       R = R + Ri;
+0065     <span class="keyword">end</span>
+0066     
+0067     Ymat(icurr:(icurr+dk(i)-1),:) = <a href="gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>(Ri,X); 
+0068     icurr = icurr+dk(i);
+0069     <span class="keyword">if</span> vb; fprintf(<span class="string">'finished.\n'</span>); <span class="keyword">end</span>;
+0070     
+0071     <span class="comment">% skeletonize the gram matrix and get the corresponding terms</span>
+0072     <span class="keyword">if</span> vb; fprintf(<span class="string">'  Skeletonizing...'</span>); <span class="keyword">end</span>;
+0073     <span class="comment">%[P,ix] = kskel(Ymat(1:(icurr-1),:),norm(Ymat(1:(icurr-1),:))*tol_id);</span>
+0074     [P,ix] = <a href="kskel.html" class="code" title="function [P,ix] = kskel(Y,tol)">kskel</a>(Ymat(1:(icurr-1),:),tol_id); <span class="comment">% note: no need to include norm of Y, I changed kskel</span>
+0075     Y = <a href="getterms.html" class="code" title="function B = getterms(A,idx)">getterms</a>(X,ix);
+0076     Y = arrange(Y);
+0077     Y.lambda = ones(size(Y.lambda));
+0078     <span class="keyword">if</span> vb
+0079       fprintf(<span class="string">'finished.\n'</span>); 
+0080       fprintf(<span class="string">'  ||Ymat-Ymat(:,ix)*P||_2 / ||Ymat||_2 = %e\n'</span>, norm(Ymat-Ymat(:,ix)*P)/norm(Ymat));
+0081     <span class="keyword">end</span>
+0082     
+0083     <span class="comment">% form gram matrices for computing coefficients</span>
+0084     <span class="keyword">if</span> vb;  fprintf(<span class="string">'  Constructing linear system...'</span>);  <span class="keyword">end</span>
+0085     Gy = full(<a href="gram.html" class="code" title="function G = gram(A)">gram</a>(Y));
+0086     Gx = full(<a href="gram2.html" class="code" title="function G = gram2(A,B)">gram2</a>(Y,X));
+0087     <span class="keyword">if</span> vb;  fprintf(<span class="string">'finished.\n'</span>);  <span class="keyword">end</span>;
+0088     
+0089     <span class="comment">% use SVD for pseudo inverse</span>
+0090     <span class="keyword">if</span> vb; fprintf(<span class="string">'  Solving linear system...'</span>);  <span class="keyword">end</span>;
+0091     [U,S,V] = svd(Gy);
+0092     
+0093     <span class="comment">% Dave's pseudoinverse. I prefer to truncate the SVD. I'm not sure it</span>
+0094     <span class="comment">% matters which way you go about it.</span>
+0095     <span class="comment">%rnk = min(size(S));</span>
+0096     <span class="comment">%Gycond = S(1,1)/S(rnk,rnk);</span>
+0097     <span class="comment">%S = S(1:rnk,1:rnk) + S(1,1) * (100*eps) * eye(rnk);   % should this just be, e.g., 100*eps not sqrt(eps)?</span>
+0098     <span class="comment">%Gypinv = V(:,1:rnk) * diag(1./diag(S(1:rnk,1:rnk))) * U(:,1:rnk)';</span>
+0099     <span class="comment">%P = Gypinv * Gx;</span>
+0100     
+0101     <span class="comment">% Pseudo inverse by MR.</span>
+0102     rnk = length(S(diag(S)/S(1,1) &gt; tol_id));
+0103     Gycond = S(1,1)/S(rnk,rnk);
+0104     S = S(1:rnk,1:rnk);
+0105     Gypinv = V(:,1:rnk) * diag(1./diag(S(1:rnk,1:rnk))) * U(:,1:rnk)';
+0106     P = Gypinv * Gx;
+0107     
+0108     <span class="comment">% Print the condition numbers</span>
+0109     <span class="keyword">if</span> vb; fprintf(<span class="string">'finished.\n'</span>); <span class="keyword">end</span>
+0110     <span class="keyword">if</span> vb; fprintf(<span class="string">'    (cond(Gy) = %e)\n'</span>, Gycond); <span class="keyword">end</span>;
+0111     <span class="keyword">if</span> vb; fprintf(<span class="string">'    (cond(Gx) = %e)\n'</span>, cond(Gx)); <span class="keyword">end</span>;
+0112     
+0113     <span class="comment">% update the coefficients</span>
+0114     <span class="keyword">if</span> vb; fprintf(<span class="string">'  Computing new coefficients...'</span>); <span class="keyword">end</span>;
+0115     Y.lambda = Y.lambda .* sum(P,2);
+0116     Y = <a href="poswts.html" class="code" title="function A = poswts(A)">poswts</a>(Y);
+0117     <span class="keyword">if</span> vb; fprintf(<span class="string">' finished.\n'</span>); <span class="keyword">end</span>;
+0118 
+0119     <span class="comment">% Condition the representation to avoid disparate svalues</span>
+0120     <span class="comment">% Dave: since I use als after I apply the tenid, I don't require this</span>
+0121     <span class="comment">% step and comment it out.</span>
+0122     <span class="comment">%if vb; fprintf('  Conditioning via ALS sweep...\n'); end;</span>
+0123     <span class="comment">%Y = alsi(Y,length(Y.lambda),0,-Inf,delta,[],'maxit',3,'verbose',vb,'B',Y,'density',1);</span>
+0124     <span class="comment">%if vb; fprintf('Finished ALS sweep.\n'); end;</span>
+0125     
+0126     <span class="keyword">if</span> vb; fprintf(<span class="string">'  Computing error...'</span>); <span class="keyword">end</span>;
+0127     <span class="keyword">if</span> isequal(nrmtype,<span class="string">'frob'</span>)
+0128       err(i) = sqrt(abs(Xnorm^2+<a href="fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(Y)^2-2*<a href="iprod.html" class="code" title="function ip=iprod(A,B)">iprod</a>(X,Y)))/Xnorm;
+0129     <span class="keyword">end</span>
+0130     <span class="keyword">if</span> isequal(nrmtype,<span class="string">'snorm'</span>)
+0131       err(i) = <a href="snorma.html" class="code" title="function [nrm,T] = snorma(A,tol,maxit)">snorma</a>(<a href="poswts.html" class="code" title="function A = poswts(A)">poswts</a>(Y-X))/Xnorm;
+0132     <span class="keyword">end</span>
+0133     <span class="keyword">if</span> vb; fprintf(<span class="string">'finished.\n'</span>); <span class="keyword">end</span>;
+0134     
+0135     <span class="keyword">if</span> vb; fprintf(<span class="string">'kk = %d, NTERMS = %d, TOL = %e, ERR = %e\n\n'</span>, kk(i), length(ix), tol, err(i)); <span class="keyword">end</span>;
+0136     
+0137     <span class="comment">% I don't think this is sufficient. Isn't there a requirement on dim?</span>
+0138     <span class="keyword">if</span> (err(i) &lt; sqrt(2)*tol) &amp;&amp; (length(Y.lambda) + 10 &lt;= kk(i)) <span class="comment">%added by MR</span>
+0139       err = err(1:i);
+0140       fprintf(<span class="string">'Tensor ID converged with %d terms, err = %e\n'</span>, length(Y.lambda), err(i));
+0141       <span class="keyword">return</span>
+0142     <span class="keyword">end</span>
+0143     
+0144   <span class="keyword">end</span>
+0145   
+0146 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

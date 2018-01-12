@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makeop</title>
+  <meta name="keywords" content="makeop">
+  <meta name="description" content="MAKEOP creates the operator of the linear HJB equation.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makeop
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEOP creates the operator of the linear HJB equation.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">MAKEOP creates the operator of the linear HJB equation.
+ (ktensor cell := cell array with ktensors as elements.)
+ Input:
+   fTens - f as a ktensor cell.
+   BTens - B as a ktensor cell.
+   noise_covTens - noise_cov as a matrix ktensor.
+   qTens - q as ktensor.
+   D - cell with first order differentiation operators. D{i} is
+   differentiation with respect to dimension i.
+   D2 - cell with second order differentiation operators. D2{i} is
+   differentiation with respect to dimension i.
+   lambda - the scalar lambda.
+Output:
+   op - the operator as a ktensor.
+   conv - vector corresponding to which dimensions that have a convection
+   term. conv(i) = 1 if dimension i has convection term, otherwise 0.
+   diff - vector corresponding to which dimensions that have a diffusion
+   term. diff(i) = 1 if dimension i has diffusion term, otherwise 0.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>	DIAGKTENSOR Diagonalize a series of vectors in each dimension to a</li><li><a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>	MATKTENS converts a cell array of ktensor functions to corresponding cell</li><li><a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>	SRMULTM multiplies two ktensor operators A and B. The result is a new</li><li><a href="TMatM.html" class="code" title="function [C] = TMatM(A,B)">TMatM</a>	TMATM Tensor Matrix Multiply. Multiplies two cell array with ktensor</li><li><a href="hessian.html" class="code" title="function [hess] = hessian(D, D2)">hessian</a>	HESSIAN generates the Hessian operator as a cell array with ktensor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [op,conv,diff] = makeop(fTens,BTens,noise_covTens,qTens,D,D2,D4,lambda)</a>
+0002 <span class="comment">%MAKEOP creates the operator of the linear HJB equation.</span>
+0003 <span class="comment">% (ktensor cell := cell array with ktensors as elements.)</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   fTens - f as a ktensor cell.</span>
+0006 <span class="comment">%   BTens - B as a ktensor cell.</span>
+0007 <span class="comment">%   noise_covTens - noise_cov as a matrix ktensor.</span>
+0008 <span class="comment">%   qTens - q as ktensor.</span>
+0009 <span class="comment">%   D - cell with first order differentiation operators. D{i} is</span>
+0010 <span class="comment">%   differentiation with respect to dimension i.</span>
+0011 <span class="comment">%   D2 - cell with second order differentiation operators. D2{i} is</span>
+0012 <span class="comment">%   differentiation with respect to dimension i.</span>
+0013 <span class="comment">%   lambda - the scalar lambda.</span>
+0014 <span class="comment">%Output:</span>
+0015 <span class="comment">%   op - the operator as a ktensor.</span>
+0016 <span class="comment">%   conv - vector corresponding to which dimensions that have a convection</span>
+0017 <span class="comment">%   term. conv(i) = 1 if dimension i has convection term, otherwise 0.</span>
+0018 <span class="comment">%   diff - vector corresponding to which dimensions that have a diffusion</span>
+0019 <span class="comment">%   term. diff(i) = 1 if dimension i has diffusion term, otherwise 0.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% See also MAIN_RUN.</span>
+0022 
+0023 <span class="comment">% Elis Stefansson, Aug 5 2015</span>
+0024 
+0025 <span class="comment">% the operator is divided into three terms:</span>
+0026 <span class="comment">% 1. left operator : -1/lambda*q</span>
+0027 <span class="comment">% 2. middle operator : f'*(gradOp)</span>
+0028 <span class="comment">% 3. right operator : 0.5*Tr(Hess*Sigma_t)</span>
+0029 
+0030 sizef = size(fTens);
+0031 d = sizef(1);
+0032 
+0033 <span class="comment">%% create left operator</span>
+0034 opLeft = -1/lambda*<a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(qTens{1});
+0035 
+0036 <span class="comment">% debugging %</span>
+0037 <span class="comment">%save('opLeft','opLeft')</span>
+0038 <span class="comment">% debugging %</span>
+0039 
+0040 <span class="comment">% debugging %</span>
+0041 <span class="comment">%opLeft_tol = opLeft;</span>
+0042 <span class="comment">%load('InvPenPerOrg_opLeft')</span>
+0043 <span class="comment">%opLeftdiff = norm(opLeft-opLeft_tol)</span>
+0044 <span class="comment">%norm(opLeft)</span>
+0045 <span class="comment">%error('done')</span>
+0046 <span class="comment">% debugging %</span>
+0047 
+0048 <span class="comment">% debugging VTOL %</span>
+0049 <span class="comment">%fprintf('opleft')</span>
+0050 <span class="comment">%opLeft_tol = opLeft;</span>
+0051 <span class="comment">%load('opLeft_VTOL_org','opLeft')</span>
+0052 <span class="comment">%opLeft_org = opLeft;</span>
+0053 <span class="comment">%norm(opLeft_tol-opLeft_org)</span>
+0054 <span class="comment">%norm(opLeft_org-opLeft_org)</span>
+0055 <span class="comment">%norm(opLeft_org)</span>
+0056 <span class="comment">%error('done')</span>
+0057 <span class="comment">% debugging VTOL %</span>
+0058 
+0059 <span class="comment">%% create middle operator</span>
+0060 conv = ones(1,d); <span class="comment">%start with ones.</span>
+0061 opMid = [];
+0062 <span class="keyword">for</span> i=1:d
+0063     <span class="keyword">if</span> norm(fTens{i}) == 0
+0064         conv(i) = 0; <span class="comment">%no convenction term in dimension i.</span>
+0065     <span class="keyword">else</span>
+0066         <span class="keyword">if</span> isempty(opMid) == 1
+0067             opMid = <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(<a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(fTens{i}),D{i});
+0068         <span class="keyword">else</span>
+0069             opMid = opMid+<a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(<a href="DiagKTensor.html" class="code" title="function [tens] = DiagKTensor(vec)">DiagKTensor</a>(fTens{i}),D{i});
+0070         <span class="keyword">end</span>
+0071     <span class="keyword">end</span>
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="comment">% debugging %</span>
+0075 <span class="comment">%save('opMid','opMid');</span>
+0076 <span class="comment">% debugging %</span>
+0077 
+0078 <span class="comment">% debugging VTOL %</span>
+0079 <span class="comment">%fprintf('opMid')</span>
+0080 <span class="comment">%opMid_tol = opMid;</span>
+0081 <span class="comment">%load('opMid_VTOL_org','opMid')</span>
+0082 <span class="comment">%opMid_org = opMid;</span>
+0083 <span class="comment">%norm(opMid_tol-opMid_org)</span>
+0084 <span class="comment">%norm(opMid_org-opMid_org)</span>
+0085 <span class="comment">%norm(opMid_org)</span>
+0086 <span class="comment">%ncomponents(opMid_tol)</span>
+0087 <span class="comment">%ncomponents(opMid_org)</span>
+0088 <span class="comment">%error('done')</span>
+0089 <span class="comment">% debugging VTOL %</span>
+0090 
+0091 <span class="comment">%% create right operator</span>
+0092 diff = ones(1,d);
+0093 
+0094 <span class="comment">% create Hessian matrix</span>
+0095 Hess = <a href="hessian.html" class="code" title="function [hess] = hessian(D, D2)">hessian</a>(D,D2);
+0096 
+0097 <span class="comment">% debugging for VTOL %</span>
+0098 <span class="comment">%Hess_tol = Hess;</span>
+0099 <span class="comment">%load('hess_VTOL_org','hess')</span>
+0100 <span class="comment">%Hess_org = hess;</span>
+0101 <span class="comment">%sizeHess = size(Hess)</span>
+0102 <span class="comment">%for i = 1:sizeHess(1)</span>
+0103 <span class="comment">%    for j = 1:sizeHess(2)</span>
+0104 <span class="comment">%        [i,j]</span>
+0105 <span class="comment">%        norm(Hess_org{i,j}-Hess_tol{i,j})</span>
+0106 <span class="comment">%        norm(Hess_org{i,j}-Hess_org{i,j})</span>
+0107 <span class="comment">%        norm(Hess_org{i,j})</span>
+0108 <span class="comment">%    end</span>
+0109 <span class="comment">%end</span>
+0110 <span class="comment">%error('done')</span>
+0111 <span class="comment">% debugging for VTOL %</span>
+0112 
+0113 noise_covTensOp = <a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>(noise_covTens);
+0114 BTensOp = <a href="DiagMatKTensor.html" class="code" title="function [MKTensor_Op] = DiagMatKTensor(MKTensor)">DiagMatKTensor</a>(BTens);
+0115 Sigma_t = <a href="TMatM.html" class="code" title="function [C] = TMatM(A,B)">TMatM</a>(noise_covTensOp,BTensOp');
+0116 Sigma_t = <a href="TMatM.html" class="code" title="function [C] = TMatM(A,B)">TMatM</a>(BTensOp,Sigma_t);
+0117 
+0118 <span class="comment">% debugging %</span>
+0119 <span class="comment">%Sigma_t_tol = Sigma_t;</span>
+0120 <span class="comment">%load('Sigma_t_VTOL_org','Sigma_t')</span>
+0121 <span class="comment">%Sigma_t_org = Sigma_t;</span>
+0122 <span class="comment">%sizeSigma = size(Sigma_t_org);</span>
+0123 <span class="comment">%for i = 1:sizeSigma(1)</span>
+0124 <span class="comment">%    for j = 1:sizeSigma(2)</span>
+0125 <span class="comment">%        [i,j]</span>
+0126 <span class="comment">%        norm(Sigma_t_org{i,j}-Sigma_t_tol{i,j})</span>
+0127 <span class="comment">%        norm(Sigma_t_org{i,j}-Sigma_t_org{i,j})</span>
+0128 <span class="comment">%        norm(Sigma_t_org{i,j})</span>
+0129 <span class="comment">%    end</span>
+0130 <span class="comment">%end</span>
+0131 <span class="comment">%error('done')</span>
+0132 <span class="comment">% debugging %</span>
+0133 
+0134 <span class="comment">% create opRight = 0.5*Tr(Hess*Sigma_t)</span>
+0135 opRight = [];
+0136 <span class="keyword">for</span> i=1:d
+0137     <span class="keyword">for</span> j=1:d
+0138         
+0139         <span class="keyword">if</span> i == j
+0140             <span class="keyword">if</span> norm(Sigma_t{j,i}) == 0
+0141                 diff(i) = 0; <span class="comment">%no diffusion term in dimension i.</span>
+0142             <span class="keyword">end</span>
+0143         <span class="keyword">end</span>
+0144         
+0145         <span class="comment">% create term to right operator</span>
+0146         <span class="keyword">if</span> norm(Sigma_t{j,i}) ~= 0
+0147             <span class="keyword">if</span> isempty(opRight) == 1
+0148                 opRight = <a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(Sigma_t{j,i},Hess{i,j});
+0149             <span class="keyword">else</span>
+0150                 opRight = opRight+<a href="SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(Sigma_t{j,i},Hess{i,j});
+0151             <span class="keyword">end</span>
+0152         <span class="keyword">end</span>
+0153         
+0154     <span class="keyword">end</span>
+0155 <span class="keyword">end</span>
+0156 <span class="keyword">if</span> isempty(opRight) == 0
+0157     opRight = 0.5*opRight;
+0158 <span class="keyword">end</span>
+0159 
+0160 <span class="comment">% debugging %</span>
+0161 <span class="comment">%save('opRight','opRight')</span>
+0162 <span class="comment">% debugging %</span>
+0163 
+0164 <span class="comment">% debugging VTOL %</span>
+0165 <span class="comment">%fprintf('opRight')</span>
+0166 <span class="comment">%opRight_tol = opRight;</span>
+0167 <span class="comment">%load('opRight_VTOL_org','opRight')</span>
+0168 <span class="comment">%opRight_org = opRight;</span>
+0169 <span class="comment">%norm(opRight_tol-opRight_org)</span>
+0170 <span class="comment">%norm(opRight_org-opRight_org)</span>
+0171 <span class="comment">%norm(opRight_org)</span>
+0172 <span class="comment">%ncomponents(opRight_tol)</span>
+0173 <span class="comment">%ncomponents(opRight_org)</span>
+0174 <span class="comment">%error('done')</span>
+0175 <span class="comment">% debugging VTOL %</span>
+0176 
+0177 <span class="comment">% debugging %</span>
+0178 <span class="comment">%h1 = 2*pi/200;</span>
+0179 <span class="comment">%h2 = 22/200;</span>
+0180 <span class="comment">%scale = h1^2*h2^2;</span>
+0181 <span class="comment">%opRight_tol = scale*opRight; %to have the same as them</span>
+0182 <span class="comment">%load('InvPenPerOrg_opRight')</span>
+0183 <span class="comment">%opRightdiff = norm(opRight-opRight_tol)</span>
+0184 <span class="comment">%norm(opRight_tol-opRight_tol)</span>
+0185 <span class="comment">%norm(opRight)</span>
+0186 <span class="comment">%error('done')</span>
+0187 <span class="comment">% debugging %</span>
+0188 
+0189 <span class="comment">%% Stability</span>
+0190 <span class="comment">% i = 1;</span>
+0191 <span class="comment">% ep = 10^-4;</span>
+0192 <span class="comment">% opStab = ep*D4{i};</span>
+0193 <span class="comment">% for i = 2:d</span>
+0194 <span class="comment">%     opStab = opStab + ep*D4{i};</span>
+0195 <span class="comment">% end</span>
+0196 
+0197 <span class="comment">%% combine operator terms</span>
+0198 <span class="keyword">if</span> isempty(opMid) == 1
+0199     <span class="keyword">if</span> isempty(opRight) == 1
+0200         op = opLeft;
+0201     <span class="keyword">else</span>
+0202         op = opLeft+opRight;
+0203     <span class="keyword">end</span>
+0204 <span class="keyword">else</span>
+0205     <span class="keyword">if</span> isempty(opRight) == 1
+0206         op = opLeft+opMid;
+0207     <span class="keyword">else</span>
+0208         op = opLeft+opMid+opRight;
+0209     <span class="keyword">end</span>
+0210 <span class="keyword">end</span>
+0211 
+0212 <span class="comment">% op = op + opStab;</span>
+0213</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

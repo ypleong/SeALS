@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makediffopspectral</title>
+  <meta name="keywords" content="makediffopspectral">
+  <meta name="description" content="MAKEDIFFOP creates discretization grids and differentiation operators">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makediffopspectral
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEDIFFOP creates discretization grids and differentiation operators</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKEDIFFOP creates discretization grids and differentiation operators 
+ in ktensor form and differentiation matrices.
+ Inputs:
+   grid - the discretization grid.
+   n - number of grid points in each dimension.
+   bcon - the boundary conditions.
+   region - the boundaries of the goal region.
+ Outputs:
+   n - number of grid points in each dimension.
+   grid - the discretization grid.
+   region - the boundaries of the goal region.
+   D - cell of first order differentiation operators. D{i} is
+   differentiation in dimension i.
+   D2 - cell of second order differentiation operators. D2{i} is
+   differentiation in dimension i.
+   fd1 - cell of first order differentiation matrices. fd1{i} is
+   differentiation in dimension i.
+   fd2 - cell of second order differentiation matrices. fd2{i} is
+   differnetiation in dimension i.
+
+   See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/dmsuite/chebdifn.html" class="code" title="function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)">chebdifn</a>	Without (a) and (b)</li><li><a href="../src/dmsuite/fourdifn.html" class="code" title="function [x, DM] = fourdifn(N,m,xmin, xmax)">fourdifn</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [n,grid,region,D,D2,fd1,fd2] = makediffopspectral(bdim,n,bcon,region)</a>
+0002 <span class="comment">% MAKEDIFFOP creates discretization grids and differentiation operators</span>
+0003 <span class="comment">% in ktensor form and differentiation matrices.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   grid - the discretization grid.</span>
+0006 <span class="comment">%   n - number of grid points in each dimension.</span>
+0007 <span class="comment">%   bcon - the boundary conditions.</span>
+0008 <span class="comment">%   region - the boundaries of the goal region.</span>
+0009 <span class="comment">% Outputs:</span>
+0010 <span class="comment">%   n - number of grid points in each dimension.</span>
+0011 <span class="comment">%   grid - the discretization grid.</span>
+0012 <span class="comment">%   region - the boundaries of the goal region.</span>
+0013 <span class="comment">%   D - cell of first order differentiation operators. D{i} is</span>
+0014 <span class="comment">%   differentiation in dimension i.</span>
+0015 <span class="comment">%   D2 - cell of second order differentiation operators. D2{i} is</span>
+0016 <span class="comment">%   differentiation in dimension i.</span>
+0017 <span class="comment">%   fd1 - cell of first order differentiation matrices. fd1{i} is</span>
+0018 <span class="comment">%   differentiation in dimension i.</span>
+0019 <span class="comment">%   fd2 - cell of second order differentiation matrices. fd2{i} is</span>
+0020 <span class="comment">%   differnetiation in dimension i.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%   See also MAIN_RUN</span>
+0023 
+0024 <span class="comment">%% grid</span>
+0025 
+0026 size_bdim = size(bdim);
+0027 d = size_bdim(1);
+0028 
+0029 <span class="keyword">if</span> length(n(:)) == 1
+0030     n = repmat(n,d,1);
+0031 <span class="keyword">end</span>
+0032 
+0033 
+0034 <span class="comment">%% region</span>
+0035 
+0036 <span class="keyword">if</span> isempty(region) == 0
+0037     
+0038     <span class="comment">% same boundary for all dimensions</span>
+0039     <span class="keyword">if</span> length(region(:)) == 2
+0040         <span class="comment">%check if true dim</span>
+0041         <span class="keyword">if</span> size(region) ~= [1 2]
+0042             error(<span class="string">'wrong size on region'</span>)
+0043         <span class="keyword">end</span>
+0044         region = repmat(region,d,1);
+0045     <span class="keyword">end</span>   
+0046 <span class="keyword">end</span>
+0047 
+0048 <span class="comment">%% create finite-difference matrices</span>
+0049 
+0050 fd1 = cell(1,d); <span class="comment">%first order der</span>
+0051 fd2 = cell(1,d); <span class="comment">%second order der</span>
+0052 grid = cell(1,d);
+0053 
+0054 <span class="keyword">for</span> i=1:d
+0055     
+0056     <span class="keyword">if</span> bcon{i}{1} == <span class="string">'p'</span> <span class="comment">%then bcon{i} = {'p'} so periodic</span>
+0057         [grid{i}, fd1{i}] = <a href="../src/dmsuite/fourdifn.html" class="code" title="function [x, DM] = fourdifn(N,m,xmin, xmax)">fourdifn</a>(n(i), 1, bdim(i,1),bdim(i,2));
+0058         [grid{i}, fd2{i}] = <a href="../src/dmsuite/fourdifn.html" class="code" title="function [x, DM] = fourdifn(N,m,xmin, xmax)">fourdifn</a>(n(i), 2, bdim(i,1),bdim(i,2));        
+0059     <span class="keyword">else</span>
+0060         <span class="keyword">if</span> ~isempty(region)
+0061             [grid{i}, sd] = <a href="../src/dmsuite/chebdifn.html" class="code" title="function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)">chebdifn</a>(n(i), 2, bdim(i,1),bdim(i,2),region(i,1),region(i,2));
+0062         <span class="keyword">else</span>
+0063             [grid{i}, sd] = <a href="../src/dmsuite/chebdifn.html" class="code" title="function [x, DM] = chebdifn(N, M, xmin, xmax, imin, imax)">chebdifn</a>(n(i), 2, bdim(i,1),bdim(i,2));
+0064         <span class="keyword">end</span>
+0065         fd1{i} = sd(:,:,1);
+0066         fd2{i} = sd(:,:,2);
+0067         
+0068         <span class="keyword">if</span> bcon{i}{1} == <span class="string">'d'</span>
+0069             fd1{i}([1 end],:) = zeros(2,n(i));
+0070             fd2{i}([1 end],:) = zeros(2,n(i));
+0071         <span class="keyword">end</span>
+0072     <span class="keyword">end</span>
+0073     
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="keyword">if</span> ~isempty(region)
+0077     <span class="comment">% point case for region, change region to closest point.</span>
+0078     <span class="keyword">if</span> region(:,1) == region(:,2)
+0079         <span class="keyword">for</span> i=1:d
+0080             gridi = grid{i};
+0081             [~,index] = min(abs( gridi-region(i,1) ));
+0082             region(i,:) = [gridi(index) gridi(index)];
+0083         <span class="keyword">end</span>
+0084     <span class="keyword">end</span>
+0085 <span class="keyword">end</span>
+0086 
+0087 
+0088 <span class="comment">%% create differentiation operators</span>
+0089 
+0090 <span class="comment">% create identity operator</span>
+0091 idUop = cell(1,d);
+0092 <span class="keyword">for</span> i=1:d
+0093     id = eye(n(i));
+0094     idUop{i} = id(:);
+0095 <span class="keyword">end</span>
+0096 
+0097 D = cell(1,d);
+0098 D2 = cell(1,d);
+0099 
+0100 <span class="keyword">for</span> i=1:d
+0101     DU = idUop;
+0102     D2U = idUop;
+0103 
+0104     DU{i} = fd1{i}(:);
+0105     D2U{i} = fd2{i}(:);
+0106 
+0107     D{i} = ktensor(DU);
+0108     D2{i} = ktensor(D2U);
+0109 <span class="keyword">end</span>
+0110 
+0111 
+0112 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

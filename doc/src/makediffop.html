@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makediffop</title>
+  <meta name="keywords" content="makediffop">
+  <meta name="description" content="MAKEDIFFOP creates differentiation operators in ktensor form and">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makediffop
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEDIFFOP creates differentiation operators in ktensor form and</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKEDIFFOP creates differentiation operators in ktensor form and
+ differentiation matrices.
+ Inputs:
+   grid - the discretization grid.
+   n - number of grid points in each dimension.
+   h - the grid step in each dimension.
+   ord_of_acc - oder of accuracy for the derivatives.
+   bcon - the boundary conditions.
+   region - the dimensions of the goal region.
+ Outputs:
+   D - cell of first order differentiation operators. D{i} is
+   differentiation in dimension i.
+   D2 - cell of second order differentiation operators. D2{i} is
+   differentiation in dimension i.
+   fd1 - cell of first order differentiation matrices. fd1{i} is
+   differentiation in dimension i.
+   fd2 - cell of second order differentiation matrices. fd2{i} is
+   differnetiation in dimension i.
+
+   See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="diffop_region.html" class="code" title="function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)">diffop_region</a>	REGIONDIFFOP Adds boundary conditions to derivative for the region.</li><li><a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>	FDMATRIX Finite difference matrix for der:th order derivative with ord:th</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)</a>
+0002 <span class="comment">% MAKEDIFFOP creates differentiation operators in ktensor form and</span>
+0003 <span class="comment">% differentiation matrices.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   grid - the discretization grid.</span>
+0006 <span class="comment">%   n - number of grid points in each dimension.</span>
+0007 <span class="comment">%   h - the grid step in each dimension.</span>
+0008 <span class="comment">%   ord_of_acc - oder of accuracy for the derivatives.</span>
+0009 <span class="comment">%   bcon - the boundary conditions.</span>
+0010 <span class="comment">%   region - the dimensions of the goal region.</span>
+0011 <span class="comment">% Outputs:</span>
+0012 <span class="comment">%   D - cell of first order differentiation operators. D{i} is</span>
+0013 <span class="comment">%   differentiation in dimension i.</span>
+0014 <span class="comment">%   D2 - cell of second order differentiation operators. D2{i} is</span>
+0015 <span class="comment">%   differentiation in dimension i.</span>
+0016 <span class="comment">%   fd1 - cell of first order differentiation matrices. fd1{i} is</span>
+0017 <span class="comment">%   differentiation in dimension i.</span>
+0018 <span class="comment">%   fd2 - cell of second order differentiation matrices. fd2{i} is</span>
+0019 <span class="comment">%   differnetiation in dimension i.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%   See also MAIN_RUN</span>
+0022 
+0023 <span class="comment">% Elis Stefansson, Aug 5 2015</span>
+0024 
+0025 <span class="comment">%% create finite-difference matrices</span>
+0026 <span class="comment">% size_bdim = size(grid);</span>
+0027 <span class="comment">% d = size_bdim(1);</span>
+0028 d = length(grid);
+0029 
+0030 fd1 = cell(1,d); <span class="comment">%first order der</span>
+0031 fd2 = cell(1,d); <span class="comment">%second order der</span>
+0032 
+0033 <span class="keyword">if</span> isempty(region) == 0 <span class="comment">%have region</span>
+0034     fd1_edg = cell(1,d); <span class="comment">%edge derivatives for region</span>
+0035     fd2_edg = cell(1,d);
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="keyword">for</span> i=1:d
+0039     
+0040     <span class="keyword">if</span> bcon{i}{1} == <span class="string">'p'</span> <span class="comment">%then bcon{i} = {'p'} so periodic</span>
+0041         
+0042         fd1{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),1,ord_of_acc(1,:),1);
+0043         fd1{i} = 1/h(i)*fd1{i};
+0044         fd2{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),2,ord_of_acc(2,:),1);
+0045         fd2{i} = 1/(h(i)^2)*fd2{i};
+0046         
+0047     <span class="keyword">else</span>
+0048         
+0049         fd1{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),1,ord_of_acc(1,:));
+0050         fd1{i} = 1/h(i)*fd1{i};
+0051         fd2{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),2,ord_of_acc(2,:));
+0052         fd2{i} = 1/(h(i)^2)*fd2{i};
+0053         
+0054         <span class="keyword">if</span> bcon{i}{1} == <span class="string">'d'</span>
+0055             fd1{i}([1 end],:) = zeros(2,n(i));
+0056             fd2{i}([1 end],:) = zeros(2,n(i));
+0057         <span class="keyword">end</span>
+0058         
+0059     <span class="keyword">end</span>
+0060     
+0061     <span class="keyword">if</span> isempty(region) == 0
+0062         
+0063         fd1_edg{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),1,ord_of_acc(1,:));
+0064         fd1_edg{i} = 1/h(i)*fd1_edg{i};
+0065         fd2_edg{i} = <a href="fdmatrix.html" class="code" title="function [DD] = fdmatrix( n, der, ord, per )">fdmatrix</a>(n(i),2,ord_of_acc(2,:));
+0066         fd2_edg{i} = 1/(h(i)^2)*fd2_edg{i};
+0067         
+0068     <span class="keyword">end</span>
+0069     
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">%% create differentiation operators</span>
+0073 
+0074 <span class="comment">% create identity operator</span>
+0075 idUop = cell(1,d);
+0076 <span class="keyword">for</span> i=1:d
+0077     id = eye(n(i));
+0078     idUop{i} = id(:);
+0079 <span class="keyword">end</span>
+0080 
+0081 D = cell(1,d);
+0082 D2 = cell(1,d);
+0083 
+0084 <span class="keyword">if</span> isempty(region) == 1
+0085     
+0086     <span class="keyword">for</span> i=1:d
+0087         DU = idUop;
+0088         D2U = idUop;
+0089         
+0090         fd1i = fd1{i};
+0091         fd2i = fd2{i};
+0092         
+0093         DU{i} = fd1i(:);
+0094         D2U{i} = fd2i(:);
+0095         
+0096         D{i} = ktensor(DU);
+0097         D2{i} = ktensor(D2U);
+0098     <span class="keyword">end</span>
+0099     
+0100 <span class="keyword">else</span>
+0101     
+0102     D = <a href="diffop_region.html" class="code" title="function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)">diffop_region</a>(grid,fd1,region,ord_of_acc,fd1_edg,1);
+0103     D2 = <a href="diffop_region.html" class="code" title="function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)">diffop_region</a>(grid,fd2,region,ord_of_acc,fd2_edg,2);
+0104     
+0105 <span class="keyword">end</span>
+0106 
+0107 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

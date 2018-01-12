@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of diffop_region</title>
+  <meta name="keywords" content="diffop_region">
+  <meta name="description" content="REGIONDIFFOP Adds boundary conditions to derivative for the region.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>diffop_region
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>REGIONDIFFOP Adds boundary conditions to derivative for the region.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">REGIONDIFFOP Adds boundary conditions to derivative for the region.
+ Inputs:
+   x - the underlying grid. If x is a vector, then it is assumed the grid
+   is uniform along each dimension
+   D - the derivative operator
+   dim - number of nodes along each dimension
+   region - the interval where the derivative does not apply.
+   ord - order of accuracy in derivatives
+   Dedg - edge derivatives
+ Outputs:
+   Dpunch - derivative operator incooporating region.
+
+   See also <a href="makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">MAKEDIFFOP</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)</a>
+0002 <span class="comment">%REGIONDIFFOP Adds boundary conditions to derivative for the region.</span>
+0003 <span class="comment">% Inputs:</span>
+0004 <span class="comment">%   x - the underlying grid. If x is a vector, then it is assumed the grid</span>
+0005 <span class="comment">%   is uniform along each dimension</span>
+0006 <span class="comment">%   D - the derivative operator</span>
+0007 <span class="comment">%   dim - number of nodes along each dimension</span>
+0008 <span class="comment">%   region - the interval where the derivative does not apply.</span>
+0009 <span class="comment">%   ord - order of accuracy in derivatives</span>
+0010 <span class="comment">%   Dedg - edge derivatives</span>
+0011 <span class="comment">% Outputs:</span>
+0012 <span class="comment">%   Dpunch - derivative operator incooporating region.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%   See also MAKEDIFFOP.</span>
+0015 
+0016 <span class="comment">% Elis Stefansson, Aug 9 2015</span>
+0017 <span class="comment">% This is a new version incorporated for the Toolbox, explaining the</span>
+0018 <span class="comment">% different notation.</span>
+0019 
+0020 d = length(x);
+0021 opDU = cell(d,d); <span class="comment">%derivative operator in each direction</span>
+0022                   <span class="comment">%column is derivative direction, row is U{i}</span>
+0023                   
+0024 <span class="keyword">if</span> length(ord(:)) == 1 <span class="comment">%same order for every dimension</span>
+0025     ord_old = ord;
+0026     <span class="keyword">for</span> i=1:d
+0027         ord(i,1) = ord_old;
+0028     <span class="keyword">end</span>
+0029 <span class="keyword">else</span>
+0030     ord_old = ord(der,:);
+0031     <span class="keyword">for</span> i=1:d
+0032         ord(i,:) = ord_old;
+0033     <span class="keyword">end</span>
+0034 <span class="keyword">end</span>
+0035                   
+0036 <span class="keyword">for</span> ii = 1:d
+0037 
+0038     DCanv = <a href="#_sub1" class="code" title="subfunction [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)">addBCD_each</a>( x{ii}, D{ii}, region(ii,:), ord(ii,:), Dedg{ii}, der);
+0039     
+0040     count = 0;
+0041     <span class="keyword">if</span> d == 1
+0042          opDU{ii,ii} = DCanv(:);
+0043     <span class="keyword">else</span>
+0044         <span class="keyword">for</span> jj = 1:d           
+0045             <span class="keyword">if</span> ii == jj
+0046                 opDU{jj,ii} = [repmat(D{ii}(:),1,d-1) DCanv(:)];
+0047             <span class="keyword">else</span>
+0048                 id = eye(size(D{jj}));
+0049                 idRest = <a href="#_sub1" class="code" title="subfunction [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)">addBCD_each</a>( x{jj}, id, region(jj,:), ord(jj,:), id, der);                
+0050                 opDU{jj,ii} = [repmat(id(:),1,count) idRest(:) repmat(id(:)-idRest(:),1,d-1-count)];
+0051                 count = count + 1;
+0052             <span class="keyword">end</span>         
+0053         <span class="keyword">end</span>
+0054     <span class="keyword">end</span>
+0055 <span class="keyword">end</span>
+0056 
+0057 Dpunch = cell(d,1);
+0058 
+0059 <span class="keyword">for</span> i=1:d
+0060     Dpunch{i} = ktensor(opDU(:,i));
+0061     Dpunch{i} = <a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>(Dpunch{i},10^-8);
+0062 <span class="keyword">end</span>
+0063 
+0064 <span class="keyword">end</span>
+0065 
+0066 <a name="_sub1" href="#_subfunctions" class="code">function [ Dpunch] = addBCD_each( x, D, region, ord, Dedg, der)</a>
+0067     n = length(x);
+0068     d_ind = find( (x &gt;= region(1)) &amp; (x &lt;= region(2))); <span class="comment">%nodes interior</span>
+0069     
+0070     Dfill = zeros(n); <span class="comment">%canvas for new D which we will update</span>
+0071     
+0072     left = min(d_ind) - 1; <span class="comment">%find the boundaries of the region</span>
+0073     right = max(d_ind) + 1;
+0074     
+0075     <span class="keyword">if</span> mod(ord(1)+der,2) == 0
+0076         ord(1) = ord(1)+1; <span class="comment">%treat it as odd, like in fdmatrix</span>
+0077     <span class="keyword">end</span>
+0078     
+0079     <span class="comment">% special case when no edge derivates for region are needed.</span>
+0080     <span class="comment">% (OBS: ord+der must be odd and can't be 1)</span>
+0081     <span class="keyword">if</span> ord(1)+der == 3
+0082         
+0083         Drem = D;
+0084         Drem(d_ind,:) = 0; <span class="comment">%knock out the parts affecting the interior boundary</span>
+0085         
+0086         Dpunch = Dfill+Drem;
+0087         
+0088     <span class="keyword">else</span>
+0089         
+0090         <span class="keyword">if</span> length(ord(:)) == 1
+0091             ord = [ord ord]; <span class="comment">%like in fdmatrix</span>
+0092         <span class="keyword">end</span>
+0093         
+0094         d_egd = [(left+1)*ones((ord(1)+der-3)/2,1)-((ord(1)+der-3)/2:-1:1)'; (right-1)*ones((ord(1)+der-3)/2,1)+(1:(ord(1)+der-3)/2)'];
+0095         
+0096         <span class="comment">%For the current direction, set up edge derivatives</span>
+0097         Dfill( (left+1-(ord(1)+der-3)/2):left, (left+1-(ord(2)+der-1)):(left+1) ) = Dedg(end-(ord(1)+der-3)/2:end-1,end-(ord(2)+der-1):end);
+0098         Dfill(right:right+(ord(1)+der-5)/2,right-1:right-1+(ord(2)+der-1)) = Dedg(2:2+(ord(1)+der-5)/2,1:1+(ord(2)+der-1));
+0099 
+0100         Drem = D;
+0101         Drem([d_egd; d_ind],:) = 0; <span class="comment">%knock out the parts affecting the interior boundary</span>
+0102         
+0103         Dpunch = Dfill + Drem;
+0104         
+0105     <span class="keyword">end</span>
+0106 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

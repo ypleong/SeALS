@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als_onestep_sys</title>
+  <meta name="keywords" content="als_onestep_sys">
+  <meta name="description" content="ALS_ONSTEP_SYS performs one step of the ALS algorithm for solving AF=G.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als_onestep_sys
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS_ONSTEP_SYS performs one step of the ALS algorithm for solving AF=G.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS_ONSTEP_SYS performs one step of the ALS algorithm for solving AF=G.
+ Based on the version in Baylkin and Mholenkamp 2005.
+ Inputs:
+   AtG - A'*G (nf,rA*rG,nd)
+   F - the current solution as a ktensor.
+   AtA - A'*A (nf*rA,nf*rA,nd)
+   alpha - regularization constant.
+   debugging - 1 if all F, B and b are saved in cell arrays.
+ Outputs:
+   F - updated F.
+   status - 0 if ALS matrices became ill-conditioned. Otherwise 1.
+   F_cell - all F so far during the run.
+   B_cell - all B (ALS matrices) so far during the run.
+   b_cell - all b (RHS vectors) so far during the run.
+
+ See also <a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">ALS_SYS</a>, <a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">ALS_SYS_VAR</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als_sys.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell] = als_sys(A,G,F,e,als_options,debugging,verbose)">als_sys</a>	ALS_SYS code to perform the ALS algorithm as described in Beylkin</li><li><a href="als_sys_var.html" class="code" title="function [F, err, iter, Fcond, e_list, time_step, illcond, maxit, maxrank, F_cell, B_cell, b_cell, restart] = als_sys_var(A,G,F,e,als_options,als_variant,debugging,verbose)">als_sys_var</a>	ALS_SYS_VAR is a modified version of the original ALS algorithm found</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [F, status, F_cell, B_cell, b_cell] = als_onestep_sys(AtA,AtG,F,alpha,debugging)</a>
+0002 <span class="comment">% ALS_ONSTEP_SYS performs one step of the ALS algorithm for solving AF=G.</span>
+0003 <span class="comment">% Based on the version in Baylkin and Mholenkamp 2005.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   AtG - A'*G (nf,rA*rG,nd)</span>
+0006 <span class="comment">%   F - the current solution as a ktensor.</span>
+0007 <span class="comment">%   AtA - A'*A (nf*rA,nf*rA,nd)</span>
+0008 <span class="comment">%   alpha - regularization constant.</span>
+0009 <span class="comment">%   debugging - 1 if all F, B and b are saved in cell arrays.</span>
+0010 <span class="comment">% Outputs:</span>
+0011 <span class="comment">%   F - updated F.</span>
+0012 <span class="comment">%   status - 0 if ALS matrices became ill-conditioned. Otherwise 1.</span>
+0013 <span class="comment">%   F_cell - all F so far during the run.</span>
+0014 <span class="comment">%   B_cell - all B (ALS matrices) so far during the run.</span>
+0015 <span class="comment">%   b_cell - all b (RHS vectors) so far during the run.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% See also ALS_SYS, ALS_SYS_VAR.</span>
+0018 
+0019 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0020 
+0021 warning(<span class="string">'error'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0022 
+0023 status = 1;
+0024 
+0025 nd = length(AtG);
+0026 
+0027 nf = size(AtG{1},1);
+0028 rF = ncomponents(F);
+0029 rA = round(size(AtA{1},1)/nf);
+0030 rG = size(AtG{1},2);
+0031 
+0032 <span class="comment">%%% documentation %%%</span>
+0033 F_cell = {}; <span class="comment">%for no documentation, these variabels remain empty.</span>
+0034 B_cell = {};
+0035 b_cell = {};
+0036 <span class="comment">%%% documentation %%%</span>
+0037 
+0038 <span class="comment">% Distribute normalization factor evenly</span>
+0039 F_U = cell(nd,1);
+0040 Flambda = (F.lambda').^(1/nd);
+0041 <span class="keyword">for</span> i = 1:nd
+0042     F_U{i} = bsxfun(@times,F.U{i},Flambda);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">for</span> k = 1:nd
+0046     idx = [1:(k-1) (k+1):nd];
+0047     nf = size(F_U{k},1);
+0048     B = zeros(rF*nf,rF*nf);
+0049     b = zeros(rF*nf,1);
+0050     
+0051     <span class="comment">%Calculate B matrix</span>
+0052     <span class="keyword">for</span> i=1:rF      
+0053         <span class="keyword">for</span> j=1:rF         
+0054             Mt = zeros(nf,nf);
+0055             <span class="keyword">for</span> ia=1:rA
+0056                 <span class="keyword">for</span> ja=1:rA 
+0057                     Aprod2 = 1;
+0058                     <span class="keyword">for</span> dd = idx
+0059                         nnf = size(F_U{dd},1);
+0060                         A_ia_ja = AtA{dd}((ia-1)*nnf+(1:nnf),(ja-1)*nnf+(1:nnf));
+0061                         Aprod2 = Aprod2*F_U{dd}(:,j)'*A_ia_ja*F_U{dd}(:,i);
+0062                     <span class="keyword">end</span>  
+0063                     Mt = Mt + AtA{k}((ia-1)*nf+(1:nf),(ja-1)*nf+(1:nf))'*Aprod2;                   
+0064                 <span class="keyword">end</span>
+0065             <span class="keyword">end</span>
+0066             
+0067             <span class="keyword">if</span> i==j
+0068                 B((i-1)*nf+(1:nf),(j-1)*nf+(1:nf)) = Mt+alpha*eye(nf);
+0069             <span class="keyword">else</span>
+0070                 B((i-1)*nf+(1:nf),(j-1)*nf+(1:nf)) = Mt;
+0071             <span class="keyword">end</span>
+0072             
+0073         <span class="keyword">end</span>
+0074         
+0075         <span class="comment">%Calculate b matrix</span>
+0076         temp = ones(1,rG);
+0077         <span class="keyword">for</span> dd = idx
+0078             temp = temp.*(F_U{dd}(:,i)'*AtG{dd});
+0079         <span class="keyword">end</span>
+0080         b((i-1)*nf+(1:nf),:) = AtG{k}*temp';
+0081     <span class="keyword">end</span>
+0082     
+0083     <span class="comment">%%% Debugging %%%</span>
+0084     <span class="keyword">if</span> 1==0 <span class="comment">%&quot;movie-plot&quot; of ALS matrices</span>
+0085         plotmatrix(B);
+0086         <span class="comment">%error('done')</span>
+0087     <span class="keyword">end</span>
+0088     <span class="comment">%%% Debugging %%%</span>
+0089     
+0090     <span class="comment">%%% documentation %%%</span>
+0091     <span class="keyword">if</span> debugging == 1
+0092         B_cell{k} = B;
+0093         b_cell{k} = b;
+0094     <span class="keyword">end</span>
+0095     <span class="comment">%%% documentation %%%</span>
+0096     
+0097     <span class="keyword">try</span>
+0098         u = B\b;
+0099     <span class="keyword">catch</span>
+0100         status = 0;
+0101         
+0102         <span class="comment">%%% Debugging %%%</span>
+0103         <span class="keyword">if</span> 1==0
+0104             plotmatrix(B);
+0105         <span class="keyword">end</span>
+0106         <span class="comment">%%% Debugging %%%</span>
+0107         warning(<span class="string">'off'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0108         u = B\b;
+0109         warning(<span class="string">'error'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);
+0110     <span class="keyword">end</span>
+0111  
+0112     F_U{k} = reshape(u,nf,rF);
+0113     
+0114     <span class="comment">%%% documentation %%%</span>
+0115     <span class="keyword">if</span> debugging == 1
+0116         F = ktensor(F_U);
+0117         F = arrange(F);
+0118         F_cell{k} = F;
+0119     <span class="keyword">end</span>
+0120     <span class="comment">%%% documentation %%%</span>
+0121     
+0122     
+0123 <span class="keyword">end</span>
+0124 
+0125 F = ktensor(F_U);
+0126 F = fixsigns(arrange(F));
+0127 
+0128 warning(<span class="string">'on'</span>, <span class="string">'MATLAB:nearlySingularMatrix'</span>);</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

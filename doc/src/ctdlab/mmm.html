@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mmm</title>
+  <meta name="keywords" content="mmm">
+  <meta name="description" content="Multiply two operators in canonical format, performing multiplication for">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>mmm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Multiply two operators in canonical format, performing multiplication for</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function C = mmm(A,B,del) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Multiply two operators in canonical format, performing multiplication for
+ only those terms whose svalues are above a threshold.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../src/ctdlab/tests/test_mmm.html" class="code" title="">test_mmm</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function C = mmm(A,B,del)</a>
+0002 <span class="comment">% Multiply two operators in canonical format, performing multiplication for</span>
+0003 <span class="comment">% only those terms whose svalues are above a threshold.</span>
+0004 
+0005   <span class="keyword">if</span> nargin &lt; 3
+0006     del = 0;
+0007   <span class="keyword">end</span>
+0008 
+0009   D = ndims(A);
+0010   N2 = size(A);
+0011   N = sqrt(N2);
+0012 
+0013   <span class="comment">% Compute the new svalues before multiplication / normalization</span>
+0014   lambda = A.lambda * B.lambda';
+0015   [ia,ib,~] = find(abs(lambda) &gt; (max(abs(lambda(:)))*del));
+0016   
+0017   <span class="comment">% loop over all terms and perform multiplication</span>
+0018   C.lambda = zeros(length(ia),1);
+0019   C.U = cell(1,ndims(A));
+0020   <span class="keyword">for</span> d = 1:D
+0021     C.U{d} = sparse(N2(d),length(C.lambda));
+0022     ii = 1;
+0023     <span class="keyword">for</span> r = 1:length(ia)
+0024       Atmp = reshape(A{d}(:,ia(r)),[N(d),N(d)]);
+0025       <span class="keyword">if</span> d==1
+0026         C.lambda(ii) = lambda(ia(r),ib(r));
+0027       <span class="keyword">end</span>
+0028       Btmp = reshape(B{d}(:,ib(r)),[N(d),N(d)]);
+0029       Ctmp = Atmp * Btmp;     
+0030       lamtmp = sqrt(sum(Ctmp(:).^2));
+0031       C.lambda(ii) = C.lambda(ii) * lamtmp;
+0032       C.U{d}(:,ii) = reshape(Ctmp,[N2(d),1]) / lamtmp;
+0033       ii = ii+1;
+0034     <span class="keyword">end</span>
+0035   <span class="keyword">end</span>
+0036 
+0037   C = ktensor(C.lambda,C.U);
+0038     
+0039 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

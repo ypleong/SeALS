@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of three_way_array_maker</title>
+  <meta name="keywords" content="three_way_array_maker">
+  <meta name="description" content="This function takes a STT representation of a tensor A and saves it to a">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>three_way_array_maker
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This function takes a STT representation of a tensor A and saves it to a</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [B, s] = three_way_array_maker(A) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> This function takes a STT representation of a tensor A and saves it to a
+ 3 way array and a list of numbers for the s values</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [B, s] = three_way_array_maker(A)</a>
+0002 <span class="comment">% This function takes a STT representation of a tensor A and saves it to a</span>
+0003 <span class="comment">% 3 way array and a list of numbers for the s values</span>
+0004 
+0005 <span class="comment">% Save lambdas</span>
+0006 s = A.lambda;
+0007 
+0008 <span class="comment">% Get the rank of the matrix, etc.</span>
+0009 D = ndims(A);
+0010 N2 = size(A,1); <span class="comment">% Note, since saving to an array, all dir have the same # of sample</span>
+0011 rank = length(s);
+0012 
+0013 <span class="comment">% Initialize the output array</span>
+0014 B = zeros(rank, D, N2);
+0015 
+0016 <span class="comment">% Fill up the array</span>
+0017 <span class="keyword">for</span> d = 1:D
+0018     B(:,d,:) = A.U{d}';
+0019 <span class="keyword">end</span>
+0020 
+0021</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

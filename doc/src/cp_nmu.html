@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of cp_nmu</title>
+  <meta name="keywords" content="cp_nmu">
+  <meta name="description" content="CP_NMU Compute nonnegative CP with multiplicative updates.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>cp_nmu
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CP_NMU Compute nonnegative CP with multiplicative updates.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [P,Uinit,output] = cp_nmu(X,R,opts) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">CP_NMU Compute nonnegative CP with multiplicative updates.
+
+   P = CP_NMU(X,R) computes an estimate of the best rank-R PARAFAC
+   model of a tensor X with nonnegative constraints on the factors.
+   This version uses the Lee &amp; Seung multiplicative updates from
+   their NMF algorithm.  The input X can be a tensor, sptensor,
+   ktensor, or ttensor. The result P is a ktensor.
+
+   P = CP_NMU(X,R,OPTS) specify options:
+   OPTS.tol: Tolerance on difference in fit {1.0e-4}
+   OPTS.maxiters: Maximum number of iterations {50}
+   OPTS.dimorder: Order to loop through dimensions {1:ndims(A)}
+   OPTS.init: Initial guess [{'random'}|'nvecs'|cell array]
+   OPTS.printitn: Print fit every n iterations {1}
+
+   [P,U0] = CP_NMU(...) also returns the initial guess.
+
+   Examples:
+   X = sptenrand([5 4 3], 10);
+   P = cp_nmu(X,2);
+   P = cp_nmu(X,2,struct('dimorder',[3 2 1]));
+   P = cp_nmu(X,2,struct('dimorder',[3 2 1],'init','nvecs'));
+   U0 = {rand(5,2),rand(4,2),[]}; %&lt;-- Initial guess for factors of P
+   P = cp_nmu(X,2,struct('dimorder',[3 2 1],'init',{U0}));
+
+   See also KTENSOR, TENSOR, SPTENSOR, TTENSOR.
+
+MATLAB Tensor Toolbox.
+Copyright 2015, Sandia Corporation.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="als2.html" class="code" title="function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)">als2</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function x = setparam(opts,name,default)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [P,Uinit,output] = cp_nmu(X,R,opts)</a>
+0002 <span class="comment">%CP_NMU Compute nonnegative CP with multiplicative updates.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%   P = CP_NMU(X,R) computes an estimate of the best rank-R PARAFAC</span>
+0005 <span class="comment">%   model of a tensor X with nonnegative constraints on the factors.</span>
+0006 <span class="comment">%   This version uses the Lee &amp; Seung multiplicative updates from</span>
+0007 <span class="comment">%   their NMF algorithm.  The input X can be a tensor, sptensor,</span>
+0008 <span class="comment">%   ktensor, or ttensor. The result P is a ktensor.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%   P = CP_NMU(X,R,OPTS) specify options:</span>
+0011 <span class="comment">%   OPTS.tol: Tolerance on difference in fit {1.0e-4}</span>
+0012 <span class="comment">%   OPTS.maxiters: Maximum number of iterations {50}</span>
+0013 <span class="comment">%   OPTS.dimorder: Order to loop through dimensions {1:ndims(A)}</span>
+0014 <span class="comment">%   OPTS.init: Initial guess [{'random'}|'nvecs'|cell array]</span>
+0015 <span class="comment">%   OPTS.printitn: Print fit every n iterations {1}</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%   [P,U0] = CP_NMU(...) also returns the initial guess.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">%   Examples:</span>
+0020 <span class="comment">%   X = sptenrand([5 4 3], 10);</span>
+0021 <span class="comment">%   P = cp_nmu(X,2);</span>
+0022 <span class="comment">%   P = cp_nmu(X,2,struct('dimorder',[3 2 1]));</span>
+0023 <span class="comment">%   P = cp_nmu(X,2,struct('dimorder',[3 2 1],'init','nvecs'));</span>
+0024 <span class="comment">%   U0 = {rand(5,2),rand(4,2),[]}; %&lt;-- Initial guess for factors of P</span>
+0025 <span class="comment">%   P = cp_nmu(X,2,struct('dimorder',[3 2 1],'init',{U0}));</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%   See also KTENSOR, TENSOR, SPTENSOR, TTENSOR.</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%MATLAB Tensor Toolbox.</span>
+0030 <span class="comment">%Copyright 2015, Sandia Corporation.</span>
+0031 
+0032 <span class="comment">% This is the MATLAB Tensor Toolbox by T. Kolda, B. Bader, and others.</span>
+0033 <span class="comment">% http://www.sandia.gov/~tgkolda/TensorToolbox.</span>
+0034 <span class="comment">% Copyright (2015) Sandia Corporation. Under the terms of Contract</span>
+0035 <span class="comment">% DE-AC04-94AL85000, there is a non-exclusive license for use of this</span>
+0036 <span class="comment">% work by or on behalf of the U.S. Government. Export of this data may</span>
+0037 <span class="comment">% require a license from the United States Government.</span>
+0038 <span class="comment">% The full license terms can be found in the file LICENSE.txt</span>
+0039 
+0040 
+0041 <span class="comment">%% Fill in optional variable</span>
+0042 <span class="keyword">if</span> ~exist(<span class="string">'opts'</span>,<span class="string">'var'</span>)
+0043     opts = struct;
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="comment">%% Extract number of dimensions and norm of X.</span>
+0047 N = ndims(X);
+0048 normX = norm(X);
+0049 
+0050 <span class="comment">%% Set algorithm parameters from input or by using defaults</span>
+0051 fitchangetol = <a href="#_sub1" class="code" title="subfunction x = setparam(opts,name,default)">setparam</a>(opts,<span class="string">'tol'</span>,1e-4);
+0052 maxiters = <a href="#_sub1" class="code" title="subfunction x = setparam(opts,name,default)">setparam</a>(opts,<span class="string">'maxiters'</span>,500);
+0053 dimorder = <a href="#_sub1" class="code" title="subfunction x = setparam(opts,name,default)">setparam</a>(opts,<span class="string">'dimorder'</span>,1:N);
+0054 init = <a href="#_sub1" class="code" title="subfunction x = setparam(opts,name,default)">setparam</a>(opts,<span class="string">'init'</span>,<span class="string">'random'</span>);
+0055 printitn = <a href="#_sub1" class="code" title="subfunction x = setparam(opts,name,default)">setparam</a>(opts,<span class="string">'printitn'</span>,1);
+0056 epsilon = 1e-12;  <span class="comment">% Small number to protect against round-off error</span>
+0057 
+0058 <span class="comment">%% Error checking</span>
+0059 <span class="comment">% Error checking on maxiters</span>
+0060 <span class="keyword">if</span> maxiters &lt; 0
+0061     error(<span class="string">'OPTS.maxiters must be positive'</span>);
+0062 <span class="keyword">end</span>
+0063 
+0064 <span class="comment">% Error checking on dimorder</span>
+0065 <span class="keyword">if</span> ~isequal(1:N,sort(dimorder))
+0066     error(<span class="string">'OPTS.dimorder must include all elements from 1 to ndims(X)'</span>);
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="comment">%% Set up and error checking on initial guess for U.</span>
+0070 <span class="keyword">if</span> iscell(init)
+0071     Uinit = init;
+0072     <span class="keyword">if</span> numel(Uinit) ~= N
+0073         error(<span class="string">'OPTS.init does not have %d cells'</span>,N);
+0074     <span class="keyword">end</span>
+0075     <span class="keyword">for</span> n = dimorder(1:end);
+0076         <span class="keyword">if</span> ~isequal(size(Uinit{n}),[size(X,n) R])
+0077             error(<span class="string">'OPTS.init{%d} is the wrong size'</span>,n);
+0078         <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080 <span class="keyword">else</span>
+0081     <span class="keyword">if</span> strcmp(init,<span class="string">'random'</span>)
+0082         Uinit = cell(N,1);
+0083         <span class="keyword">for</span> n = dimorder(1:end)
+0084             Uinit{n} = rand(size(X,n),R) + 0.1;
+0085         <span class="keyword">end</span>
+0086     <span class="keyword">elseif</span> strcmp(init,<span class="string">'nvecs'</span>) || strcmp(init,<span class="string">'eigs'</span>) 
+0087         Uinit = cell(N,1);
+0088         <span class="keyword">for</span> n = dimorder(1:end)
+0089             k = min(R,size(X,n)-2);
+0090             fprintf(<span class="string">'  Computing %d leading e-vectors for factor %d.\n'</span>,k,n);
+0091             Uinit{n} = abs(nvecs(X,n,k));
+0092             <span class="keyword">if</span> (k &lt; R)
+0093               Uinit{n} = [Uinit{n} rand(size(X,n),R-k)]; 
+0094             <span class="keyword">end</span>
+0095         <span class="keyword">end</span>
+0096     <span class="keyword">else</span>
+0097         error(<span class="string">'The selected initialization method is not supported'</span>);
+0098     <span class="keyword">end</span>
+0099 <span class="keyword">end</span>
+0100 
+0101 <span class="comment">%% Set up for iterations - initializing U and the fit.</span>
+0102 U = Uinit;
+0103 fit = 0;
+0104 
+0105 <span class="keyword">if</span> printitn&gt;0
+0106   fprintf(<span class="string">'\nNonnegative PARAFAC:\n'</span>);
+0107 <span class="keyword">end</span>
+0108 err = zeros(maxiters,1);
+0109 t_step = zeros(maxiters,1);
+0110 <span class="comment">%% Main Loop: Iterate until convergence</span>
+0111 <span class="keyword">for</span> iter = 1:maxiters
+0112     
+0113     tic
+0114     fitold = fit;
+0115 
+0116     <span class="comment">% Iterate over all N modes of the tensor</span>
+0117     <span class="keyword">for</span> n = dimorder(1:end)
+0118 
+0119         <span class="comment">% Compute the matrix of coefficients for linear system</span>
+0120         Y = ones(R,R);
+0121         <span class="keyword">for</span> i = [1:n-1,n+1:N]
+0122             Y = Y .* (U{i}'*U{i});
+0123         <span class="keyword">end</span>
+0124         Y = U{n} * Y;
+0125 
+0126         <span class="comment">% Initialize matrix of unknowns</span>
+0127         Unew = U{n};
+0128 
+0129         <span class="comment">% Calculate Unew = X_(n) * khatrirao(all U except n, 'r').</span>
+0130         tmp = mttkrp(X,U,n) + epsilon;
+0131 
+0132         <span class="comment">% Update unknowns</span>
+0133         Unew = Unew .* tmp;
+0134         Unew = Unew ./ (Y + epsilon);
+0135 
+0136         U{n} = Unew;
+0137     <span class="keyword">end</span>
+0138 
+0139     P = ktensor(U);
+0140     normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+0141     fit = 1 - (normresidual / normX); <span class="comment">%fraction explained by model</span>
+0142     err(iter) = 1-fit;
+0143     fitchange = abs(fitold - fit);
+0144 
+0145     <span class="keyword">if</span> mod(iter,printitn)==0
+0146       fprintf(<span class="string">' Iter %2d: fit = %e fitdelta = %7.1e\n'</span>, iter, fit, fitchange);
+0147     <span class="keyword">end</span>
+0148 
+0149     <span class="comment">% Check for convergence</span>
+0150     <span class="keyword">if</span> (iter &gt; 1) &amp;&amp; (fitchange &lt; fitchangetol)
+0151         <span class="keyword">break</span>;
+0152     <span class="keyword">end</span>
+0153     
+0154     t_step(iter) = toc;
+0155 
+0156 <span class="keyword">end</span>
+0157 
+0158 <span class="comment">%% Clean up final result</span>
+0159 <span class="comment">% Arrange the final tensor so that the columns are normalized.</span>
+0160 P = arrange(P);
+0161 
+0162 <span class="keyword">if</span> printitn&gt;0
+0163   normresidual = sqrt( normX^2 + norm(P)^2 - 2 * innerprod(X,P) );
+0164   fit = 1 - (normresidual / normX); <span class="comment">%fraction explained by model</span>
+0165   fprintf(<span class="string">' Final fit = %e \n'</span>, fit);
+0166 <span class="keyword">end</span>
+0167 ill_cond = 0;
+0168 output = struct;
+0169 output.iters = iter;
+0170 output.err = err(1:iter);
+0171 output.ill_cond = ill_cond;
+0172 output.t_step = t_step(1:iter);
+0173 
+0174 <span class="keyword">return</span>;
+0175 
+0176 <span class="comment">%%</span>
+0177 <a name="_sub1" href="#_subfunctions" class="code">function x = setparam(opts,name,default)</a>
+0178 <span class="keyword">if</span> isfield(opts,name);
+0179     x = opts.(name);
+0180 <span class="keyword">else</span>
+0181     x = default;
+0182 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

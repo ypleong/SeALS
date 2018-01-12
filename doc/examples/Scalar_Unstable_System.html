@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of Scalar_Unstable_System</title>
+  <meta name="keywords" content="Scalar_Unstable_System">
+  <meta name="description" content="% Example - Scalar Unstable System">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html examples -->
+<h1>Scalar_Unstable_System
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% Example - Scalar Unstable System</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% Example - Scalar Unstable System
+ Elis Stefansson, Aug 2015</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%% Example - Scalar Unstable System</span>
+0002 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0003 
+0004 <span class="comment">% The following example is taken from the paper:</span>
+0005 <span class="comment">% Linearly Solvable Stochastic Control Lyapunov Functions</span>
+0006 <span class="comment">% by Yoke Peng Leong et. al.</span>
+0007 
+0008 <span class="comment">%% setup</span>
+0009 
+0010 <span class="comment">% 1. domain</span>
+0011 d = 1;
+0012 n = 151;
+0013 bdim = [-10 10];
+0014 bcon = { {<span class="string">'d'</span>,0.0001,0.0001} };
+0015 bsca = [0.1 0.1]; <span class="comment">%no manual scaling</span>
+0016 region = [0 0];
+0017 regval = 1;
+0018 regsca = 1;
+0019 sca_ver = 1; <span class="comment">%second scaling method</span>
+0020 ord_of_acc = 6;
+0021 
+0022 <span class="comment">% 2. dynamics</span>
+0023 lambda = 1;
+0024 x = sym(<span class="string">'x'</span>,[d,1]); <span class="comment">%do not change</span>
+0025 f = x(1)^3+5*x(1)^2+x(1);
+0026 G = 1;
+0027 B = 1;
+0028 noise_cov = 1;
+0029 q = x(1)^2;
+0030 R = 1;
+0031 
+0032 <span class="comment">% 3. artificial diffusion, compress operator and solve als</span>
+0033 artdiff_option = [];
+0034 tol_err_op = 1e-7;
+0035 comp_options = [];
+0036 tol_err = 10^-6;
+0037 als_options = [];
+0038 als_variant = []; <span class="comment">%org. ALS (SeALS gives the same result bcs AF=G is just a matrix eq. in 1D)</span>
+0039 debugging = 0;
+0040 
+0041 <span class="comment">% 4. visualize result and run simulation</span>
+0042 plotdata = 1;
+0043 saveplots = 0;
+0044 savedata = 1;
+0045 sim_config = {5,0.005,[-0.5 0.5],[],[]};
+0046 
+0047 <span class="comment">% 5. run index</span>
+0048 run = 1;
+0049 
+0050 <span class="comment">% Setup run</span>
+0051 input1 = {d,n,bdim,bcon,bsca,region,regval,regsca,sca_ver,ord_of_acc};
+0052 input2 = {x,f,G,B,noise_cov,q,R,lambda};
+0053 input3 = {artdiff_option,tol_err_op,comp_options,tol_err,als_options,als_variant,debugging};
+0054 input4 = {saveplots,savedata,plotdata,sim_config};
+0055 
+0056 save([<span class="string">'./test_run/scalar_'</span>,num2str(run),<span class="string">'_setup'</span>])
+0057 
+0058 <span class="comment">% Solve for F</span>
+0059 [F, grid] = <a href="../src/main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>(input1,input2,input3,input4,run,<span class="string">'./test_run/scalar_'</span>);</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

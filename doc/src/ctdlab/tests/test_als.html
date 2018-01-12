@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of test_als</title>
+  <meta name="keywords" content="test_als">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html src --><!-- ../menu.html ctdlab --><!-- menu.html tests -->
+<h1>test_als
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../src/als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">als</a>	ALS code to perform the ALS algorithm as described in Beylkin</li><li><a href="../../../src/ctdlab/als.html" class="code" title="function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)">als</a>	Rank reduction by standard ALS.</li><li><a href="../../../src/ctdlab/alsi.html" class="code" title="function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)">alsi</a>	Main ALS iteration.  See als.m for arguments</li><li><a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>	Frobenius norm of ktensor.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 fprintf(<span class="string">'\n***test_als***\n'</span>)
+0002 
+0003 fprintf(<span class="string">'which -all als\n'</span>)
+0004 which -all <a href="../../../src/als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">als</a>
+0005 fprintf(<span class="string">'which -all alsi\n'</span>)
+0006 which -all <a href="../../../src/ctdlab/alsi.html" class="code" title="function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)">alsi</a>
+0007 
+0008 N=16;
+0009 
+0010 x1=2*pi*linspace(0,1,N)';
+0011 x2=x1;
+0012 x3=x1;
+0013 x4=x1;
+0014 s1=sin(x1);
+0015 s2=sin(x2);
+0016 s3=sin(x3);
+0017 s4=sin(x4);
+0018 c1=cos(x1);
+0019 c2=cos(x2);
+0020 c3=cos(x3);
+0021 c4=cos(x4);
+0022 
+0023 s=ones(8,1);
+0024 
+0025 U=cell(1,4);
+0026 U{1}=[s1, -s1, c1, -c1, c1, c1, -s1, -s1];
+0027 U{2}=[c2, c2, s2, s2, c2, c2, s2, s2];
+0028 U{3}=[c3, s3, c3, s3, s3, c3, s3, c3];
+0029 U{4}=[c4, s4, c4, s4, c4, s4, c4, s4];
+0030 
+0031 A = ktensor(s,U);
+0032 
+0033 <span class="comment">% put als code here</span>
+0034 tol = 1e-6;
+0035 stucktol = 1e-8;
+0036 delta = [];
+0037 r0 = 1;
+0038 rmax = []; 
+0039 verbose = 0;
+0040 maxit = 250;
+0041 errtype = <span class="string">'rel'</span>;
+0042 Anorm = <a href="../../../src/ctdlab/fnorm.html" class="code" title="function nrm = fnorm(A)">fnorm</a>(A);
+0043 A_guess = [];
+0044 [B,err,Anorm,ext] = <a href="../../../src/als.html" class="code" title="function [F, err, iter, Fcond, e_list, t_step, illcond, noreduce] = als(G,F,e,options)">als</a>(A,tol,stucktol,delta,r0,rmax,<span class="string">'verbose'</span>,verbose,<span class="keyword">...</span>
+0045   <span class="string">'maxit'</span>,maxit,<span class="string">'errtype'</span>,errtype,<span class="string">'Anorm'</span>,Anorm,<span class="string">'B'</span>,A_guess);
+0046 fprintf(<span class="string">'ALS: target tensor has rank = %d, optimal reduced srank = %d\n'</span>, length(A.lambda), ndims(A))
+0047 fprintf(<span class="string">'     approximation err = %e, srank = %d\n'</span>, err(end), length(B.lambda));</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

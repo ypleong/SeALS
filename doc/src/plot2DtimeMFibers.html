@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot2DtimeMFibers</title>
+  <meta name="keywords" content="plot2DtimeMFibers">
+  <meta name="description" content="Plot the time evolution of the tensor marginalized for each dimension">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>plot2DtimeMFibers
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Plot the time evolution of the tensor marginalized for each dimension</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [  ] = plot2DtimeMFibers( pk, timeVector, gridT ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Plot the time evolution of the tensor marginalized for each dimension
+
+ pk, 
+ timeVector, %
+ gridT,</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>	TEMPLATE/SET Edit data stored in a Template object</li><li><a href="createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>	Create weights for integration</li><li><a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>	F - ktensor</li><li><a href="meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>	Compute the mean and covariance of a tensor</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="plotkTensorCell.html" class="code" title="function [ handleoutput ] = plotkTensorCell( Fcell, gridT, seqVector, varargin )">plotkTensorCell</a>	Plot a sequence of ktensors</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [  ] = plot2DtimeMFibers( pk, timeVector, gridT )</a>
+0002 <span class="comment">% Plot the time evolution of the tensor marginalized for each dimension</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% pk,</span>
+0005 <span class="comment">% timeVector, %</span>
+0006 <span class="comment">% gridT,</span>
+0007 <span class="comment">%</span>
+0008 
+0009     dim = ndims(pk{1});
+0010     nT = arrayfun( @(x) length( gridT{x} ), 1:dim ); 
+0011     [ weMean, weCov, weOnes ] = <a href="createWeights.html" class="code" title="function [ weMean, weCov, weOnes ] = createWeights( gridT, n )">createWeights</a>( gridT, nT );
+0012     meanT = zeros(dim,length(timeVector));
+0013     <span class="keyword">for</span> k=1:length(timeVector)
+0014         pk{k} = pk{k}*(1/<a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [], gridT, weOnes));
+0015         [ meanT(:,k), ~ ] = <a href="meanCovTensor.html" class="code" title="function [ meanT, covT ] = meanCovTensor( itens, gridT, weMean, weCov, weOnes )">meanCovTensor</a>( pk{k}, gridT, weMean, weCov, weOnes );
+0016     <span class="keyword">end</span>
+0017     figure
+0018     title(<span class="string">'Marginalized fibers for each dimension'</span>)
+0019     <span class="keyword">for</span> i=1:dim
+0020         subplot(dim,1,i)
+0021         fiberTime = zeros(length(gridT{i}),length(timeVector));
+0022         <span class="keyword">for</span> k=1:length(timeVector)
+0023             tempT = <a href="intTens.html" class="code" title="function [Fint] = intTens(F, dim, gridT, w)">intTens</a>(pk{k}, [1:i-1 i+1:dim], gridT, []);
+0024             fiberTime(:,k) = sum( repmat(tempT.lambda',size(tempT.U{i},1),1).*tempT.U{i},2);
+0025         <span class="keyword">end</span>
+0026         handleOutput = pcolor(timeVector',gridT{i},fiberTime);
+0027         shading interp 
+0028         hold on
+0029         plot(timeVector,meanT(i,:) )
+0030         <a href="../m2html/@template/set.html" class="code" title="function tpl = set(tpl,action,varargin)">set</a>(handleOutput,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+0031         xlabel(<span class="string">'time(s)'</span>)
+0032         ylabel([<span class="string">'x_'</span>,num2str(i)])   
+0033     <span class="keyword">end</span>
+0034 
+0035 <span class="keyword">end</span>
+0036</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

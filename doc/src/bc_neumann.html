@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bc_neumann</title>
+  <meta name="keywords" content="bc_neumann">
+  <meta name="description" content="BC_DIRICHLET Set up Neumann boundary conditions boundary conditions on">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>bc_neumann
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>BC_DIRICHLET Set up Neumann boundary conditions boundary conditions on</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [op] = bc_neumann(op, dim, bsca, n, fd1dim) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BC_DIRICHLET Set up Neumann boundary conditions boundary conditions on
+ operator. More precisely:
+   Modifies an operator so that it doesn't affect the boundaries of its
+   domain. The operator acts as &quot;pure&quot; differentiation on the boundaries
+   (in the relevant dimension respectively) times the boundary scaling.
+   Common boundary points will have the scaling of the lowest dimension,
+   see also <a href="makebc.html" class="code" title="function [bc] = makebc(bcon,bsca,grid,x,n)">MAKEBC</a>.
+ Input:
+   op - the operator as ktensor.
+   dim - the dimension along which to modify the operator.
+   n - the number of grid points in each dimension.
+   fd1dim - the differentiation matrix in the corresponding dimension.
+ Output:
+   op - the adjusted operator.
+
+ OBS: Neumann conditions has not been tested in any example yet.
+
+ See also <a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">MAKEBCOP</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="makebcop.html" class="code" title="function [op] = makebcop(op,bcon,bsca,n,fd1)">makebcop</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li><li><a href="makebcopspectral.html" class="code" title="function [op] = makebcopspectral(op,bcon,bsca,n,fd1)">makebcopspectral</a>	MAKEBCOP modifies the operator to incooporate boundary conditions.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [op] = bc_neumann(op, dim, bsca, n, fd1dim)</a>
+0002 <span class="comment">% BC_DIRICHLET Set up Neumann boundary conditions boundary conditions on</span>
+0003 <span class="comment">% operator. More precisely:</span>
+0004 <span class="comment">%   Modifies an operator so that it doesn't affect the boundaries of its</span>
+0005 <span class="comment">%   domain. The operator acts as &quot;pure&quot; differentiation on the boundaries</span>
+0006 <span class="comment">%   (in the relevant dimension respectively) times the boundary scaling.</span>
+0007 <span class="comment">%   Common boundary points will have the scaling of the lowest dimension,</span>
+0008 <span class="comment">%   see also MAKEBC.</span>
+0009 <span class="comment">% Input:</span>
+0010 <span class="comment">%   op - the operator as ktensor.</span>
+0011 <span class="comment">%   dim - the dimension along which to modify the operator.</span>
+0012 <span class="comment">%   n - the number of grid points in each dimension.</span>
+0013 <span class="comment">%   fd1dim - the differentiation matrix in the corresponding dimension.</span>
+0014 <span class="comment">% Output:</span>
+0015 <span class="comment">%   op - the adjusted operator.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% OBS: Neumann conditions has not been tested in any example yet.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% See also MAKEBCOP.</span>
+0020 
+0021 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0022 
+0023 d = length(n);
+0024 
+0025 <span class="comment">%% Construct identity on the boundary without interfering lower dimensions</span>
+0026 U = cell(1,d);
+0027 
+0028 <span class="comment">% don't interfer with boundary for lower dimensions</span>
+0029 <span class="keyword">for</span> i = 1:(dim-1)
+0030     ni = n(i);
+0031     idcut = eye(ni);
+0032     idcut(1,:) = zeros(1,ni);
+0033     idcut(<span class="keyword">end</span>,:) = zeros(1,ni);
+0034     U{i} = idcut(:);
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">% the boundary for dim</span>
+0038 ndim = n(dim);
+0039 dim_matrix = zeros(ndim,ndim);
+0040 
+0041 <span class="comment">% scaling incorporating the magnitude from the finite difference scheme fd1</span>
+0042 fd1_max = max(abs(fd1dim(1,:)));
+0043 dim_matrix(1,:) = (bsca(1)/fd1_max)*fd1dim(1,:);
+0044 fd1_max = max(abs(fd1dim(ndim,:)));
+0045 dim_matrix(ndim,:) = (bsca(2)/fd1_max)*fd1dim(ndim,:);
+0046 
+0047 U{dim} = dim_matrix(:);
+0048 
+0049 <span class="keyword">for</span> i = (dim+1):d
+0050     ni = n(i);
+0051     id = eye(ni);
+0052     U{i} = id(:);
+0053 <span class="keyword">end</span>
+0054 
+0055 ident = ktensor(U);
+0056 
+0057 <span class="comment">%% Eliminate whatever is happening on the boundary currently</span>
+0058 sr = ncomponents(op);
+0059 dimU = op.U{dim};
+0060 <span class="keyword">for</span> i=1:sr
+0061     el = reshape(dimU(:,i),ndim,ndim);
+0062     el(1,:) = zeros(1,ndim);
+0063     el(ndim,:) = zeros(1,ndim);
+0064     dimU(:,i) = el(:);
+0065 <span class="keyword">end</span>
+0066 op.U{dim} = dimU;
+0067 
+0068 <span class="comment">%% Combine above</span>
+0069 op = op + ident;
+0070 op = fixsigns(arrange(op));
+0071 <span class="keyword">end</span>
+0072</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

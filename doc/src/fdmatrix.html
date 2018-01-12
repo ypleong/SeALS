@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fdmatrix</title>
+  <meta name="keywords" content="fdmatrix">
+  <meta name="description" content="FDMATRIX Finite difference matrix for der:th order derivative with ord:th">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>fdmatrix
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>FDMATRIX Finite difference matrix for der:th order derivative with ord:th</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [DD] = fdmatrix( n, der, ord, per ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> FDMATRIX Finite difference matrix for der:th order derivative with ord:th 
+ order accuracy in one dimension.
+ Inputs:
+   n - grid size
+   ord - order of accuracy (interior, edge). If periodic: edge order of
+   accuracy will equal interior accuracy.
+   der - order of derivative.
+   per - periodic (1 - yes, [] - no).
+ Outputs:
+   DD - the finite difference matrix.
+
+   See also <a href="makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">MAKEDIFFOP</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fdcoeffF.html" class="code" title="function c = fdcoeffF(k,xbar,x)">fdcoeffF</a>	Compute coefficients for finite difference approximation for the</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="makediffop.html" class="code" title="function [D,D2,fd1,fd2] = makediffop(grid,n,h,ord_of_acc,bcon,region)">makediffop</a>	MAKEDIFFOP creates differentiation operators in ktensor form and</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [DD] = make_fdmatrix(n, der, ord, per, c)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [DD] = fdmatrix( n, der, ord, per )</a>
+0002 <span class="comment">% FDMATRIX Finite difference matrix for der:th order derivative with ord:th</span>
+0003 <span class="comment">% order accuracy in one dimension.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   n - grid size</span>
+0006 <span class="comment">%   ord - order of accuracy (interior, edge). If periodic: edge order of</span>
+0007 <span class="comment">%   accuracy will equal interior accuracy.</span>
+0008 <span class="comment">%   der - order of derivative.</span>
+0009 <span class="comment">%   per - periodic (1 - yes, [] - no).</span>
+0010 <span class="comment">% Outputs:</span>
+0011 <span class="comment">%   DD - the finite difference matrix.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%   See also MAKEDIFFOP.</span>
+0014 
+0015 <span class="comment">% Elis Stefansson, Aug 9 2015</span>
+0016 
+0017 <span class="keyword">if</span> nargin == 3
+0018     per = 0;
+0019 <span class="keyword">end</span>
+0020 
+0021 <span class="keyword">if</span> length(ord) &lt; 2
+0022     ord = [ord ord];
+0023 <span class="keyword">end</span>
+0024 
+0025 <span class="keyword">if</span> mod(ord(1)+der,2) == 1 <span class="comment">%ord(1)+der is odd</span>
+0026     
+0027     c = <a href="fdcoeffF.html" class="code" title="function c = fdcoeffF(k,xbar,x)">fdcoeffF</a>(der,0,-(ord(1)+der-1)/2:(ord(1)+der-1)/2);
+0028         
+0029     DD = <a href="#_sub1" class="code" title="subfunction [DD] = make_fdmatrix(n, der, ord, per, c) ">make_fdmatrix</a>(n,der,ord,per,c);
+0030     
+0031         
+0032 <span class="keyword">else</span> <span class="comment">%ord(1)+der is even</span>
+0033     
+0034     c = <a href="fdcoeffF.html" class="code" title="function c = fdcoeffF(k,xbar,x)">fdcoeffF</a>(der,0,-((ord(1)+der)/2-1):(ord(1)+der)/2); <span class="comment">%gives the correct order of acc.</span>
+0035     c = [0 c]; <span class="comment">%treat it as a central difference (compare to odd case)</span>
+0036     ord(1) = ord(1)+1; <span class="comment">%this is a fake order, so we can use make_fdmatrix.</span>
+0037     
+0038     DD = <a href="#_sub1" class="code" title="subfunction [DD] = make_fdmatrix(n, der, ord, per, c) ">make_fdmatrix</a>(n,der,ord,per,c);
+0039         
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="keyword">end</span>
+0043 
+0044 <a name="_sub1" href="#_subfunctions" class="code">function [DD] = make_fdmatrix(n, der, ord, per, c) </a><span class="comment">% help function</span>
+0045 
+0046 dc1 = zeros(1,n);
+0047 dc1(1:(ord(1)+der-1)/2+1) = c((ord(1)+der-1)/2+1:end);
+0048 dc2 = zeros(1,n);
+0049 dc2(1:(ord(1)+der-1)/2+1) = c((ord(1)+der-1)/2+1:-1:1);
+0050     
+0051 <span class="keyword">if</span> per == 1
+0052         
+0053     add_to_dc1 = dc2(2:(length(c)+1)/2);
+0054     add_to_dc1 = fliplr(add_to_dc1);
+0055     dc1(end-length(add_to_dc1)+1:end) = add_to_dc1;
+0056     
+0057     add_to_dc2 = dc1(2:(length(c)+1)/2);
+0058     add_to_dc2 = fliplr(add_to_dc2);
+0059     dc2(end-length(add_to_dc1)+1:end) = add_to_dc2;
+0060         
+0061 <span class="keyword">end</span>
+0062     
+0063 DD = toeplitz(dc2,dc1);
+0064 
+0065 <span class="keyword">if</span> per ~= 1
+0066     <span class="keyword">for</span> ii = 1:(ord(1)+der-1)/2
+0067         cc = <a href="fdcoeffF.html" class="code" title="function c = fdcoeffF(k,xbar,x)">fdcoeffF</a>(der,ii,1:ord(2)+der);
+0068         cc = [cc zeros(1,n-length(cc))];
+0069         DD(ii,:) = cc;
+0070         DD(n-ii+1,:) = ((-1)^der)*cc(end:-1:1); <span class="comment">%since &quot;f(-x)&quot;.</span>
+0071     <span class="keyword">end</span>
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

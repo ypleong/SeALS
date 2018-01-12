@@ -1,0 +1,400 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als_test_code</title>
+  <meta name="keywords" content="als_test_code">
+  <meta name="description" content="load('./test/test_data_smooth2D.mat')">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html test -->
+<h1>als_test_code
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>load('./test/test_data_smooth2D.mat')</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [] = als_test_code() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> load('./test/test_data_smooth2D.mat')
+ load('./test/test_data_VTOL.mat')</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>	SRMULTM multiplies two ktensor operators A and B. The result is a new</li><li><a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>	SRMULTV multiplies a ktensor operators A with a ktensor function F. The</li><li><a href="../src/blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>	</li><li><a href="../src/blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [err] = test_compute_WB(A,G)</a></li><li><a href="#_sub2" class="code">function [err] = test_compute_Wb(A,G)</a></li><li><a href="#_sub3" class="code">function [err, err2] = test_compute_AFtAF(A,F)</a></li><li><a href="#_sub4" class="code">function [err, err2] = test_compute_B(A,F,G)</a></li><li><a href="#_sub5" class="code">function [err] = test_SRMultV(A,F)</a></li><li><a href="#_sub6" class="code">function [err] = test_SRMultM(A,B)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [] = als_test_code()</a>
+0002 
+0003 <span class="comment">% load('./test/test_data_smooth2D.mat')</span>
+0004 <span class="comment">% load('./test/test_data_VTOL.mat')</span>
+0005 
+0006 d = 4; <span class="comment">% ndims(A);</span>
+0007 F = cell(1,d);
+0008 N = 150; <span class="comment">% size(G,1);</span>
+0009 rF = 3;
+0010 rA = 8;
+0011 rG = 4;
+0012 <span class="keyword">for</span> ii = 1:d
+0013     F{ii} = matrandnorm(N,rF);
+0014     A{ii} = matrandnorm(N*N,rA);
+0015     A2{ii} = matrandnorm(N*N,rA+2);
+0016 <span class="comment">%     G{ii} = matrandnorm(N,rG);</span>
+0017 <span class="keyword">end</span>
+0018 
+0019 At = ktensor(A);
+0020 At2 = ktensor(A2);
+0021 <span class="comment">% Gt = ktensor(G);</span>
+0022 
+0023 <span class="comment">% err = test_compute_WB(A,G);</span>
+0024 <span class="comment">% %</span>
+0025 <span class="comment">% err = test_compute_Wb(A,G);</span>
+0026 <span class="comment">% %</span>
+0027 <span class="comment">% [err, err2] = test_compute_AFtAF(A,F);</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% [err, err2] = test_compute_B(A,F,G);</span>
+0030 
+0031 <span class="comment">% err = test_SRMultV(A,ktensor(F));</span>
+0032 
+0033 err = <a href="#_sub6" class="code" title="subfunction [err] = test_SRMultM(A,B)">test_SRMultM</a>(At,At2);
+0034 
+0035 <span class="keyword">end</span>
+0036 
+0037 
+0038 <a name="_sub1" href="#_subfunctions" class="code">function [err] = test_compute_WB(A,G)</a>
+0039     
+0040     d = ndims(A);
+0041     rA = ncomponents(A);
+0042     N = sqrt(size(A,1));
+0043     
+0044     WB = cell(rA,rA,d);
+0045     lambda = zeros(rA,rA);
+0046     
+0047     tic
+0048     <span class="keyword">for</span> kk = 1:d
+0049         A_temp = reshape(A.U{kk},N,N,rA);
+0050         <span class="keyword">for</span> ii = 1:rA
+0051             <span class="keyword">for</span> jj = 1:rA 
+0052                 lambda(ii,jj) = A.lambda(ii)*A.lambda(jj);
+0053                 WB{ii,jj,kk} = lambda(ii,jj)*A_temp(:,:,ii)'*A_temp(:,:,jj);    
+0054             <span class="keyword">end</span>
+0055         <span class="keyword">end</span>
+0056     <span class="keyword">end</span>
+0057     toc
+0058     
+0059     W = als_sys_weights(A,G);
+0060     WB2 = W{1};
+0061     
+0062     err = zeros(rA,rA,d);
+0063     <span class="keyword">for</span> kk = 1:d
+0064         <span class="keyword">for</span> ii = 1:rA
+0065             <span class="keyword">for</span> jj = 1:rA          
+0066                 err(ii,jj,kk) = max(max(WB{ii,jj,kk}-WB2((ii-1)*N+(1:N),(jj-1)*N+(1:N),kk)));
+0067             <span class="keyword">end</span>
+0068         <span class="keyword">end</span>
+0069     <span class="keyword">end</span>
+0070 <span class="keyword">end</span>
+0071 
+0072 <a name="_sub2" href="#_subfunctions" class="code">function [err] = test_compute_Wb(A,G)</a>
+0073 
+0074     d = ndims(A);
+0075     rA = ncomponents(A);
+0076     rG = ncomponents(G);
+0077     N = sqrt(size(A,1));
+0078     
+0079     Wb = cell(rA,rG,d);
+0080     lambda = zeros(rA,rG);
+0081     
+0082     tic
+0083     <span class="keyword">for</span> kk = 1:d
+0084         A_temp = reshape(A.U{kk},N,N,rA);
+0085         G_temp = G.U{kk};
+0086         <span class="keyword">for</span> ii = 1:rA
+0087             <span class="keyword">for</span> jj = 1:rG
+0088                 lambda(ii,jj) = A.lambda(ii)*G.lambda(jj);
+0089                 Wb{ii,jj,kk} = lambda(ii,jj)*A_temp(:,:,ii)'*G_temp(:,jj);    
+0090             <span class="keyword">end</span>
+0091         <span class="keyword">end</span>
+0092     <span class="keyword">end</span>
+0093     toc
+0094     
+0095     W = als_sys_weights(A,G);
+0096     Wb2 = W{2};
+0097     
+0098     err = zeros(rA,rA,d);
+0099     <span class="keyword">for</span> kk = 1:d
+0100         <span class="keyword">for</span> ii = 1:rA
+0101             <span class="keyword">for</span> jj = 1:rG        
+0102                 err(ii,jj,kk) = max(max(Wb{ii,jj,kk}-Wb2((ii-1)*N+(1:N),jj,kk)));
+0103             <span class="keyword">end</span>
+0104         <span class="keyword">end</span>
+0105     <span class="keyword">end</span>
+0106     
+0107 <span class="keyword">end</span>
+0108 
+0109 <a name="_sub3" href="#_subfunctions" class="code">function [err, err2] = test_compute_AFtAF(A,F)</a>
+0110     
+0111     d = ndims(A); 
+0112     R = size(F{1},2);
+0113     rA = ncomponents(A);
+0114     N = sqrt(size(A,1));
+0115     
+0116     
+0117     tic
+0118     AFtAF = cell(rA,rA,d);
+0119     AUtAU = cell(rA,rA,d);
+0120     <span class="keyword">for</span> ii = 1:rA
+0121         <span class="keyword">for</span> jj = 1:rA
+0122             <span class="keyword">for</span> kk = 1:d
+0123                 A_temp = reshape(A.U{kk},N,N,rA); 
+0124                 AUtAU{ii,jj,kk} = (A_temp(:,:,ii)*F{kk})'*A_temp(:,:,jj)*F{kk};
+0125             <span class="keyword">end</span>
+0126         <span class="keyword">end</span>
+0127     <span class="keyword">end</span>
+0128     
+0129     <span class="keyword">for</span> ii = 1:rA
+0130         <span class="keyword">for</span> jj = 1:rA
+0131             <span class="keyword">for</span> kk = 1:d
+0132                 AFtAF{ii,jj,kk} = 1;
+0133                 <span class="keyword">for</span> nn = [1:kk-1 kk+1:d] 
+0134                     AFtAF{ii,jj,kk} = AFtAF{ii,jj,kk}*AUtAU{ii,jj,nn};
+0135                 <span class="keyword">end</span>
+0136             <span class="keyword">end</span>
+0137         <span class="keyword">end</span>
+0138     <span class="keyword">end</span>
+0139     toc
+0140     
+0141     tic
+0142     A_U = cell(d,1);
+0143     AU = cell(d,1);
+0144     AUtAU2 = zeros(rA*R,rA*R,d);
+0145     AFtAF2 = cell(d,1);
+0146     <span class="keyword">for</span> nn = 1:d
+0147         A_U{nn} = reshape(A.U{nn},N,N*rA);
+0148         AU{nn} = <a href="../src/blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>(<a href="../src/blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>(A_U{nn},N)*F{nn},N);
+0149         AUtAU2(:,:,nn) = AU{nn}'*AU{nn}; 
+0150     <span class="keyword">end</span>
+0151     <span class="keyword">for</span> kk = 1:d
+0152         AFtAF2{kk} = prod(AUtAU2(:,:,[1:kk-1 kk+1:d]),3);
+0153     <span class="keyword">end</span>
+0154     toc
+0155     
+0156     err = zeros(rA,rA,d);
+0157     <span class="keyword">for</span> ii = 1:rA
+0158         <span class="keyword">for</span> jj = 1:rA 
+0159             <span class="keyword">for</span> kk = 1:d   
+0160                 max_val = max(max([AFtAF{ii,jj,kk} AFtAF2{kk}((ii-1)*R+(1:R),(jj-1)*R+(1:R))]));
+0161                 err(ii,jj,kk) = max(max(AFtAF{ii,jj,kk} - AFtAF2{kk}((ii-1)*R+(1:R),(jj-1)*R+(1:R))))/max_val;
+0162             <span class="keyword">end</span>
+0163         <span class="keyword">end</span>
+0164     <span class="keyword">end</span>
+0165     
+0166     err2 = zeros(rA,rA,d);
+0167     <span class="keyword">for</span> ii = 1:rA
+0168         <span class="keyword">for</span> jj = 1:rA 
+0169             <span class="keyword">for</span> kk = 1:d   
+0170                 max_val = max(max([AUtAU{ii,jj,kk} AUtAU2((ii-1)*R+(1:R),(jj-1)*R+(1:R),kk)]));
+0171                 err2(ii,jj,kk) = max(max(AUtAU{ii,jj,kk} - AUtAU2((ii-1)*R+(1:R),(jj-1)*R+(1:R),kk)))/max_val;
+0172             <span class="keyword">end</span>
+0173         <span class="keyword">end</span>
+0174     <span class="keyword">end</span>
+0175 <span class="keyword">end</span>
+0176 
+0177 <a name="_sub4" href="#_subfunctions" class="code">function [err, err2] = test_compute_B(A,F,G)</a>
+0178 
+0179     d = ndims(A);   
+0180     R = size(F{1},2);
+0181     rA = ncomponents(A);
+0182     rG = ncomponents(G);
+0183     N = sqrt(size(A,1));
+0184     
+0185     W = als_sys_weights(A,G);
+0186     WB2 = W{1};
+0187     Wb = W{2};
+0188     
+0189     A_U = cell(d,1);
+0190     AU = cell(d,1);
+0191     AUtAU2 = zeros(rA*R,rA*R,d);
+0192     AUtG = zeros(rA*R,rG,d);
+0193     AFtAF2 = cell(d,1);
+0194     <span class="keyword">for</span> nn = 1:d
+0195         A_U{nn} = reshape(A.U{nn},N,N*rA);
+0196         AU{nn} = <a href="../src/blockTransposeV2H.html" class="code" title="function [At] = blockTransposeV2H(A, blksize)">blockTransposeV2H</a>(<a href="../src/blockTransposeH2V.html" class="code" title="function [At] = blockTransposeH2V(A, blksize)">blockTransposeH2V</a>(A_U{nn},N)*F{nn},N);
+0197         AUtAU2(:,:,nn) = AU{nn}'*AU{nn}; 
+0198         AUtG(:,:,nn) = AU{nn}'*G.U{nn};
+0199     <span class="keyword">end</span>
+0200     tic
+0201     B = cell(R,R,d);
+0202     b = cell(R,R,d);
+0203     <span class="keyword">for</span> kk = 1:d
+0204         AFtAF2{kk} = prod(AUtAU2(:,:,[1:kk-1 kk+1:d]),3);
+0205         Z = prod(AUtG(:,:,[1:kk-1 kk+1:d]),3);
+0206         <span class="keyword">for</span> ii = 1:R
+0207             <span class="keyword">for</span> jj = 1:R
+0208                 B{ii,jj,kk} = 0;
+0209                 b{ii,jj,kk} = 0;
+0210                 <span class="keyword">for</span> iii = 1:rA
+0211                     <span class="keyword">for</span> jjj = 1:rA
+0212                         B{ii,jj,kk} = B{ii,jj,kk} + WB2((iii-1)*N+(1:N),(jjj-1)*N+(1:N),kk)*AFtAF2{kk}((iii-1)*R+ii,(jjj-1)*R+jj);                       
+0213                     <span class="keyword">end</span>
+0214                     <span class="keyword">for</span> jjj = 1:rG
+0215                         b{ii,jj,kk} = b{ii,jj,kk} + Wb((iii-1)*N+(1:N),jjj,kk)*Z((iii-1)*R+ii,jjj);
+0216                     <span class="keyword">end</span>
+0217                 <span class="keyword">end</span>
+0218             <span class="keyword">end</span>
+0219         <span class="keyword">end</span>
+0220     <span class="keyword">end</span>
+0221     toc
+0222     
+0223     tic
+0224     B2 = cell(d,1);
+0225     b2 = cell(d,1);
+0226     Y = cell(d,1);
+0227     <span class="keyword">for</span> n = 1:d
+0228         Y{n} = prod(AUtAU2(:,:,[1:n-1 n+1:d]),3);
+0229         Z = prod(AUtG(:,:,[1:n-1 n+1:d]),3);
+0230         B2{n} = 0;
+0231         b2{n} = 0;
+0232         <span class="keyword">for</span> ii = 1:rA
+0233             <span class="keyword">for</span> jj = 1:rA
+0234                 B2{n} = B2{n} + kron(Y{n}((ii-1)*R+(1:R),(jj-1)*R+(1:R)),W{1}((ii-1)*N+(1:N),(jj-1)*N+(1:N),n));
+0235             <span class="keyword">end</span>
+0236             utemp = W{2}((ii-1)*N+(1:N),:,n)*Z((ii-1)*R+(1:R),:)';
+0237             b2{n} =  b2{n} + utemp(:);
+0238         <span class="keyword">end</span>
+0239     <span class="keyword">end</span>
+0240     toc
+0241     
+0242     err = zeros(R,R,d);
+0243     <span class="keyword">for</span> ii = 1:R
+0244         <span class="keyword">for</span> jj = 1:R
+0245             <span class="keyword">for</span> kk = 1:d   
+0246                 max_val = max(max([B{ii,jj,kk} B2{kk}((ii-1)*N+(1:N),(jj-1)*N+(1:N))]));
+0247                 err(ii,jj,kk) = max(max(B{ii,jj,kk} - B2{kk}((ii-1)*N+(1:N),(jj-1)*N+(1:N))))/max_val;
+0248             <span class="keyword">end</span>
+0249         <span class="keyword">end</span>
+0250     <span class="keyword">end</span>
+0251     
+0252     err2 = zeros(R,R,d);
+0253     <span class="keyword">for</span> ii = 1:R
+0254         <span class="keyword">for</span> jj = 1:1
+0255             <span class="keyword">for</span> kk = 1:d   
+0256                 max_val = max(max([b{ii,jj,kk} b2{kk}((ii-1)*N+(1:N),jj)]));
+0257                 err2(ii,jj,kk) = max(max(b{ii,jj,kk} - b2{kk}((ii-1)*N+(1:N),jj)))/max_val;
+0258             <span class="keyword">end</span>
+0259         <span class="keyword">end</span>
+0260     <span class="keyword">end</span>
+0261 <span class="keyword">end</span>
+0262 
+0263 <a name="_sub5" href="#_subfunctions" class="code">function [err] = test_SRMultV(A,F)</a>
+0264 
+0265     tic
+0266     rF = ncomponents(F);
+0267     rA = ncomponents(A);
+0268     nd = ndims(F);
+0269 
+0270     <span class="comment">% tensor access is slow, so do this at the expense of mem</span>
+0271     Alambda = A.lambda;
+0272     Flambda = F.lambda;
+0273     AU = cell(nd,1);
+0274     FU = cell(nd,1);
+0275     <span class="keyword">for</span> k = 1:nd
+0276         n = size(F.U{k},1);
+0277         AU{k} = reshape(A.U{k},n,n,rA);
+0278         FU{k} = F.U{k};
+0279     <span class="keyword">end</span>
+0280 
+0281 
+0282     first = 1;
+0283     <span class="keyword">for</span> kA = 1:rA
+0284         <span class="keyword">for</span> kF = 1:rF
+0285             clear T U
+0286             U = cell(1,nd);
+0287             <span class="keyword">for</span> k = 1:nd
+0288                 U{k} = AU{k}(:,:,kA)*FU{k}(:,kF);
+0289             <span class="keyword">end</span>
+0290             T = ktensor(Alambda(kA)*Flambda(kF),U);
+0291             <span class="keyword">if</span> first
+0292                 res = T;
+0293                 first = 0;
+0294             <span class="keyword">else</span>
+0295                 res = res + T;
+0296             <span class="keyword">end</span>
+0297         <span class="keyword">end</span>
+0298     <span class="keyword">end</span>
+0299     toc
+0300     
+0301     tic
+0302     res2 = <a href="../src/SRMultV.html" class="code" title="function res = SRMultV(A,F)">SRMultV</a>(A,F);
+0303     toc
+0304     
+0305     err = norm(res-res2)/norm(res);
+0306 <span class="keyword">end</span>
+0307 
+0308 <a name="_sub6" href="#_subfunctions" class="code">function [err] = test_SRMultM(A,B)</a>
+0309 
+0310     tic
+0311     rB = ncomponents(B);
+0312     rA = ncomponents(A);
+0313     nd = ndims(A);
+0314 
+0315     Alambda = A.lambda;
+0316     Blambda = B.lambda;
+0317 
+0318     <span class="keyword">for</span> k = 1:nd
+0319         nA = round(sqrt(length(A.U{k}(:,1))));
+0320         nB = round(sqrt(length(B.U{k}(:,1))));
+0321 
+0322         AU{k} = reshape(A.U{k},nA,nA,rA);
+0323         BU{k} = reshape(B.U{k},nB,nB,rB);
+0324     <span class="keyword">end</span>
+0325 
+0326     first = 1;
+0327     <span class="keyword">for</span> kA = 1:rA
+0328         <span class="keyword">for</span> kB = 1:rB
+0329             clear T U mat
+0330             U = cell(1,nd);
+0331             <span class="keyword">for</span> k = 1:nd
+0332                 mat = AU{k}(:,:,kA)*BU{k}(:,:,kB);
+0333                 U{k} = mat(:);
+0334             <span class="keyword">end</span>
+0335             T = ktensor(Alambda(kA)*Blambda(kB),U);
+0336             <span class="keyword">if</span> first
+0337                 res = T;
+0338                 first = 0;
+0339             <span class="keyword">else</span>
+0340                 res = res + T;
+0341             <span class="keyword">end</span>
+0342         <span class="keyword">end</span>
+0343     <span class="keyword">end</span>
+0344     toc
+0345     
+0346     tic
+0347     res2 = <a href="../src/SRMultM.html" class="code" title="function res = SRMultM(A,B)">SRMultM</a>(A,B);
+0348     toc
+0349     
+0350     err = norm(res-res2)/norm(res);
+0351 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

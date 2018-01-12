@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of als2</title>
+  <meta name="keywords" content="als2">
+  <meta name="description" content="ALS code to perform the ALS algorithm as described in Beylkin">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>als2
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>ALS code to perform the ALS algorithm as described in Beylkin</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ALS code to perform the ALS algorithm as described in Beylkin
+ and Mohlenkamp 2005.
+ Input:
+   op - tensor to be approximated.
+   optional - optional inputs:
+      e - desired accuracy.
+      maxit - maximum number of iterations.
+      Pinit - inital guess (cell array).
+      if options is empty, ALS will use the default setup maxit = 2000, e
+      = 1e-3 and Pinit = random tensor.
+ Output:
+   F - the low rank approimxation of G.
+   err - the error during the run.
+   iter - the number of iterations.
+   Fcond - the condition number of F during the run.
+   e_list - index when tensor term is added.
+   t_step - computing time for als onestep during the run.
+   illcond - 1 if a als matrice were illcond, otherwise 0.
+   noreduce - 1 if als couldn't reduce rank, otherwise 0.
+
+ See also <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>	CP_ALS Compute a CP decomposition of any type of tensor.</li><li><a href="cp_nmu.html" class="code" title="function [P,Uinit,output] = cp_nmu(X,R,opts)">cp_nmu</a>	CP_NMU Compute nonnegative CP with multiplicative updates.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="../examples/test_pdf_2D.html" class="code" title="">test_pdf_2D</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="create_FP_op.html" class="code" title="function [ op ] = create_FP_op( fFPE, q, dt, D, D2,gridT, tol_err_op, explicit,x)">create_FP_op</a>	</li><li><a href="diffop_region.html" class="code" title="function [ Dpunch] = diffop_region( x, D, region, ord, Dedg, der)">diffop_region</a>	REGIONDIFFOP Adds boundary conditions to derivative for the region.</li><li><a href="diffop_region_spectral.html" class="code" title="function [ Dpunch] = diffop_region_spectral( x, D, region)">diffop_region_spectral</a>	REGIONDIFFOP Adds boundary conditions to derivative for the region.</li><li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="main_run_spectral.html" class="code" title="function [F, grid] = main_run_spectral(input1,input2,input3,input4,run,save_folder)">main_run_spectral</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li><li><a href="../test/tensor_examples.html" class="code" title="">tensor_examples</a>	Tensor examples playground</li><li><a href="../test/test_VTOL_tensor.html" class="code" title="">test_VTOL_tensor</a>	</li><li><a href="../test/test_convergence_radar.html" class="code" title="">test_convergence_radar</a>	% Load data</li><li><a href="../test/test_finite_horizon_hjb_backward_euler.html" class="code" title="">test_finite_horizon_hjb_backward_euler</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_finite_horizon_hjb_euler.html" class="code" title="">test_finite_horizon_hjb_euler</a>	Test finite horizon hjb, forward euler</li><li><a href="../test/test_finite_horizon_hjb_scaling.html" class="code" title="">test_finite_horizon_hjb_scaling</a>	Finite Horizon</li><li><a href="../test/test_infinite_horizon_hjb.html" class="code" title="">test_infinite_horizon_hjb</a>	Test finite horizon hjb, backward euler</li><li><a href="../test/test_pdf_1D_tensor.html" class="code" title="">test_pdf_1D_tensor</a>	% Test Tensor Form PDF Evolution</li><li><a href="../test/test_pdf_2D_tensor.html" class="code" title="">test_pdf_2D_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor.html" class="code" title="">test_pdf_ND_tensor</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_pdf_ND_tensor_run.html" class="code" title="">test_pdf_ND_tensor_run</a>	% Test Tensor Form PDF Evolution ND</li><li><a href="../test/test_run_spectral_heat.html" class="code" title="function test_run_spectral_heat()">test_run_spectral_heat</a>	Wave equation (3.13, pg 24) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_helmholtz.html" class="code" title="function test_run_spectral_helmholtz(run)">test_run_spectral_helmholtz</a>	Helmholtz equation (7.6) in Spectral Methods in MATLAB by Trefethen</li><li><a href="../test/test_run_spectral_periodic.html" class="code" title="function test_run_spectral_periodic(run)">test_run_spectral_periodic</a>	Poisson equation (pg 119) in Spectral Methods in MATLAB by Trefethen</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [F, err, iter, e_list, t_step, illcond, noreduce] = als2(op,varargin)</a>
+0002 <span class="comment">% ALS code to perform the ALS algorithm as described in Beylkin</span>
+0003 <span class="comment">% and Mohlenkamp 2005.</span>
+0004 <span class="comment">% Input:</span>
+0005 <span class="comment">%   op - tensor to be approximated.</span>
+0006 <span class="comment">%   optional - optional inputs:</span>
+0007 <span class="comment">%      e - desired accuracy.</span>
+0008 <span class="comment">%      maxit - maximum number of iterations.</span>
+0009 <span class="comment">%      Pinit - inital guess (cell array).</span>
+0010 <span class="comment">%      if options is empty, ALS will use the default setup maxit = 2000, e</span>
+0011 <span class="comment">%      = 1e-3 and Pinit = random tensor.</span>
+0012 <span class="comment">% Output:</span>
+0013 <span class="comment">%   F - the low rank approimxation of G.</span>
+0014 <span class="comment">%   err - the error during the run.</span>
+0015 <span class="comment">%   iter - the number of iterations.</span>
+0016 <span class="comment">%   Fcond - the condition number of F during the run.</span>
+0017 <span class="comment">%   e_list - index when tensor term is added.</span>
+0018 <span class="comment">%   t_step - computing time for als onestep during the run.</span>
+0019 <span class="comment">%   illcond - 1 if a als matrice were illcond, otherwise 0.</span>
+0020 <span class="comment">%   noreduce - 1 if als couldn't reduce rank, otherwise 0.</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% See also MAIN_RUN.</span>
+0023 
+0024 dim = ndims(op);
+0025 R = ncomponents(op);
+0026 op_len = length(varargin);
+0027 illcond = 0;
+0028 
+0029 
+0030 <span class="keyword">if</span> op_len &lt; 5
+0031     fullBasis = 1;
+0032 <span class="keyword">else</span>
+0033     fullBasis = varargin{5};
+0034 <span class="keyword">end</span>
+0035 
+0036 <span class="keyword">if</span> op_len &lt; 4
+0037     curr_rank = 1;
+0038 <span class="keyword">else</span>
+0039     curr_rank = varargin{4};
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="keyword">if</span> op_len &lt; 3 
+0043     Pinit = cell(1,dim);
+0044     <span class="keyword">for</span> ii = 1:dim
+0045         Pinit{ii} = matrandnorm(size(op.U{ii},1),1);
+0046     <span class="keyword">end</span>
+0047 <span class="keyword">else</span>
+0048     Pinit = varargin{3};
+0049     <span class="keyword">if</span> isempty(Pinit)
+0050         Pinit = cell(1,dim);
+0051         <span class="keyword">for</span> ii = 1:dim
+0052             Pinit{ii} = matrandnorm(size(op.U{ii},1),1);
+0053         <span class="keyword">end</span>
+0054     <span class="keyword">end</span>
+0055 <span class="keyword">end</span>
+0056 
+0057 <span class="keyword">if</span> op_len &lt; 2
+0058     maxit = 2000;
+0059 <span class="keyword">else</span>
+0060     maxit = varargin{2};
+0061 <span class="keyword">end</span>
+0062 
+0063 <span class="keyword">if</span> op_len &lt; 1
+0064      e = 1e-4; 
+0065 <span class="keyword">else</span>
+0066     e = abs(varargin{1});
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="comment">%curr_rank = 1;</span>
+0070 iter = 0;
+0071 err = zeros(maxit,1);
+0072 t_step = zeros(maxit,1);
+0073 tol = 1000;
+0074 noreduce = 0;
+0075 
+0076 e_list = 1;
+0077 
+0078 <span class="keyword">while</span> (iter &lt; maxit) &amp;&amp; (tol &gt; e) &amp;&amp; (curr_rank &lt; R) &amp;&amp; ~(illcond)
+0079     
+0080     <span class="keyword">if</span> (fullBasis)
+0081         [P,~,out]= <a href="cp_als.html" class="code" title="function [P,Uinit,output] = cp_als(X,R,varargin)">cp_als</a>(op,curr_rank,<span class="string">'init'</span>,Pinit,<span class="string">'printitn'</span>,0);
+0082     <span class="keyword">else</span>
+0083         curr_rank = min(curr_rank,4);
+0084         [P,~,out]= <a href="cp_nmu.html" class="code" title="function [P,Uinit,output] = cp_nmu(X,R,opts)">cp_nmu</a>(op,curr_rank);
+0085     <span class="keyword">end</span>
+0086     iter = iter + out.iters;
+0087     e_list = [e_list out.iters+1];
+0088     tol = out.err(out.iters);
+0089     illcond = out.ill_cond;
+0090     err(iter-out.iters+1:iter) = out.err;
+0091     t_step(iter-out.iters+1:iter) = out.t_step;
+0092     <span class="keyword">for</span> ii = 1:dim
+0093         Pinit{ii} = [P.U{ii} matrandnorm(size(P.U{ii},1),1)];     
+0094     <span class="keyword">end</span>
+0095     curr_rank = curr_rank + 1;
+0096     
+0097 <span class="keyword">end</span>
+0098 
+0099 t_step = t_step(1:iter);
+0100 err = err(1:iter);
+0101 
+0102 <span class="keyword">if</span> curr_rank == R
+0103     F = op;
+0104     <span class="keyword">if</span> iter == 0
+0105         err = 0;
+0106     <span class="keyword">else</span>
+0107         err(iter) = 0;
+0108     <span class="keyword">end</span>
+0109     disp(<span class="string">'cannot reduce rank'</span>)
+0110     noreduce = 1;
+0111 <span class="keyword">else</span>
+0112     F = P;
+0113 <span class="keyword">end</span>
+0114 
+0115 <span class="keyword">if</span> (iter == maxit &amp;&amp; err(iter) &gt; e )
+0116     disp(<span class="string">'Max iterations reached without finding a good solution'</span>)
+0117 <span class="keyword">end</span>
+0118 
+0119</pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

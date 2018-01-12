@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of makebasic</title>
+  <meta name="keywords" content="makebasic">
+  <meta name="description" content="MAKEBASIC initalize basic variables. For example, if ord_of_acc is">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html src -->
+<h1>makebasic
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>MAKEBASIC initalize basic variables. For example, if ord_of_acc is</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [n,grid,h,region,ord_of_acc,noise_cov,R] = makebasic(bdim,n,region,ord_of_acc,noise_cov,R,G,B) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> MAKEBASIC initalize basic variables. For example, if ord_of_acc is
+ specified as a scalar (same order of accuracy in all dimensions) then
+ MAKEBASIC converts ord_of_acc into the general form. 
+ Inputs:
+   bdim - the dimensions of the hyperrectangle domain.
+   n - the number of grid points in each dimension.
+   region - the dimension of the goal region.
+   ord_of_acc - the order of accuracy for the derivatives.
+   noise_cov - the variance of the noise.
+   R - the control cost matrix (may be scalar).
+   G - the function G in symbolic representation.
+   B - the function B in symbolic representation.
+   See MAIN_PROGRAM for a detailed description.
+ Outputs:
+   n - number of grid points in each dimension.
+   grid - the discretization grid.
+   h - the grid step in each dimension.
+   region - the dimensions of the goal region.
+   ord_of_acc - order of accuracy for the derivates.
+   noise_cov - the noise covariance as a matrix.
+   R - the control cost matrix as a matrix.
+
+ See also, <a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">MAIN_RUN</a>.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_run.html" class="code" title="function [F, grid] = main_run(input1,input2,input3,input4,run,save_folder)">main_run</a>	MAIN_RUN obtains the solution to the setup specified in MAIN_PROGRAM,</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [n,grid,h,region,ord_of_acc,noise_cov,R] = makebasic(bdim,n,region,ord_of_acc,noise_cov,R,G,B)</a>
+0002 <span class="comment">% MAKEBASIC initalize basic variables. For example, if ord_of_acc is</span>
+0003 <span class="comment">% specified as a scalar (same order of accuracy in all dimensions) then</span>
+0004 <span class="comment">% MAKEBASIC converts ord_of_acc into the general form.</span>
+0005 <span class="comment">% Inputs:</span>
+0006 <span class="comment">%   bdim - the dimensions of the hyperrectangle domain.</span>
+0007 <span class="comment">%   n - the number of grid points in each dimension.</span>
+0008 <span class="comment">%   region - the dimension of the goal region.</span>
+0009 <span class="comment">%   ord_of_acc - the order of accuracy for the derivatives.</span>
+0010 <span class="comment">%   noise_cov - the variance of the noise.</span>
+0011 <span class="comment">%   R - the control cost matrix (may be scalar).</span>
+0012 <span class="comment">%   G - the function G in symbolic representation.</span>
+0013 <span class="comment">%   B - the function B in symbolic representation.</span>
+0014 <span class="comment">%   See MAIN_PROGRAM for a detailed description.</span>
+0015 <span class="comment">% Outputs:</span>
+0016 <span class="comment">%   n - number of grid points in each dimension.</span>
+0017 <span class="comment">%   grid - the discretization grid.</span>
+0018 <span class="comment">%   h - the grid step in each dimension.</span>
+0019 <span class="comment">%   region - the dimensions of the goal region.</span>
+0020 <span class="comment">%   ord_of_acc - order of accuracy for the derivates.</span>
+0021 <span class="comment">%   noise_cov - the noise covariance as a matrix.</span>
+0022 <span class="comment">%   R - the control cost matrix as a matrix.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% See also, MAIN_RUN.</span>
+0025 
+0026 <span class="comment">% Elis Stefansson, Aug 2015</span>
+0027 
+0028 <span class="comment">%% grid</span>
+0029 
+0030 size_bdim = size(bdim);
+0031 d = size_bdim(1);
+0032 
+0033 <span class="keyword">if</span> length(n(:)) == 1
+0034     n = repmat(n,d,1);
+0035 <span class="keyword">end</span>
+0036 
+0037 grid = cell(1,d);
+0038 h = ones(1,d);
+0039 <span class="keyword">for</span> i=1:d
+0040     grid{i} = linspace(bdim(i,1),bdim(i,2),n(i))';
+0041     gridi = grid{i};
+0042     h(i) = gridi(2)-gridi(1);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="comment">%% region</span>
+0046 
+0047 <span class="keyword">if</span> isempty(region) == 0
+0048     
+0049     <span class="comment">% same boundary for all dimensions</span>
+0050     <span class="keyword">if</span> length(region(:)) == 2
+0051         <span class="comment">%check if true dim</span>
+0052         <span class="keyword">if</span> size(region) ~= [1 2]
+0053             error(<span class="string">'wrong size on region'</span>)
+0054         <span class="keyword">end</span>
+0055         region = repmat(region,d,1);
+0056     <span class="keyword">end</span>
+0057     
+0058     <span class="comment">% point case for region, change region to closest point.</span>
+0059     <span class="keyword">if</span> region(:,1) == region(:,2)
+0060         <span class="keyword">for</span> i=1:d
+0061             gridi = grid{i};
+0062             [c,index] = min(abs( gridi-region(i,1) ));
+0063             region(i,:) = [gridi(index) gridi(index)];
+0064         <span class="keyword">end</span>
+0065     <span class="keyword">end</span>
+0066     
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="comment">%% order of accuracy for derivatives</span>
+0070 
+0071 <span class="comment">% same accuracy for all dimensions</span>
+0072 <span class="keyword">if</span> length(ord_of_acc(:)) == 1
+0073     k = ord_of_acc;
+0074     ord_of_acc = [k k; k k];
+0075 <span class="keyword">elseif</span> length(ord_of_acc(:)) == 2
+0076     ord_of_acc = [ord_of_acc; ord_of_acc];
+0077 <span class="keyword">end</span>
+0078 
+0079 <span class="comment">%% noise covariance</span>
+0080 sizeB = size(B);
+0081 <span class="keyword">if</span> length(noise_cov) == 1
+0082     noise_cov = noise_cov*eye(sizeB(2));
+0083 <span class="keyword">else</span> <span class="comment">%then vector for the diagonal elements.</span>
+0084     noise_cov = diag(noise_cov);
+0085 <span class="keyword">end</span>
+0086 
+0087 <span class="comment">%% matrix R</span>
+0088 sizeG = size(G);
+0089 <span class="keyword">if</span> length(R) == 1
+0090     R = R*eye(sizeG(2));
+0091 <span class="keyword">end</span>
+0092 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

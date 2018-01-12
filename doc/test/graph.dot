@@ -1,0 +1,33 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  test_VTOL -> fVTOL;
+  test_VTOL_radar -> fVTOL;
+  test_VTOL_tensor -> fVTOL;
+  test_pdf_2D_PFE -> plot2d;
+  test_pdf_2D_tensor -> plot2d;
+  test_pdf_ND_tensor -> plot2d;
+
+  als_test_code [URL="als_test_code.html"];
+  fVTOL [URL="fVTOL.html"];
+  plot2d [URL="plot2d.html"];
+  tensor_examples [URL="tensor_examples.html"];
+  test_VTOL [URL="test_VTOL.html"];
+  test_VTOL_radar [URL="test_VTOL_radar.html"];
+  test_VTOL_tensor [URL="test_VTOL_tensor.html"];
+  test_convergence_radar [URL="test_convergence_radar.html"];
+  test_finite_horizon_hjb_backward_euler [URL="test_finite_horizon_hjb_backward_euler.html"];
+  test_finite_horizon_hjb_euler [URL="test_finite_horizon_hjb_euler.html"];
+  test_finite_horizon_hjb_scaling [URL="test_finite_horizon_hjb_scaling.html"];
+  test_infinite_horizon_hjb [URL="test_infinite_horizon_hjb.html"];
+  test_intTens [URL="test_intTens.html"];
+  test_monteCarlo [URL="test_monteCarlo.html"];
+  test_pdf_1D [URL="test_pdf_1D.html"];
+  test_pdf_1D_tensor [URL="test_pdf_1D_tensor.html"];
+  test_pdf_2D_PFE [URL="test_pdf_2D_PFE.html"];
+  test_pdf_2D_tensor [URL="test_pdf_2D_tensor.html"];
+  test_pdf_ND_tensor [URL="test_pdf_ND_tensor.html"];
+  test_pdf_ND_tensor_run [URL="test_pdf_ND_tensor_run.html"];
+  test_run_spectral_heat [URL="test_run_spectral_heat.html"];
+  test_run_spectral_helmholtz [URL="test_run_spectral_helmholtz.html"];
+  test_run_spectral_periodic [URL="test_run_spectral_periodic.html"];
+}

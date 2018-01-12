@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of kskel</title>
+  <meta name="keywords" content="kskel">
+  <meta name="description" content="Compute the skeletonization of a matrix Y, s.t., Y = Y(:,ix)*P">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html src --><!-- menu.html ctdlab -->
+<h1>kskel
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Compute the skeletonization of a matrix Y, s.t., Y = Y(:,ix)*P</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [P,ix] = kskel(Y,tol) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Compute the skeletonization of a matrix Y, s.t., Y = Y(:,ix)*P</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="dgsqr.html" class="code" title="function [Q,R,piv,k] = dgsqr(A,tol)">dgsqr</a>	Authors:</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="tenid.html" class="code" title="function [Y,err,svCell] = tenid(X,tol,k0,kmax,nrmtype,delta,Xnorm,vb)">tenid</a>	Tensor ID.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [P,ix] = kskel(Y,tol)</a>
+0002 <span class="comment">% Compute the skeletonization of a matrix Y, s.t., Y = Y(:,ix)*P</span>
+0003    
+0004   <span class="keyword">if</span> issparse(Y)
+0005       Y = full(Y);
+0006   <span class="keyword">end</span>
+0007   
+0008   <span class="comment">% Compute the norm of the input matrix Y</span>
+0009   nY = norm(Y);
+0010   
+0011   <span class="comment">% Rank-revealing QR</span>
+0012   <span class="comment">%[~,R,ix,k] = mgsqr(Y,tol); % Changed by MR</span>
+0013   [~,R,ix,k] = <a href="dgsqr.html" class="code" title="function [Q,R,piv,k] = dgsqr(A,tol)">dgsqr</a>(Y,tol*nY); <span class="comment">% Doubly-modified GS to maintain orthogonality</span>
+0014   Pr = eye(size(Y,2));
+0015   Pr = Pr(:,ix);
+0016   ix = ix(1:k);
+0017 
+0018   [Ru,Rs,Rv] = svd(R(1:k,1:k));
+0019   
+0020   <span class="comment">% Dave's pseudo inverse</span>
+0021   <span class="comment">%rnk = min(size(Rs));</span>
+0022   <span class="comment">%Rs = Rs(1:rnk,1:rnk);</span>
+0023   <span class="comment">%Rs = Rs + Rs(1,1) * eps * eye(rnk);</span>
+0024   <span class="comment">%Rpinv = Rv(:,1:rnk) * diag(1./diag(Rs)) * Ru(:,1:rnk)';</span>
+0025   <span class="comment">%T = Rpinv * R(1:k,(k+1):end);</span>
+0026   
+0027   <span class="comment">% My pseudo inverse</span>
+0028   rnk = length(Rs(diag(Rs)/Rs(1,1) &gt; tol));
+0029   Rs = Rs(1:rnk,1:rnk);
+0030   Rpinv = Rv(:,1:rnk) * diag(1./diag(Rs)) * Ru(:,1:rnk)';
+0031   T = Rpinv * R(1:k,(k+1):end);
+0032 
+0033   P = [eye(k),T];
+0034   P = P * Pr';
+0035    
+0036 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 12-Jan-2018 11:28:53 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

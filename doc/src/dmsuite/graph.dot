@@ -1,0 +1,7 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+
+  chebdifn [URL="chebdifn.html"];
+  clencurt [URL="clencurt.html"];
+  fourdifn [URL="fourdifn.html"];
+}
