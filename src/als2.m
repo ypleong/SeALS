@@ -47,7 +47,7 @@ else
     e = abs(varargin{1});
 end
 
-curr_rank = 1;
+curr_rank = 0;
 iter = 0;
 err = zeros(maxit,1);
 t_step = zeros(maxit,1);
@@ -58,6 +58,7 @@ e_list = 1;
 
 while (iter < maxit) && (tol > e) && (curr_rank < R) && ~(illcond)
     
+    curr_rank = curr_rank + 1;
     [P,~,out]= cp_als(op,curr_rank,'init',Pinit,'printitn',0);
     iter = iter + out.iters;
     e_list = [e_list out.iters+1];
@@ -68,7 +69,6 @@ while (iter < maxit) && (tol > e) && (curr_rank < R) && ~(illcond)
     for ii = 1:dim
         Pinit{ii} = [P.U{ii} matrandnorm(size(P.U{ii},1),1)];     
     end
-    curr_rank = curr_rank + 1;
     
 end
 
